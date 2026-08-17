@@ -3,6 +3,11 @@ import { type FastifyPluginAsync } from 'fastify'
 
 export interface UsageReport {
   instanceId: string
+  /**
+   * Display name only: instanceId stays the identity, so a relabel never
+   * splits or merges an instance's history.
+   */
+  label?: string
   n8nVersion: string
   data: Record<string, number>
 }
@@ -13,6 +18,7 @@ const usageReportSchema = {
   additionalProperties: false,
   properties: {
     instanceId: { type: 'string', minLength: 1 },
+    label: { type: 'string', minLength: 1, maxLength: 200 },
     n8nVersion: { type: 'string', minLength: 1 },
     data: {
       type: 'object',
@@ -39,8 +45,8 @@ const ingest: FastifyPluginAsync = async (fastify): Promise<void> => {
   })
 
   const insertEvent = fastify.db.prepare(
-    `INSERT INTO usage_events (instance_id, n8n_version, data, received_at)
-     VALUES (?, ?, ?, ?)`
+    `INSERT INTO usage_events (instance_id, label, n8n_version, data, received_at)
+     VALUES (?, ?, ?, ?, ?)`
   )
 
   fastify.post<{ Body: UsageReport }>('/', {
@@ -49,7 +55,7 @@ const ingest: FastifyPluginAsync = async (fastify): Promise<void> => {
       response: { 201: successResponseSchema }
     }
   }, async function (request, reply) {
-    const { instanceId, n8nVersion, data } = request.body
+    const { instanceId, label, n8nVersion, data } = request.body
 
     // Every report is appended, never merged into a per-instance row: the
     // history is what makes a disputed invoice auditable after the fact.
@@ -57,6 +63,7 @@ const ingest: FastifyPluginAsync = async (fastify): Promise<void> => {
     // stamped here.
     const { lastInsertRowid } = insertEvent.run(
       instanceId,
+      label ?? null,
       n8nVersion,
       JSON.stringify(data),
       new Date().toISOString()
