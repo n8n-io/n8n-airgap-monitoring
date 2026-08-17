@@ -1,5 +1,4 @@
-# Getting Started with [Fastify-CLI](https://www.npmjs.com/package/fastify-cli)
-This project was bootstrapped with Fastify-CLI.
+# n8n Airgap Monitoring
 
 ## Available Scripts
 
@@ -18,6 +17,3 @@ For production mode
 
 Run the test cases.
 
-## Learn More
-
-To learn Fastify, check out the [Fastify documentation](https://fastify.dev/docs/latest/).
