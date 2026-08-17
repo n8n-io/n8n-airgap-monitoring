@@ -7,6 +7,14 @@ export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPlugin
 }
 // Pass --options via CLI arguments in command to enable these options.
 const options: AppOptions = {
+  ajv: {
+    customOptions: {
+      // Ajv coerces by default, which would turn a null or boolean metric value
+      // into 0 or 1 and silently write a wrong number into a usage metrid record.
+      // Reports must be rejected instead, so operators can see the bad payload.
+      coerceTypes: false
+    }
+  }
 }
 
 const app: FastifyPluginAsync<AppOptions> = async (

@@ -63,3 +63,9 @@ test/types/index.js
 
 # compiled app
 dist
+
+# local environment overrides
+.env
+
+# local usage event database
+data
