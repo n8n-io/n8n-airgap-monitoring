@@ -23,6 +23,7 @@ Content-Type: application/json
 
 {
   "instanceId": "bmw-prod-01",
+  "label": "prod",
   "n8nVersion": "1.99.0",
   "data": {
     "prodExecutions": 15234,
@@ -30,6 +31,10 @@ Content-Type: application/json
   }
 }
 ```
+
+`label` is optional, human-readable, and purely cosmetic: `instanceId` remains
+the identity, so relabeling an instance never splits or merges its history. It
+is customer-chosen free text and should be treated as untrusted display data by any consumer.
 
 `data` is an open map of metric name to number, so instances can report new
 metrics without a change here. Values may be counters, percentages or decimals,

@@ -33,9 +33,30 @@ test('stores an accepted usage report', async (t) => {
     .get(id) as Record<string, string>
 
   assert.equal(row.instance_id, 'instance-1')
+  assert.equal(row.label, null)
   assert.equal(row.n8n_version, '1.99.0')
   assert.deepEqual(JSON.parse(row.data), validReport.data)
   assert.ok(!Number.isNaN(Date.parse(row.received_at)))
+})
+
+test('stores the optional label when provided', async (t) => {
+  const app = await build(t)
+
+  const res = await app.inject({
+    method: 'POST',
+    url: URL,
+    headers: AUTHORIZED,
+    payload: { ...validReport, label: 'BMW Leipzig — Plant floor prod' }
+  })
+
+  assert.equal(res.statusCode, 201)
+
+  const { id } = res.json() as { id: number }
+  const row = app.db
+    .prepare('SELECT label FROM usage_events WHERE id = ?')
+    .get(id) as Record<string, string>
+
+  assert.equal(row.label, 'BMW Leipzig — Plant floor prod')
 })
 
 test('appends every report instead of overwriting the instance', async (t) => {
@@ -90,7 +111,10 @@ test('rejects malformed usage reports', async (t) => {
     'empty data': { ...validReport, data: {} },
     'string metric value': { ...validReport, data: { prodExecutions: '15234' } },
     'null metric value': { ...validReport, data: { prodExecutions: null } },
-    'boolean metric value': { ...validReport, data: { prodExecutions: true } }
+    'boolean metric value': { ...validReport, data: { prodExecutions: true } },
+    'empty label': { ...validReport, label: '' },
+    'non-string label': { ...validReport, label: 42 },
+    'oversized label': { ...validReport, label: 'x'.repeat(201) }
   }
 
   for (const [description, payload] of Object.entries(invalidPayloads)) {

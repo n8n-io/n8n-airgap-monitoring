@@ -7,6 +7,7 @@ const SCHEMA = `
   CREATE TABLE IF NOT EXISTS usage_events (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     instance_id TEXT NOT NULL,
+    label       TEXT,
     n8n_version TEXT NOT NULL,
     data        TEXT NOT NULL,
     received_at TEXT NOT NULL
