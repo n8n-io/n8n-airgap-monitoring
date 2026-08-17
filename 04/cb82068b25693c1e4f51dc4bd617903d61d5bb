@@ -1,0 +1,19 @@
+pnpm-lock.yaml
+  s_9b3254f9631ddd::t_d01b54ef7febbf 1-1421
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "04cb82068b25693c1e4f51dc4bd617903d61d5bb",
+  "prompts": {},
+  "sessions": {
+    "s_9b3254f9631ddd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "578c1a9c-9bfc-4d38-94a4-57d04cd7f6af",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
