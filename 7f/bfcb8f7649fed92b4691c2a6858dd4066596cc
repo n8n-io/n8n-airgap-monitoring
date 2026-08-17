@@ -1,0 +1,28 @@
+test/tsconfig.json
+  s_6d8d8e5642fe3e::t_abc18e4fa86f80 4
+package.json
+  s_6d8d8e5642fe3e::t_97d71ee80ba945 31
+  s_6d8d8e5642fe3e::t_f3ca9154577f58 11
+  s_6d8d8e5642fe3e::t_dfcb4ae03efa04 32-36
+  s_6d8d8e5642fe3e::t_94df0c82598403 30
+tsconfig.json
+  s_6d8d8e5642fe3e::t_34740c71bf1334 5
+pnpm-lock.yaml
+  s_6d8d8e5642fe3e::t_15c7202725f172 39-41,43-44,52-206,262-381,494-498,567-571,906-910,915-917,977-1053,1113-1114,1116-1162,1164-1173,1279-1307,1403-1405,1705-1710,1717-1738
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7fbfcb8f7649fed92b4691c2a6858dd4066596cc",
+  "prompts": {},
+  "sessions": {
+    "s_6d8d8e5642fe3e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61a31c2b-f4f1-4c2b-a9bc-d92668cb8b6e",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
