@@ -1,0 +1,33 @@
+{
+  "name": "airgap-monitoring",
+  "version": "0.1.0",
+  "description": "Aggregate usage metrics for n8n instances in airgapped environments.",
+  "main": "app.ts",
+  "packageManager": "pnpm@10.15.1",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "pnpm run build:ts && tsc -p test/tsconfig.json && c8 node --test -r ts-node/register \"test/**/*.ts\"",
+    "start": "pnpm run build:ts && fastify start -l info dist/app.js",
+    "build:ts": "tsc",
+    "watch:ts": "tsc -w",
+    "dev": "pnpm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
+    "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js"
+  },
+  "dependencies": {
+    "fastify": "^5.0.0",
+    "fastify-plugin": "^5.0.0",
+    "@fastify/autoload": "^6.0.0",
+    "@fastify/sensible": "^6.0.0",
+    "fastify-cli": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "c8": "^11.0.0",
+    "ts-node": "^10.4.0",
+    "concurrently": "^9.0.0",
+    "fastify-tsconfig": "^3.0.0",
+    "typescript": "~5.9.2"
+  }
+}
