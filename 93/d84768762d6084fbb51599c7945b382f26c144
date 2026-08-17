@@ -1,0 +1,53 @@
+README.md
+  s_b2d22ea0ffb5a0::t_1932cbbeed8459 11-12
+  s_b2d22ea0ffb5a0::t_7801571f207b19 21
+  h_c63dce324dfc7b 5
+  s_b2d22ea0ffb5a0::t_7594d170650293 3-4,6-10,13-20,22-42
+test/routes/ingest.test.ts
+  s_b2d22ea0ffb5a0::t_170b30b14c626a 1-125
+src/plugins/config.ts
+  s_b2d22ea0ffb5a0::t_11b6c5758e5e63 1-16,18,20-23,25-34
+  s_b2d22ea0ffb5a0::t_a578c1667a7b91 17,19,24
+src/plugins/db.ts
+  s_b2d22ea0ffb5a0::t_dc6a281d1abaf7 1-2,4-33,35-37,39-50,52-53
+  s_b2d22ea0ffb5a0::t_7ee694b42529cd 3,34,38,51
+src/routes/api/v1/ingest/index.ts
+  s_b2d22ea0ffb5a0::t_d1201470ad2667 1-19,22-70
+  h_c63dce324dfc7b 20-21
+package.json
+  s_b2d22ea0ffb5a0::t_5b1c0ab6e45702 22,28
+  s_b2d22ea0ffb5a0::t_538084847d7e2e 16
+  s_b2d22ea0ffb5a0::t_dab3d27470398e 20,23-25
+  s_b2d22ea0ffb5a0::t_f7123bf7951147 12
+src/app.ts
+  h_c63dce324dfc7b 13
+  s_b2d22ea0ffb5a0::t_c8473b4a30b2dd 10-12,14-17
+.gitignore
+  s_b2d22ea0ffb5a0::t_c292bc5d78432a 66-71
+test/helper.ts
+  s_b2d22ea0ffb5a0::t_2c1763a9855eeb 14-15
+  s_b2d22ea0ffb5a0::t_cc5e3faa7e21c3 12-13,16,27-30
+pnpm-lock.yaml
+  s_b2d22ea0ffb5a0::t_f6f80fa362f574 14-16,20-22,33-35,223-225,268-270,430-433,707-710,1086-1090,1135-1138,1233-1236,1545-1546
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "93d84768762d6084fbb51599c7945b382f26c144",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_b2d22ea0ffb5a0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3b9950d5-fcd5-4482-bf7a-85e2ac96e2f0",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
