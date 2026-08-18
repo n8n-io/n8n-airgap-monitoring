@@ -25,10 +25,16 @@ Content-Type: application/json
   "instanceId": "bmw-prod-01",
   "label": "prod",
   "n8nVersion": "1.99.0",
-  "data": {
-    "prodExecutions": 15234,
-    "successRate": 99.5
-  }
+  "dataPoints": [
+    { "kind": "cumulative", "name": "activeWorkflows", "value": 87 },
+    {
+      "kind": "daily",
+      "name": "prodExecutions",
+      "value": 15234,
+      "batchId": "a1b2c3d4",
+      "date": "2026-03-25"
+    }
+  ]
 }
 ```
 
@@ -36,9 +42,20 @@ Content-Type: application/json
 the identity, so relabeling an instance never splits or merges its history. It
 is customer-chosen free text and should be treated as untrusted display data by any consumer.
 
-`data` is an open map of metric name to number, so instances can report new
-metrics without a change here. Values may be counters, percentages or decimals,
-and may increase or decrease between reports.
+`dataPoints` is an open array of metric name to value, so instances can report
+new metrics without a change here. Each entry is one of:
+
+- `cumulative` — a running total maintained by the instance (e.g. lifetime
+  execution count). Can regress after a customer-side DB rollback.
+- `daily` — a value covering a single UTC calendar day (e.g. billable
+  executions for that day), identified by a `batchId` (generated on the
+  reporting instance, distinguishes a retry of the same day from two
+  instances that happen to share an `instanceId`) and the `date` it covers.
+  Scoping to a day bounds the damage of a customer-side DB rollback to the
+  affected days instead of corrupting a lifetime counter.
+
+Values may be counters, percentages or decimals, and may increase or decrease
+between reports.
 
 Responses are `201` with the stored event id, `400` for a malformed report,
 and `401` for a missing or wrong token. Every report is appended as its own
