@@ -1,0 +1,26 @@
+adr/2026-08-18-backwards-compatibility-via-n8n-version.md
+  s_6381d36b2e31c5::t_62a492c8430f98 1-43
+adr/2026-08-18-store-datapoints-as-json.md
+  s_6381d36b2e31c5::t_90867da58eb36c 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c459a60936dfcecf80b96508404643160b8802a6",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_6381d36b2e31c5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "26ffd744-9552-4e54-ab75-e4539ac26bc6",
+        "model": "claude-fable-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
