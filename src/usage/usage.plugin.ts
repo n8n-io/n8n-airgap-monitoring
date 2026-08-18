@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin'
-import { UsageRepository } from '../usage/usage.repository'
-import { UsageService } from '../usage/usage.service'
+import { UsageRepository } from './usage.repository'
+import { UsageService } from './usage.service'
 
 /**
  * Wires the usage layers together.

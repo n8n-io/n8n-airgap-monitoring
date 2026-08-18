@@ -7,7 +7,7 @@ export type TestContext = {
   after: typeof test.after
 }
 
-const AppPath = path.join(__dirname, '..', 'src', 'app.ts')
+const AppPath = path.join(__dirname, '..', 'app.ts')
 
 // Every test gets its own throwaway database, so nothing has to be cleaned up
 // between runs and no test can observe another test's events.

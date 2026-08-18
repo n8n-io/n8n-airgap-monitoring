@@ -1,10 +1,15 @@
 import { join } from 'node:path'
 import AutoLoad, { AutoloadPluginOptions } from '@fastify/autoload'
 import { FastifyPluginAsync, FastifyServerOptions } from 'fastify'
+import usage from './usage/usage.plugin'
 
 export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {
 
 }
+
+// Tests live next to the code they cover, so the autoloaded directories contain
+// test files that must not be registered as plugins or routes.
+const TEST_FILES = /\.test\.(?:ts|js)$/
 // Pass --options via CLI arguments in command to enable these options.
 const options: AppOptions = {
   ajv: {
@@ -31,15 +36,22 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // eslint-disable-next-line no-void
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'plugins'),
-    options: opts
+    options: opts,
+    ignorePattern: TEST_FILES
   })
+
+  // Feature modules wire themselves up and are registered explicitly, so a
+  // module keeps its plugin next to the service and repository it composes.
+  // eslint-disable-next-line no-void
+  void fastify.register(usage)
 
   // This loads all plugins defined in routes
   // define your routes in one of these
   // eslint-disable-next-line no-void
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'routes'),
-    options: opts
+    options: opts,
+    ignorePattern: TEST_FILES
   })
 }
 
