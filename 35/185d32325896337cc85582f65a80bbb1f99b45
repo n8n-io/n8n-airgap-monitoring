@@ -1,0 +1,38 @@
+tsconfig.build.json
+  s_e038f2f66a0076::t_d9ff94ae535b42 1-6
+src/usage/usage.plugin.ts
+  s_e038f2f66a0076::t_20190ed330e8fb 2-3
+src/routes/api/v1/ingest/ingest.test.ts
+  s_e038f2f66a0076::t_d7d26af7f9a7e9 1-173
+src/routes/root.test.ts
+  s_e038f2f66a0076::t_d7d26af7f9a7e9 1-12
+src/testing/build-app.ts
+  s_e038f2f66a0076::t_e9885b462a84dc 10
+src/app.ts
+  s_e038f2f66a0076::t_124b1df209130a 39-40,43-47,53-54
+  s_e038f2f66a0076::t_e203b6c1bb6871 4,9-12
+src/usage/usage.service.test.ts
+  s_e038f2f66a0076::t_d7d26af7f9a7e9 1-59
+package.json
+  s_e038f2f66a0076::t_e4509f19a33115 34-42
+  s_e038f2f66a0076::t_881d5c9e7f1abd 8-9,11-12
+adr/2026-08-18-colocate-tests-with-implementation.md
+  s_e038f2f66a0076::t_87e52f38abfd4a 24
+  s_e038f2f66a0076::t_d4967806f6ec21 1-23,25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "35185d32325896337cc85582f65a80bbb1f99b45",
+  "prompts": {},
+  "sessions": {
+    "s_e038f2f66a0076": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f9b6347a-fce4-4fda-81b2-9687848df50f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
