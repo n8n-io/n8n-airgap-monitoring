@@ -2,6 +2,9 @@
 
 Date: YYYY-MM-DD (ISO 8601 format)
 
+Save this file as `YYYY-MM-DD-short-kebab-case-title.md`, using the same date as the `Date` field above.
+The date prefix keeps the directory listing in chronological order (sort descending to see the newest first).
+
 ## Status
 
 Accepted/Superseded/Deprecated
