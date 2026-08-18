@@ -5,7 +5,7 @@
   "main": "app.ts",
   "packageManager": "pnpm@10.15.1",
   "scripts": {
-    "test": "pnpm run typecheck && pnpm run build:ts && c8 node --test -r tsx/cjs \"src/**/*.test.ts\"",
+    "test": "pnpm run typecheck && pnpm run build:ts && node --experimental-test-coverage --test-coverage-exclude=\"src/testing/**\" --test-coverage-exclude=\"**/*.test.ts\" --test -r tsx/cjs \"src/**/*.test.ts\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "pnpm run build:ts && fastify start --options -l info dist/app.js",
     "build:ts": "tsc -p tsconfig.build.json",
@@ -25,20 +25,10 @@
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^25.0.3",
-    "c8": "^11.0.0",
     "concurrently": "^9.0.0",
     "fastify-tsconfig": "^3.0.0",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2"
-  },
-  "c8": {
-    "exclude": [
-      "src/**/*.test.ts",
-      "src/testing/**",
-      "**/*.d.ts",
-      "coverage/**",
-      "dist/**"
-    ]
   },
   "pnpm": {
     "onlyBuiltDependencies": [
