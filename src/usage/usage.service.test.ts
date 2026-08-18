@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import * as assert from 'node:assert'
-import { UsageService, type UsageReport } from '../../src/usage/usage.service'
-import { type NewUsageEvent, type UsageRepository } from '../../src/usage/usage.repository'
+import { UsageService, type UsageReport } from './usage.service'
+import { type NewUsageEvent, type UsageRepository } from './usage.repository'
 
 const report: UsageReport = {
   instanceId: 'instance-1',
