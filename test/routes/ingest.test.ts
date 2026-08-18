@@ -8,11 +8,18 @@ const AUTHORIZED = { authorization: 'Bearer test-token' }
 const validReport = {
   instanceId: 'instance-1',
   n8nVersion: '1.99.0',
-  data: {
-    prodExecutions: 15234,
-    activeWorkflows: 87,
-    successRate: 99.5
-  }
+  dataPoints: [
+    { kind: 'cumulative', name: 'activeWorkflows', value: 87 },
+    { kind: 'cumulative', name: 'successRate', value: 99.5 },
+    {
+      kind: 'interval',
+      name: 'prodExecutions',
+      value: 15234,
+      batchId: 'batch-1',
+      start: '2026-03-25T00:00:00.000Z',
+      end: '2026-03-26T00:00:00.000Z'
+    }
+  ]
 }
 
 test('stores an accepted usage report', async (t) => {
@@ -35,7 +42,7 @@ test('stores an accepted usage report', async (t) => {
   assert.equal(row.instance_id, 'instance-1')
   assert.equal(row.label, null)
   assert.equal(row.n8n_version, '1.99.0')
-  assert.deepEqual(JSON.parse(row.data), validReport.data)
+  assert.deepEqual(JSON.parse(row.data), validReport.dataPoints)
   assert.ok(!Number.isNaN(Date.parse(row.received_at)))
 })
 
@@ -62,12 +69,12 @@ test('stores the optional label when provided', async (t) => {
 test('appends every report instead of overwriting the instance', async (t) => {
   const app = await build(t)
 
-  for (const prodExecutions of [10, 25]) {
+  for (const value of [10, 25]) {
     const res = await app.inject({
       method: 'POST',
       url: URL,
       headers: AUTHORIZED,
-      payload: { ...validReport, data: { prodExecutions } }
+      payload: { ...validReport, dataPoints: [{ kind: 'cumulative', name: 'activeWorkflows', value }] }
     })
     assert.equal(res.statusCode, 201)
   }
@@ -76,7 +83,7 @@ test('appends every report instead of overwriting the instance', async (t) => {
     .prepare('SELECT data FROM usage_events WHERE instance_id = ? ORDER BY id')
     .all('instance-1') as Array<{ data: string }>
 
-  assert.deepEqual(rows.map((row) => JSON.parse(row.data).prodExecutions), [10, 25])
+  assert.deepEqual(rows.map((row) => JSON.parse(row.data)[0].value), [10, 25])
 })
 
 test('rejects a request without a bearer token', async (t) => {
@@ -104,14 +111,20 @@ test('rejects malformed usage reports', async (t) => {
   const app = await build(t)
 
   const invalidPayloads: Record<string, unknown> = {
-    'missing instanceId': { n8nVersion: '1.99.0', data: { prodExecutions: 1 } },
+    'missing instanceId': { n8nVersion: '1.99.0', dataPoints: validReport.dataPoints },
     'empty instanceId': { ...validReport, instanceId: '' },
-    'missing n8nVersion': { instanceId: 'instance-1', data: { prodExecutions: 1 } },
-    'missing data': { instanceId: 'instance-1', n8nVersion: '1.99.0' },
-    'empty data': { ...validReport, data: {} },
-    'string metric value': { ...validReport, data: { prodExecutions: '15234' } },
-    'null metric value': { ...validReport, data: { prodExecutions: null } },
-    'boolean metric value': { ...validReport, data: { prodExecutions: true } },
+    'missing n8nVersion': { instanceId: 'instance-1', dataPoints: validReport.dataPoints },
+    'missing dataPoints': { instanceId: 'instance-1', n8nVersion: '1.99.0' },
+    'empty dataPoints': { ...validReport, dataPoints: [] },
+    'string metric value': { ...validReport, dataPoints: [{ kind: 'cumulative', name: 'x', value: '15234' }] },
+    'null metric value': { ...validReport, dataPoints: [{ kind: 'cumulative', name: 'x', value: null }] },
+    'boolean metric value': { ...validReport, dataPoints: [{ kind: 'cumulative', name: 'x', value: true }] },
+    'metric missing kind': { ...validReport, dataPoints: [{ name: 'x', value: 1 }] },
+    'metric with unknown kind': { ...validReport, dataPoints: [{ kind: 'unknown', name: 'x', value: 1 }] },
+    'interval metric missing batchId': {
+      ...validReport,
+      dataPoints: [{ kind: 'interval', name: 'x', value: 1, start: '2026-03-25T00:00:00.000Z', end: '2026-03-26T00:00:00.000Z' }]
+    },
     'empty label': { ...validReport, label: '' },
     'non-string label': { ...validReport, label: 42 },
     'oversized label': { ...validReport, label: 'x'.repeat(201) }
