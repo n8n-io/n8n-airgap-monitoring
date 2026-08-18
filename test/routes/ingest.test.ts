@@ -12,12 +12,11 @@ const validReport = {
     { kind: 'cumulative', name: 'activeWorkflows', value: 87 },
     { kind: 'cumulative', name: 'successRate', value: 99.5 },
     {
-      kind: 'interval',
+      kind: 'daily',
       name: 'prodExecutions',
       value: 15234,
       batchId: 'batch-1',
-      start: '2026-03-25T00:00:00.000Z',
-      end: '2026-03-26T00:00:00.000Z'
+      date: '2026-03-25'
     }
   ]
 }
@@ -121,9 +120,21 @@ test('rejects malformed usage reports', async (t) => {
     'boolean metric value': { ...validReport, dataPoints: [{ kind: 'cumulative', name: 'x', value: true }] },
     'metric missing kind': { ...validReport, dataPoints: [{ name: 'x', value: 1 }] },
     'metric with unknown kind': { ...validReport, dataPoints: [{ kind: 'unknown', name: 'x', value: 1 }] },
-    'interval metric missing batchId': {
+    'daily metric missing batchId': {
       ...validReport,
-      dataPoints: [{ kind: 'interval', name: 'x', value: 1, start: '2026-03-25T00:00:00.000Z', end: '2026-03-26T00:00:00.000Z' }]
+      dataPoints: [{ kind: 'daily', name: 'x', value: 1, date: '2026-03-25' }]
+    },
+    'daily metric missing date': {
+      ...validReport,
+      dataPoints: [{ kind: 'daily', name: 'x', value: 1, batchId: 'batch-1' }]
+    },
+    'non-calendar date': {
+      ...validReport,
+      dataPoints: [{ kind: 'daily', name: 'x', value: 1, batchId: 'batch-1', date: '2026-02-30' }]
+    },
+    'timestamp instead of date': {
+      ...validReport,
+      dataPoints: [{ kind: 'daily', name: 'x', value: 1, batchId: 'batch-1', date: '2026-03-25T00:00:00.000Z' }]
     },
     'empty label': { ...validReport, label: '' },
     'non-string label': { ...validReport, label: 42 },

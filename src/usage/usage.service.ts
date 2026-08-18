@@ -6,29 +6,28 @@ interface BaseMetric {
 }
 
 /**
- * A value scoped to one reporting window, e.g. billable executions per day.
- * Windowed reporting limits the damage of a customer DB rollback to the
- * affected days instead of corrupting a lifetime counter.
+ * A value covering one UTC calendar day, e.g. billable executions for
+ * 2026-03-25. Day-scoped reporting limits the damage of a n8n instance DB
+ * rollback to the affected days instead of corrupting a lifetime counter.
  */
-interface IntervalMetric extends BaseMetric {
-  kind: 'interval'
+interface DailyMetric extends BaseMetric {
+  kind: 'daily'
   /**
    * Generated on the reporting instance, unique per batch. Distinguishes a
-   * retry of the same window (same batchId, drop the duplicate) from two
+   * retry of the same day (same batchId, drop the duplicate) from two
    * instances sharing an instanceId (different batchId, keep both).
    *
    * See https://app.notion.com/p/n8n/License-Server-Duplicated-Instances-2ed5b6e0c94f80338478cb53103dccff?source=copy_link#2f15b6e0c94f801a8657eabc7cc33112
    */
   batchId: string
   /**
-   * Window start, inclusive. ISO string in UTC, e.g. 2026-03-25T00:00:00.000Z
+   * The UTC calendar day this value covers, as YYYY-MM-DD.
+   *
+   * Days are the only supported window, so one date replaces an explicit
+   * range: there is no way to express a gap, an overlap, or a start after
+   * its own end. Boundaries must be computed against UTC midnight.
    */
-  start: string
-  /**
-   * Window end, exclusive: the instant the next window starts, e.g.
-   * 2026-03-26T00:00:00.000Z for a window covering 2026-03-25.
-   */
-  end: string
+  date: string
 }
 
 /** A running total maintained by the instance. Can regress after a customer DB rollback. */
@@ -36,7 +35,7 @@ interface CumulativeMetric extends BaseMetric {
   kind: 'cumulative'
 }
 
-export type Metric = IntervalMetric | CumulativeMetric
+export type Metric = DailyMetric | CumulativeMetric
 
 export interface UsageReport {
   instanceId: string

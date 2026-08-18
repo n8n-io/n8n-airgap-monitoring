@@ -9,12 +9,11 @@ const report: UsageReport = {
   dataPoints: [
     { kind: 'cumulative', name: 'activeWorkflows', value: 7 },
     {
-      kind: 'interval',
+      kind: 'daily',
       name: 'prodExecutions',
       value: 42,
       batchId: 'batch-1',
-      start: '2026-03-25T00:00:00.000Z',
-      end: '2026-03-26T00:00:00.000Z'
+      date: '2026-03-25'
     }
   ]
 }
