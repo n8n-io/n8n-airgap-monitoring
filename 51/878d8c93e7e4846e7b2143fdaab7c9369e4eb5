@@ -1,0 +1,27 @@
+adr/TEMPLATE.md
+  h_c63dce324dfc7b 1-32
+adr/daily-metric-combined-with-cumulative.md
+  h_c63dce324dfc7b 11
+  s_7a4514aee3322e::t_8e48246b202d94 1-10,12-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "51878d8c93e7e4846e7b2143fdaab7c9369e4eb5",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_7a4514aee3322e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6a2cf7a5-db97-4b7c-b0d8-3c92ad01747f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
