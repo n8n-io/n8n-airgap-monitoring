@@ -1,0 +1,26 @@
+adr/TEMPLATE.md
+  s_f4933ea0d4688d::t_3eba00fd887f39 5-7
+adr/2026-08-18-fastify-over-express.md
+  s_f4933ea0d4688d::t_08afe54ad17f32 1-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "42332afae03a3b3e359b942e4373f52fe7a4d350",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_f4933ea0d4688d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c6b9e5f5-6910-463f-8570-4596fed9f47d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
