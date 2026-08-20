@@ -26,6 +26,7 @@ const metricSchema = {
   if: { properties: { kind: { const: "daily" } } },
   // biome-ignore lint/suspicious/noThenProperty: JSON Schema conditional keyword, not a thenable
   then: { required: ["batchId", "date"] },
+  else: { properties: { batchId: false, date: false } },
 };
 
 const instanceReportSchema = {
