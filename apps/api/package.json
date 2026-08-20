@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "test": "NODE_OPTIONS=\"--import tsx\" vitest run",
+    "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "pnpm run build && fastify start --options -l info dist/app.js",
     "build": "tsc -p tsconfig.build.json",
@@ -14,7 +14,6 @@
     "dev:start": "fastify start --options --ignore-watch=.ts$ -w -l info -P dist/app.js"
   },
   "dependencies": {
-    "@fastify/autoload": "6.5.0",
     "@fastify/bearer-auth": "10.1.3",
     "@fastify/sensible": "6.0.5",
     "better-sqlite3": "13.0.3",
@@ -28,7 +27,6 @@
     "@types/node": "25.9.5",
     "concurrently": "9.2.4",
     "fastify-tsconfig": "3.0.0",
-    "tsx": "4.23.12",
     "typescript": "7.0.2",
     "vitest": "4.1.9"
   }

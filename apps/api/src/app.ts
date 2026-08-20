@@ -1,13 +1,13 @@
-import { join } from "node:path";
-import AutoLoad, { type AutoloadPluginOptions } from "@fastify/autoload";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
+import config from "./plugins/config";
+import db from "./plugins/db";
+import sensible from "./plugins/sensible";
+import ingest from "./routes/api/v1/ingest/index";
+import root from "./routes/root";
 import usage from "./usage/usage.plugin";
 
-export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
+export interface AppOptions extends FastifyServerOptions {}
 
-// Tests live next to the code they cover, so the autoloaded directories contain
-// test files that must not be registered as plugins or routes.
-const TEST_FILES = /\.test\.(?:ts|js)$/;
 // Pass --options via CLI arguments in command to enable these options.
 const options: AppOptions = {
   ajv: {
@@ -20,34 +20,17 @@ const options: AppOptions = {
   },
 };
 
-const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void> => {
-  // Place here your custom code!
-
-  // Do not touch the following lines
-
-  // This loads all plugins defined in plugins
-  // those should be support plugins that are reused
-  // through your application
-  // eslint-disable-next-line no-void
-  void fastify.register(AutoLoad, {
-    dir: join(__dirname, "plugins"),
-    options: opts,
-    ignorePattern: TEST_FILES,
-  });
+const app: FastifyPluginAsync<AppOptions> = async (fastify, _opts): Promise<void> => {
+  void fastify.register(config);
+  void fastify.register(db);
+  void fastify.register(sensible);
 
   // Feature modules wire themselves up and are registered explicitly, so a
   // module keeps its plugin next to the service and repository it composes.
-  // eslint-disable-next-line no-void
   void fastify.register(usage);
 
-  // This loads all plugins defined in routes
-  // define your routes in one of these
-  // eslint-disable-next-line no-void
-  void fastify.register(AutoLoad, {
-    dir: join(__dirname, "routes"),
-    options: opts,
-    ignorePattern: TEST_FILES,
-  });
+  void fastify.register(root);
+  void fastify.register(ingest, { prefix: "/api/v1/ingest" });
 };
 
 export default app;

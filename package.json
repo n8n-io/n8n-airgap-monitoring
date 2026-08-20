@@ -8,11 +8,10 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",
-    "test:watch": "NODE_OPTIONS=\"--import tsx\" vitest",
+    "test:watch": "vitest",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "tsx": "4.23.12",
     "turbo": "2.10.10",
     "vitest": "4.1.9"
   },

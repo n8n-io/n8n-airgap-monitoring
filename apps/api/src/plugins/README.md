@@ -9,6 +9,9 @@ Files in this folder are typically defined through the
 making them non-encapsulated. They can define decorators and set hooks
 that will then be used in the rest of your application.
 
+Plugins are not discovered from this directory: add them to the explicit
+registration list in `src/app.ts`, in dependency order.
+
 Check out:
 
 * [The hitchhiker's guide to plugins](https://fastify.dev/docs/latest/Guides/Plugins-Guide/)
