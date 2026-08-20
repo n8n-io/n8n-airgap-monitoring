@@ -1,0 +1,53 @@
+adr/2026-08-18-backwards-compatibility-via-n8n-version.md
+  h_c63dce324dfc7b 17
+apps/api/src/app.ts
+  h_c63dce324dfc7b 16,30-32
+  s_f0f4245c10fb9f::t_7a0c74fbdbb7fa 7
+  s_f0f4245c10fb9f::t_baff68986fe801 2
+  s_f0f4245c10fb9f::t_040e902bdae2d1 35
+adr/2026-08-18-store-datapoints-as-json.md
+  h_c63dce324dfc7b 11,15,22
+apps/api/src/instance-report/instance-report.service.ts
+  h_c63dce324dfc7b 1,40,55-56,58
+apps/api/src/instance-report/instance-report.repository.ts
+  h_c63dce324dfc7b 2,5,14,17,23,29
+apps/api/src/routes/v1/instance-report/create-instance-report.route.ts
+  h_c63dce324dfc7b 3,31,57,62,66,73,78
+apps/api/src/instance-report/instance-report.service.test.ts
+  h_c63dce324dfc7b 3-4,6,23,26,32,38,48,55
+apps/api/src/instance-report/instance-report.plugin.ts
+  h_c63dce324dfc7b 3-4,7,14,16,18,23
+apps/api/src/plugins/db.ts
+  h_c63dce324dfc7b 8,17-18
+apps/api/src/routes/v1/index.ts
+  s_f0f4245c10fb9f::t_448ac690583cba 2,4-5,8
+apps/api/src/routes/v1/instance-report/index.ts
+  s_f0f4245c10fb9f::t_624bfe73574eda 1-12
+README.md
+  h_c63dce324dfc7b 3
+adr/2026-08-18-fastify-over-express.md
+  h_c63dce324dfc7b 11
+apps/api/src/routes/v1/instance-report/create-instance-report.route.test.ts
+  h_c63dce324dfc7b 3,5,24,37,53,59,61,78,108,154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "28387723193f2794f4aa2a669367494492d1cb8a",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_f0f4245c10fb9f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "05276a66-ce28-46bb-a29d-cc403424387b",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
