@@ -1,3 +1,4 @@
+import { type FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 import { UsageRepository } from './usage.repository'
 import { UsageService } from './usage.service'
@@ -8,7 +9,7 @@ import { UsageService } from './usage.service'
  * Only the service is decorated onto the instance: routes have no way to reach
  * the repository, so the controller cannot bypass the business layer.
  */
-export default fp(async (fastify) => {
+export default fp(async (fastify: FastifyInstance) => {
   const repository = new UsageRepository(fastify.db)
 
   fastify.decorate('usageService', new UsageService(repository))

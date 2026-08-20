@@ -1,6 +1,7 @@
 import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
 import Database from 'better-sqlite3'
+import { type FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 
 const SCHEMA = `
@@ -24,7 +25,7 @@ const SCHEMA = `
  * when the operator is a customer running this in an environment we cannot
  * reach. Thousands of instances reporting once a day is a trivial write load.
  */
-export default fp(async (fastify) => {
+export default fp(async (fastify: FastifyInstance) => {
   const { dbPath } = fastify.config
   const isInMemory = dbPath === ':memory:'
 
