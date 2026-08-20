@@ -14,7 +14,7 @@ Tests lived in a top-level `test/` mirroring `src/`, so every test reached back 
 
 Tests live next to the code they cover as `<impl>.test.ts` (a route folder's test is named after the route, since its implementation is `index.ts`). Shared harness code lives in `src/testing/`.
 
-Feature modules own their wiring: `src/usage/` holds `usage.plugin.ts` alongside its service, repository and tests, and `app.ts` registers it explicitly. `src/plugins/` is now infrastructure only (config, db, sensible).
+Feature modules own their wiring: `src/instance-report/` holds `instance-report.plugin.ts` alongside its service, repository and tests, and `app.ts` registers it explicitly. `src/plugins/` is now infrastructure only (config, db, sensible).
 
 ## Consequences
 
