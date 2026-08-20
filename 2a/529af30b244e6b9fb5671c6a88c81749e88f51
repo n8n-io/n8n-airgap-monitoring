@@ -1,0 +1,46 @@
+apps/api/src/routes/root.test.ts
+  s_841b58652b4087::t_85c11babaeb0a5 2,5-6
+turbo.json
+  s_841b58652b4087::t_0b8eab2d80c240 20
+apps/api/package.json
+  s_841b58652b4087::t_40fe80533217ee 6
+  s_841b58652b4087::t_a7b966360b9e82 32-33
+package.json
+  s_841b58652b4087::t_dd8d4ba9610da0 15
+  s_841b58652b4087::t_d69d270a148c95 16-17
+  s_841b58652b4087::t_0ccc9d1c87cf40 11
+apps/api/src/routes/api/v1/ingest/ingest.test.ts
+  s_841b58652b4087::t_04f7b53b21cd60 24-25,46-47,64-65,87-88,95-96,108-109,159-160
+  s_841b58652b4087::t_70460c375d5e3e 2
+apps/api/src/usage/usage.service.test.ts
+  s_841b58652b4087::t_06df890f55addd 2
+apps/api/src/testing/build-app.ts
+  s_841b58652b4087::t_7017e6b76f039b 3,23,35
+apps/api/vitest.config.mts
+  s_841b58652b4087::t_4fe557150e1cc7 1-7
+pnpm-lock.yaml
+  s_841b58652b4087::t_57e6c142107c60 11-13,17-19,66-68,317-319,324-326,330-425,459-467,591-619,642-645,657-660,698-700,716-719,726-728,738-744,789-797,867-940,945-947,966-970,975-978,1002-1011,1030-1033,1084-1088,1121-1123,1127-1130,1138-1140,1145-1147,1175-1189,1236-1319,1323-1327,1508-1509,1512-1513,1516-1561,1584-1592,1657-1697,1717-1718,1730-1731,1770-1771,1780-1781,1788-1789,1821-1826,1898-1901,1962-2010,2016-2019,2034-2035,2038-2039,2058-2063,2104-2109,2145-2164,2187-2188,2193-2194,2201-2202,2205-2206,2235-2245,2306-2345,2350-2354
+vitest.config.mts
+  s_841b58652b4087::t_cbbf557edbdcb0 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "2a529af30b244e6b9fb5671c6a88c81749e88f51",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_841b58652b4087": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5d52e319-1b5d-41e4-ac96-fabdd6970deb",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
