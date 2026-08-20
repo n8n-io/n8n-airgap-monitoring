@@ -1,0 +1,16 @@
+apps/api/src/app.ts
+  h_c63dce324dfc7b 7,34
+apps/api/src/routes/health.ts
+  h_c63dce324dfc7b 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "41049b6c846d289d69fb2fc3ca1dd170fd0d9985",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
