@@ -14,7 +14,7 @@ The usual remedies assume deployment control we don't have: "ship the new API ve
 
 ## Decision
 
-Every usage report carries the reporting instance's `n8nVersion`, and the collector persists it verbatim on the stored event. Compatibility is then handled in two tiers:
+Every instance report carries the reporting instance's `n8nVersion`, and the collector persists it verbatim on the stored event. Compatibility is then handled in two tiers:
 
 1. **Prefer additive evolution, so no version branching is needed at all.** The ingest contract is deliberately lenient about content: metric *names* are unconstrained and `dataPoints` are stored as the JSON that arrived, so a newer instance can ship an entirely new metric through an old collector and have it stored — interpretable later, with zero collector changes. Unknown report fields are accepted rather than rejected.
 2. **When interpretation genuinely must differ by reporter version** — a renamed metric, changed units, corrected semantics — **the conditional logic lives at read time**, in whatever consumes the stored events (billing, reconciliation, a reporting UI), keyed off the persisted `n8nVersion`. The ingest path never branches on version: it stays a dumb, stable funnel that old and new instances alike can hit. Because the version is stored per event, history remains interpretable indefinitely — a consumer can apply the right reading to old rows long after every instance has moved on.

@@ -1,6 +1,6 @@
 import bearerAuth from "@fastify/bearer-auth";
 import type { FastifyPluginAsync } from "fastify";
-import type { UsageReport } from "../../../../usage/usage.service";
+import type { CreateInstanceReport } from "../../../instance-report/instance-report.service";
 
 // A running total (kind: cumulative, can regress after a customer DB rollback)
 // or a value covering one UTC calendar day (kind: daily, e.g. billable
@@ -28,7 +28,7 @@ const metricSchema = {
   then: { required: ["batchId", "date"] },
 };
 
-const usageReportSchema = {
+const instanceReportSchema = {
   type: "object",
   required: ["instanceId", "n8nVersion", "dataPoints"],
   additionalProperties: false,
@@ -54,25 +54,25 @@ const successResponseSchema = {
   },
 };
 
-const ingest: FastifyPluginAsync = async (fastify): Promise<void> => {
+const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> => {
   await fastify.register(bearerAuth, {
     keys: new Set([fastify.config.authToken]),
   });
 
-  fastify.post<{ Body: UsageReport }>(
+  fastify.post<{ Body: CreateInstanceReport }>(
     "/",
     {
       schema: {
-        body: usageReportSchema,
+        body: instanceReportSchema,
         response: { 201: successResponseSchema },
       },
     },
     async (request, reply) => {
       reply.code(201);
 
-      return fastify.usageService.recordReport(request.body);
+      return fastify.instanceReportService.recordReport(request.body);
     },
   );
 };
 
-export default ingest;
+export default createInstanceReport;

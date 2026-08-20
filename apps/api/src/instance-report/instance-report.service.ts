@@ -1,4 +1,4 @@
-import type { UsageRepository } from "./usage.repository";
+import type { InstanceReportRepository } from "./instance-report.repository";
 
 interface BaseMetric {
   name: string;
@@ -37,7 +37,7 @@ interface CumulativeMetric extends BaseMetric {
 
 export type Metric = DailyMetric | CumulativeMetric;
 
-export interface UsageReport {
+export interface CreateInstanceReport {
   instanceId: string;
   /**
    * Display name only: instanceId stays the identity, so a relabel never
@@ -52,10 +52,10 @@ export interface UsageReport {
   dataPoints: Metric[];
 }
 
-export class UsageService {
-  constructor(private readonly repository: UsageRepository) {}
+export class InstanceReportService {
+  constructor(private readonly repository: InstanceReportRepository) {}
 
-  recordReport(report: UsageReport): { id: number } {
+  recordReport(report: CreateInstanceReport): { id: number } {
     const id = this.repository.insert({
       ...report,
       receivedAt: new Date().toISOString(),

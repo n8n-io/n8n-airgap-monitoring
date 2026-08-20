@@ -5,7 +5,7 @@ import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 
 const SCHEMA = `
-  CREATE TABLE IF NOT EXISTS usage_events (
+  CREATE TABLE IF NOT EXISTS instance_reports (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     instance_id TEXT NOT NULL,
     label       TEXT,
@@ -14,8 +14,8 @@ const SCHEMA = `
     received_at TEXT NOT NULL
   );
 
-  CREATE INDEX IF NOT EXISTS idx_usage_events_instance
-    ON usage_events (instance_id, received_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_instance_reports_instance
+    ON instance_reports (instance_id, received_at DESC);
 `;
 
 /**

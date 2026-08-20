@@ -8,18 +8,18 @@ Accepted
 
 ## Context
 
-With `dataPoints` now an array of structured metrics (`daily` with `batchId`/`date`, `cumulative`; see `adr/2026-08-18-daily-metric-combined-with-cumulative.md`), the unit of meaning shifted from the report to the individual metric, and the committed read paths — billing sums and the daily-vs-cumulative reconciliation — aggregate over metrics, not reports. That invites a normalized `usage_metrics` table with per-metric columns, CHECK constraints and indexes. At the same time, `adr/2026-08-18-backwards-compatibility-via-n8n-version.md` establishes that this collector's job is capture, not interpretation: it runs at whatever version the customer deployed, possibly for years, and must retain payloads it does not fully understand.
+With `dataPoints` now an array of structured metrics (`daily` with `batchId`/`date`, `cumulative`; see `adr/2026-08-18-daily-metric-combined-with-cumulative.md`), the unit of meaning shifted from the report to the individual metric, and the committed read paths — billing sums and the daily-vs-cumulative reconciliation — aggregate over metrics, not reports. That invites a normalized `instance_report_metrics` table with per-metric columns, CHECK constraints and indexes. At the same time, `adr/2026-08-18-backwards-compatibility-via-n8n-version.md` establishes that this collector's job is capture, not interpretation: it runs at whatever version the customer deployed, possibly for years, and must retain payloads it does not fully understand.
 
 ## Decision
 
-The `usage_events` table stays as it is: append-only, one row per report, `dataPoints` stored as the JSON that arrived. No per-metric table.
+The `instance_reports` table stays as it is: append-only, one row per report, `dataPoints` stored as the JSON that arrived. No per-metric table.
 
 - **Normalization is interpretation at write time.** A schema that enumerates kinds and per-metric fields in DDL caps what a frozen collector can retain: a new metric field has no column, a new kind fails the CHECK constraint, and fixing either requires the collector update we cannot schedule. JSON storage keeps the write path version-agnostic, so evolution on the reporting side lands as data, not as rejections.
 - **The read load does not justify per-metric indexes.** Per-instance queries use the existing `(instance_id, received_at)` index and touch ~365 rows per instance-year. Fleet-wide billing and reconciliation are periodic batch jobs; scanning a few million rows with SQLite's `json_each()` costs seconds, which is acceptable at that cadence. No interactive per-metric query path exists today.
 
 **Alternatives considered:**
 
-- *Normalized `usage_reports` + `usage_metrics` tables.* Best query ergonomics and DB-enforced invariants (CHECK constraints, partial indexes, dedup as a unique index). Rejected: it violates the capture principle above — the deployed collector's DDL becomes a permanent ceiling on what is retained — and every envelope change becomes a migration gated on customer deployments.
+- *Normalized `instance_reports` + `instance_reports_metrics` tables.* Best query ergonomics and DB-enforced invariants (CHECK constraints, partial indexes, dedup as a unique index). Rejected: it violates the capture principle above — the deployed collector's DDL becomes a permanent ceiling on what is retained — and every envelope change becomes a migration gated on customer deployments.
 - *JSON log as source of truth plus a rebuildable normalized projection, written in the same transaction.* Preserves capture and provides indexed reads, and remains the growth path (see below). Rejected for now: maintaining two representations of the same data — dual writes, rebuild machinery, and a "which table is the truth" rule every contributor must know — is more complexity than the current read requirements justify.
 
 ## Consequences
