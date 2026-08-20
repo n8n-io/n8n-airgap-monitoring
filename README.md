@@ -75,7 +75,39 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 For production mode
 
+### `pnpm build:client`
+
+The dashboard's browser code lives in
+[src/routes/dashboard/dashboard.client.ts](src/routes/dashboard/dashboard.client.ts)
+and compiles separately from the server, via
+[tsconfig.client.json](tsconfig.client.json): it needs the DOM lib, no Node
+types, and a non-CommonJS emit. Output goes to `dist/public/dashboard.client.js`
+(with an inline source map, so devtools shows the original TypeScript) and is
+served at `/dashboard/dashboard.client.js`.
+
+`pnpm build:ts` and `pnpm dev` run it for you; the only reason to call it
+directly is a one-off rebuild. Because the server reads that file at startup,
+running a test file without building first fails with a message telling you to
+build.
+
 ### `pnpm test`
 
 Run the test cases.
+
+### `pnpm seed`
+
+Populates a running instance with a handful of sample usage reports (a few
+instances, mixed `daily`/`cumulative` metrics) by POSTing them through the
+real `/api/v1/ingest` endpoint — the same validation and business logic real
+reports go through. Useful for getting realistic-looking local data to look
+at without hand-writing `curl` requests, e.g. before opening `/dashboard`.
+
+```bash
+pnpm dev                                 # in one shell
+N8N_AUTH_TOKEN=<token> pnpm seed         # in another, once the app is up
+```
+
+`N8N_AUTH_TOKEN` must match whatever the running instance was started with.
+`N8N_BASE_URL` defaults to `http://localhost:3000`; override it if the app is
+running elsewhere. See [scripts/seed.ts](scripts/seed.ts) to change what gets seeded.
 

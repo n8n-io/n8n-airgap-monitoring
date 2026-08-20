@@ -5,5 +5,8 @@
     "rootDir": "src",
     "sourceMap": true
   },
-  "include": ["src/**/*.ts"]
+  // Browser code is compiled by tsconfig.client.json instead: it needs the DOM
+  // lib, no Node types, and a non-CommonJS emit.
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.client.ts"]
 }

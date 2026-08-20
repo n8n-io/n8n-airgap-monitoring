@@ -2,5 +2,7 @@
   // Emits dist. Tests and their harness live inside src, so they are excluded
   // here instead of shipping them; tsconfig.json still type checks them.
   "extends": "./tsconfig.json",
-  "exclude": ["src/**/*.test.ts", "src/testing/**"]
+  // `exclude` replaces the base list rather than extending it, so the client
+  // build's files are repeated here.
+  "exclude": ["src/**/*.test.ts", "src/testing/**", "src/**/*.client.ts"]
 }

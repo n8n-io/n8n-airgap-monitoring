@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import AutoLoad, { AutoloadPluginOptions } from '@fastify/autoload'
 import { FastifyPluginAsync, FastifyServerOptions } from 'fastify'
+import dashboard from './dashboard/dashboard.plugin'
 import usage from './usage/usage.plugin'
 
 export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {
@@ -44,6 +45,8 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // module keeps its plugin next to the service and repository it composes.
   // eslint-disable-next-line no-void
   void fastify.register(usage)
+  // eslint-disable-next-line no-void
+  void fastify.register(dashboard)
 
   // This loads all plugins defined in routes
   // define your routes in one of these

@@ -1,0 +1,27 @@
+{
+  // Browser code, so it can't share the server's tsconfig: that one emits
+  // CommonJS (unusable in a browser) and has Node types but no DOM lib.
+  //
+  // The output is loaded with <script type="module">, so it must stay
+  // self-contained: nothing here bundles, and dist/public holds this one file,
+  // so a runtime `import` of a sibling would 404. Type-only imports are erased
+  // and therefore safe.
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "es2020",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "types": [],
+    "strict": true,
+    "noUnusedLocals": true,
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "src/routes/dashboard",
+    "outDir": "dist/public",
+    // Inlined so devtools can show the original TypeScript with breakpoints,
+    // without a second file to serve.
+    "inlineSourceMap": true,
+    "inlineSources": true
+  },
+  "files": ["src/routes/dashboard/dashboard.client.ts"]
+}

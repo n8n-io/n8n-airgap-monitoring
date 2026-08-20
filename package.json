@@ -6,12 +6,15 @@
   "packageManager": "pnpm@10.15.1",
   "scripts": {
     "test": "pnpm run typecheck && pnpm run build:ts && node --experimental-test-coverage --test-coverage-exclude=\"src/testing/**\" --test-coverage-exclude=\"**/*.test.ts\" --test -r tsx/cjs \"src/**/*.test.ts\"",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.client.json --noEmit",
     "start": "pnpm run build:ts && fastify start --options -l info dist/app.js",
-    "build:ts": "tsc -p tsconfig.build.json",
+    "build:ts": "tsc -p tsconfig.build.json && pnpm run build:client",
+    "build:client": "tsc -p tsconfig.client.json",
     "watch:ts": "tsc -w -p tsconfig.build.json",
-    "dev": "pnpm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
-    "dev:start": "fastify start --options --ignore-watch=.ts$ -w -l info -P dist/app.js"
+    "watch:client": "tsc -w -p tsconfig.client.json",
+    "dev": "pnpm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,Client,App\" -c \"yellow.bold,magenta.bold,cyan.bold\" \"npm:watch:ts\" \"npm:watch:client\" \"npm:dev:start\"",
+    "dev:start": "fastify start --options --ignore-watch=.ts$ -w -l info -P dist/app.js",
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@fastify/autoload": "^6.0.0",
