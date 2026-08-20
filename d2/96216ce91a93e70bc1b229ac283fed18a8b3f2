@@ -1,0 +1,26 @@
+apps/api/src/app.ts
+  s_d9dc16685134e8::t_7c288c2fd11298 6
+apps/api/src/routes/health.ts
+  s_d9dc16685134e8::t_7c288c2fd11298 1,4-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d296216ce91a93e70bc1b229ac283fed18a8b3f2",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_d9dc16685134e8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b662118a-6cc2-4d00-9bdc-4e762159da00",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
