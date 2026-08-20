@@ -9,7 +9,8 @@
       "!.turbo/**",
       "!**/dist/**",
       "!.pnpm-store/**",
-      "!packages/backend-client/**"
+      "!packages/backend-client/**",
+      "!apps/dashboard/**"
     ]
   },
   "assist": {

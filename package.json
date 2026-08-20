@@ -9,6 +9,7 @@
     "dev": "turbo run dev",
     "start": "pnpm --filter api start",
     "test": "turbo run test",
+    "format": "turbo run format",
     "test:watch": "vitest",
     "typecheck": "turbo run typecheck"
   },

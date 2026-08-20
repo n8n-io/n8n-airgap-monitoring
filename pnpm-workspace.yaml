@@ -2,6 +2,20 @@ packages:
   - "apps/*"
   - "tools/*"
 
+# Single source of truth for versions shared across workspaces. Reference these
+# from a package's dependencies with `"typescript": "catalog:"`.
+catalog:
+  typescript: 7.0.2
+
+# The Vue toolchain cannot run TypeScript 7 (the native port) yet: vue-tsc 3.3.10
+# resolves `typescript/lib/tsc.js`, which TS 7 no longer exports, and
+# typescript-eslint caps its peer range at <6.1.0. The dashboard
+# pins the last 6.x here via `"typescript": "catalog:vue"`. Once both support
+# TS 7, delete this block and switch the dashboard back to `catalog:`.
+catalogs:
+  vue:
+    typescript: 6.0.3
+
 # Only resolve package versions published at least 3 days ago, so a compromised
 # or broken release has time to be pulled before it can enter the lockfile.
 minimumReleaseAge: 4320

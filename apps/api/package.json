@@ -7,6 +7,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "pnpm run build && fastify start --options -l info dist/app.js",
     "build": "tsc -p tsconfig.build.json",
+    "format": "biome format --no-errors-on-unmatched --write src",
     "lint": "biome check --no-errors-on-unmatched --write --unsafe src",
     "lint:staged": "biome check --no-errors-on-unmatched --write --unsafe --staged src",
     "watch": "tsc -w -p tsconfig.build.json",
@@ -27,7 +28,7 @@
     "@types/node": "25.9.5",
     "concurrently": "9.2.4",
     "fastify-tsconfig": "3.0.0",
-    "typescript": "7.0.2",
+    "typescript": "catalog:",
     "vitest": "4.1.9"
   }
 }
