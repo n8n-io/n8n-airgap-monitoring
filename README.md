@@ -14,15 +14,15 @@ customer-hosted instance can aggregate usage numbers for many n8n instances.
 ## Reporting usage
 
 Each n8n instance sets `N8N_USAGE_METRICS_REPORTING_WEBHOOK_URL` to this
-service's `POST /api/v1/ingest` endpoint and sends one report per day:
+service's `POST /api/v1/instance-report` endpoint and sends one report per day:
 
 ```http
-POST /api/v1/ingest
+POST /api/v1/instance-report
 Authorization: Bearer <N8N_AUTH_TOKEN>
 Content-Type: application/json
 
 {
-  "instanceId": "bmw-prod-01",
+  "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
   "label": "prod",
   "n8nVersion": "1.99.0",
   "dataPoints": [
