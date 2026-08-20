@@ -1,8 +1,8 @@
-import { mkdirSync } from 'node:fs'
-import { dirname } from 'node:path'
-import Database from 'better-sqlite3'
-import { type FastifyInstance } from 'fastify'
-import fp from 'fastify-plugin'
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
+import Database from "better-sqlite3";
+import type { FastifyInstance } from "fastify";
+import fp from "fastify-plugin";
 
 const SCHEMA = `
   CREATE TABLE IF NOT EXISTS usage_events (
@@ -16,7 +16,7 @@ const SCHEMA = `
 
   CREATE INDEX IF NOT EXISTS idx_usage_events_instance
     ON usage_events (instance_id, received_at DESC);
-`
+`;
 
 /**
  * Opens the append-only event store.
@@ -25,30 +25,33 @@ const SCHEMA = `
  * when the operator is a customer running this in an environment we cannot
  * reach. Thousands of instances reporting once a day is a trivial write load.
  */
-export default fp(async (fastify: FastifyInstance) => {
-  const { dbPath } = fastify.config
-  const isInMemory = dbPath === ':memory:'
+export default fp(
+  async (fastify: FastifyInstance) => {
+    const { dbPath } = fastify.config;
+    const isInMemory = dbPath === ":memory:";
 
-  if (!isInMemory) {
-    mkdirSync(dirname(dbPath), { recursive: true })
-  }
+    if (!isInMemory) {
+      mkdirSync(dirname(dbPath), { recursive: true });
+    }
 
-  const db = new Database(dbPath)
+    const db = new Database(dbPath);
 
-  if (!isInMemory) {
-    // Lets a future reporting UI read while the daily report burst is written.
-    db.pragma('journal_mode = WAL')
-  }
+    if (!isInMemory) {
+      // Lets a future reporting UI read while the daily report burst is written.
+      db.pragma("journal_mode = WAL");
+    }
 
-  db.exec(SCHEMA)
+    db.exec(SCHEMA);
 
-  fastify.decorate('db', db)
-  fastify.addHook('onClose', async () => {
-    db.close()
-  })
-}, { name: 'db', dependencies: ['config'] })
+    fastify.decorate("db", db);
+    fastify.addHook("onClose", async () => {
+      db.close();
+    });
+  },
+  { name: "db", dependencies: ["config"] },
+);
 
-declare module 'fastify' {
+declare module "fastify" {
   export interface FastifyInstance {
     db: Database.Database;
   }
