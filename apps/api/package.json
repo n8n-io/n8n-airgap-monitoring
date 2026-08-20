@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "test": "node --experimental-test-coverage --test-coverage-exclude=\"src/testing/**\" --test-coverage-exclude=\"**/*.test.ts\" --test -r tsx/cjs \"src/**/*.test.ts\"",
+    "test": "NODE_OPTIONS=\"--import tsx\" vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "pnpm run build && fastify start --options -l info dist/app.js",
     "build": "tsc -p tsconfig.build.json",
@@ -29,6 +29,7 @@
     "concurrently": "9.2.4",
     "fastify-tsconfig": "3.0.0",
     "tsx": "4.23.12",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "vitest": "4.1.9"
   }
 }

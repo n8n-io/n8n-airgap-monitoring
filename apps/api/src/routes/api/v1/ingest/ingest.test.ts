@@ -1,5 +1,5 @@
 import * as assert from "node:assert";
-import { test } from "node:test";
+import { test } from "vitest";
 import { build } from "../../../../testing/build-app";
 
 const URL = "/api/v1/ingest";
@@ -21,8 +21,8 @@ const validReport = {
   ],
 };
 
-test("stores an accepted usage report", async (t) => {
-  const app = await build(t);
+test("stores an accepted usage report", async () => {
+  const app = await build();
 
   const res = await app.inject({
     method: "POST",
@@ -43,8 +43,8 @@ test("stores an accepted usage report", async (t) => {
   assert.ok(!Number.isNaN(Date.parse(row.received_at)));
 });
 
-test("stores the optional label when provided", async (t) => {
-  const app = await build(t);
+test("stores the optional label when provided", async () => {
+  const app = await build();
 
   const res = await app.inject({
     method: "POST",
@@ -61,8 +61,8 @@ test("stores the optional label when provided", async (t) => {
   assert.equal(row.label, "BMW Leipzig — Plant floor prod");
 });
 
-test("appends every report instead of overwriting the instance", async (t) => {
-  const app = await build(t);
+test("appends every report instead of overwriting the instance", async () => {
+  const app = await build();
 
   for (const value of [10, 25]) {
     const res = await app.inject({
@@ -84,16 +84,16 @@ test("appends every report instead of overwriting the instance", async (t) => {
   );
 });
 
-test("rejects a request without a bearer token", async (t) => {
-  const app = await build(t);
+test("rejects a request without a bearer token", async () => {
+  const app = await build();
 
   const res = await app.inject({ method: "POST", url: URL, payload: validReport });
 
   assert.equal(res.statusCode, 401);
 });
 
-test("rejects a request with the wrong bearer token", async (t) => {
-  const app = await build(t);
+test("rejects a request with the wrong bearer token", async () => {
+  const app = await build();
 
   const res = await app.inject({
     method: "POST",
@@ -105,8 +105,8 @@ test("rejects a request with the wrong bearer token", async (t) => {
   assert.equal(res.statusCode, 401);
 });
 
-test("rejects malformed usage reports", async (t) => {
-  const app = await build(t);
+test("rejects malformed usage reports", async () => {
+  const app = await build();
 
   const invalidPayloads: Record<string, unknown> = {
     "missing instanceId": { n8nVersion: "1.99.0", dataPoints: validReport.dataPoints },
@@ -156,8 +156,8 @@ test("rejects malformed usage reports", async (t) => {
   assert.equal(count, 0);
 });
 
-test("ignores unknown top level fields so newer instances stay compatible", async (t) => {
-  const app = await build(t);
+test("ignores unknown top level fields so newer instances stay compatible", async () => {
+  const app = await build();
 
   const res = await app.inject({
     method: "POST",

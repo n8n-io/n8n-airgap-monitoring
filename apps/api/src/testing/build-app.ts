@@ -1,12 +1,8 @@
 // This file contains code that we reuse between our tests.
 import * as path from "node:path";
-import type * as test from "node:test";
+import { onTestFinished } from "vitest";
 
 const helper = require("fastify-cli/helper.js");
-
-export type TestContext = {
-  after: typeof test.after;
-};
 
 const AppPath = path.join(__dirname, "..", "app.ts");
 
@@ -24,7 +20,7 @@ function config() {
 }
 
 // Automatically build and tear down our instance
-async function build(t: TestContext) {
+async function build() {
   // you can set all the options supported by the fastify CLI command.
   // --options makes the CLI apply the server options exported by app.ts, so
   // tests validate payloads under the same Ajv settings as production.
@@ -36,8 +32,7 @@ async function build(t: TestContext) {
   const app = await helper.build(argv, config());
 
   // Tear down our app after we are done
-  // eslint-disable-next-line no-void
-  t.after(() => void app.close());
+  onTestFinished(() => void app.close());
 
   return app;
 }

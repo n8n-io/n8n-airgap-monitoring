@@ -1,5 +1,5 @@
 import * as assert from "node:assert";
-import { test } from "node:test";
+import { test } from "vitest";
 import type { NewUsageEvent, UsageRepository } from "./usage.repository";
 import { type UsageReport, UsageService } from "./usage.service";
 

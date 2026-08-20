@@ -1,9 +1,9 @@
 import * as assert from "node:assert";
-import { test } from "node:test";
+import { test } from "vitest";
 import { build } from "../testing/build-app";
 
-test("default root route", async (t) => {
-  const app = await build(t);
+test("default root route", async () => {
+  const app = await build();
 
   const res = await app.inject({
     url: "/",
