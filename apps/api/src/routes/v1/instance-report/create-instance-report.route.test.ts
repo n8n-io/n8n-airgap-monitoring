@@ -1,8 +1,8 @@
 import * as assert from "node:assert";
 import { test } from "vitest";
-import { build } from "../../../../testing/build-app";
+import { build } from "../../../testing/build-app";
 
-const URL = "/api/v1/ingest";
+const URL = "/api/v1/instance-report";
 const AUTHORIZED = { authorization: "Bearer test-token" };
 
 const validReport = {
@@ -21,7 +21,7 @@ const validReport = {
   ],
 };
 
-test("stores an accepted usage report", async () => {
+test("stores an accepted instance report", async () => {
   const app = await build();
 
   const res = await app.inject({
@@ -34,7 +34,7 @@ test("stores an accepted usage report", async () => {
   assert.equal(res.statusCode, 201);
 
   const { id } = res.json() as { id: number };
-  const row = app.db.prepare("SELECT * FROM usage_events WHERE id = ?").get(id) as Record<string, string>;
+  const row = app.db.prepare("SELECT * FROM instance_reports WHERE id = ?").get(id) as Record<string, string>;
 
   assert.equal(row.instance_id, "instance-1");
   assert.equal(row.label, null);
@@ -50,15 +50,15 @@ test("stores the optional label when provided", async () => {
     method: "POST",
     url: URL,
     headers: AUTHORIZED,
-    payload: { ...validReport, label: "BMW Leipzig — Plant floor prod" },
+    payload: { ...validReport, label: "Kiwi prod" },
   });
 
   assert.equal(res.statusCode, 201);
 
   const { id } = res.json() as { id: number };
-  const row = app.db.prepare("SELECT label FROM usage_events WHERE id = ?").get(id) as Record<string, string>;
+  const row = app.db.prepare("SELECT label FROM instance_reports WHERE id = ?").get(id) as Record<string, string>;
 
-  assert.equal(row.label, "BMW Leipzig — Plant floor prod");
+  assert.equal(row.label, "Kiwi prod");
 });
 
 test("appends every report instead of overwriting the instance", async () => {
@@ -75,7 +75,7 @@ test("appends every report instead of overwriting the instance", async () => {
   }
 
   const rows = app.db
-    .prepare("SELECT data FROM usage_events WHERE instance_id = ? ORDER BY id")
+    .prepare("SELECT data FROM instance_reports WHERE instance_id = ? ORDER BY id")
     .all("instance-1") as Array<{ data: string }>;
 
   assert.deepEqual(
@@ -105,7 +105,7 @@ test("rejects a request with the wrong bearer token", async () => {
   assert.equal(res.statusCode, 401);
 });
 
-test("rejects malformed usage reports", async () => {
+test("rejects malformed instance reports", async () => {
   const app = await build();
 
   const invalidPayloads: Record<string, unknown> = {
@@ -151,7 +151,7 @@ test("rejects malformed usage reports", async () => {
     assert.equal(res.statusCode, 400, `expected 400 for ${description}`);
   }
 
-  const { count } = app.db.prepare("SELECT COUNT(*) AS count FROM usage_events").get() as { count: number };
+  const { count } = app.db.prepare("SELECT COUNT(*) AS count FROM instance_reports").get() as { count: number };
 
   assert.equal(count, 0);
 });
