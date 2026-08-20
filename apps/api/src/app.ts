@@ -3,8 +3,8 @@ import instanceReport from "./instance-report/instance-report.plugin";
 import config from "./plugins/config";
 import db from "./plugins/db";
 import sensible from "./plugins/sensible";
+import { healthRoutes } from "./routes/health";
 import v1Routes from "./routes/v1";
-import { healthRoutes } from './routes/health';
 
 export interface AppOptions extends FastifyServerOptions {}
 
