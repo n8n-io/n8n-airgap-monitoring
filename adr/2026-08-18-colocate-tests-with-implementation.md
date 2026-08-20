@@ -20,6 +20,6 @@ Feature modules own their wiring: `src/usage/` holds `usage.plugin.ts` alongside
 
 - Both autoload calls need `ignorePattern: /\.test\.(?:ts|js)$/`; without it autoload registers test files as plugins and routes.
 - `tsconfig.build.json` excludes `**/*.test.ts` and `src/testing/**` so tests do not reach `dist`; `tsconfig.json` still covers them for the editor and `pnpm typecheck`. A bare `tsc` (no `-p`) would emit tests — use `pnpm build:ts`.
-- `c8.exclude` in `package.json` replaces istanbul's defaults, so test files and `src/testing/` are listed there explicitly.
+- Coverage is not wired up yet; if added, the vitest/coverage config must exclude `**/*.test.ts` and `src/testing/**` so tests do not leak into the coverage report.
 - Each new feature module costs one `register` call in `app.ts`. If that becomes tedious, autoload `*.plugin.*` files by convention instead.
 - Routes stay in `src/routes/`, keeping autoload's URL-from-folder mapping; a feature is therefore split between its module and a thin controller.
