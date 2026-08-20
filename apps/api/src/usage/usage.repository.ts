@@ -1,13 +1,13 @@
-import type Database from 'better-sqlite3'
-import { Metric } from './usage.service'
+import type Database from "better-sqlite3";
+import type { Metric } from "./usage.service";
 
 /** One row to append, with every value the caller has already decided on. */
 export interface NewUsageEvent {
-  instanceId: string
-  label?: string
-  n8nVersion: string
-  dataPoints: Metric[]
-  receivedAt: string
+  instanceId: string;
+  label?: string;
+  n8nVersion: string;
+  dataPoints: Metric[];
+  receivedAt: string;
 }
 
 /**
@@ -15,18 +15,18 @@ export interface NewUsageEvent {
  * what to store, this only decides how it is written.
  */
 export class UsageRepository {
-  readonly #insertEvent: Database.Statement
+  readonly #insertEvent: Database.Statement;
 
-  constructor (db: Database.Database) {
+  constructor(db: Database.Database) {
     // Prepared once per process: the daily report burst reuses the same plan.
     this.#insertEvent = db.prepare(
       `INSERT INTO usage_events (instance_id, label, n8n_version, data, received_at)
-       VALUES (?, ?, ?, ?, ?)`
-    )
+       VALUES (?, ?, ?, ?, ?)`,
+    );
   }
 
   /** Appends one event and returns its id. */
-  insert (event: NewUsageEvent): number {
+  insert(event: NewUsageEvent): number {
     const { lastInsertRowid } = this.#insertEvent.run(
       event.instanceId,
       // better-sqlite3 rejects undefined bindings, so an absent label is stored
@@ -34,9 +34,9 @@ export class UsageRepository {
       event.label ?? null,
       event.n8nVersion,
       JSON.stringify(event.dataPoints),
-      event.receivedAt
-    )
+      event.receivedAt,
+    );
 
-    return Number(lastInsertRowid)
+    return Number(lastInsertRowid);
   }
 }
