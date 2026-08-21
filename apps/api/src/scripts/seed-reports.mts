@@ -13,7 +13,7 @@ import { createHash } from "node:crypto";
 import type { CreateInstanceReport, Metric } from "../instance-report/instance-report.service.js";
 
 const baseUrl = process.env.N8N_BASE_URL ?? "http://localhost:3000";
-const authToken = process.env.N8N_INSTANCE_AUTH_TOKEN;
+const authToken = process.env.N8N_INSTANCE_AUTH_TOKEN?.trim();
 
 // Real instanceIds are 64-char hex, so derive a stable one per seed instance
 // instead of a human-readable slug.
