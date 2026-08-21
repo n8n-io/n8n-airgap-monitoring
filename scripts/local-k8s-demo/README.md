@@ -55,6 +55,17 @@ template: reports go out every minute instead of every 60, and
 every minute rather than hourly. Without the second one the daily figure would lag behind
 by up to an hour.
 
+`make up` also posts `BACKFILL_DAYS` (default 3) of invented daily history to the
+collector, so the dashboard has a series to show on a cluster that is minutes old. The
+volumes are randomised per instance and per day — quieter at weekends — but seeded from
+the instance id and the date, so re-running reproduces the same numbers instead of
+reshuffling the chart. `make backfill` runs it on demand and `BACKFILL_DAYS=0 make up`
+turns it off.
+
+Only the collector is backfilled; n8n's own insights tables are left alone. That is why
+the invented days stop at the *day before yesterday* — yesterday belongs to the live
+reporter, and writing both would put two rows with the same date in the history panel.
+
 The two metrics behave differently, which is worth knowing before concluding something is
 broken:
 
@@ -62,7 +73,16 @@ broken:
   minute or two of seeding.
 - `billableExecutionPerDay` covers **yesterday's** completed UTC day. n8n deliberately
   never reports a partial day, so on a cluster created today this reads 0 no matter how
-  many executions run — it turns non-zero after the first UTC midnight.
+  many executions run — it turns non-zero after the first UTC midnight. The instances
+  table shows this live 0 rather than the backfilled history, because the summary takes
+  the most recently received value for a metric regardless of which day it describes.
+  Open an instance's metric history to see the backfilled days.
+
+One rough edge, visible in that history panel: n8n stamps every report with a fresh
+`batchId` (`randomUUID()` per send), even when re-sending the same day. The collector
+dedupes daily points by `batchId`, so yesterday accumulates one row per minute — all
+identical. The backfilled days are unaffected, since this script uses a deterministic
+`batchId` per day.
 
 ## Notes
 

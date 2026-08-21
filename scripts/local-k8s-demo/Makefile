@@ -3,7 +3,6 @@
 # Run `make up`; see README.md for prerequisites.
 
 CLUSTER          := airgap-demo
-NAMESPACES       := n8n-1 n8n-2
 MONITORING_NS    := monitoring
 N8N_IMAGE        := n8nio/n8n:local
 MONITORING_IMAGE := airgap-monitoring:local
@@ -26,10 +25,17 @@ INGEST_URL := http://airgap-monitoring.$(MONITORING_NS).svc.cluster.local:3000/a
 # someone is still watching.
 REPORT_INTERVAL_MINUTES := 1
 
-# Host ports for the port-forwards.
-N8N_1_PORT      := 3003
-N8N_2_PORT      := 3004
+# One row per n8n instance, as namespace:host-port:reporting-identifier. Every
+# loop below reads this table, so adding an instance is a one-line change.
+# Recipes unpack a row with `ns=$${spec%%:*}` and friends.
+INSTANCES  := n8n-1:3003:axolotl n8n-2:3004:narwhal
+NAMESPACES := $(foreach spec,$(INSTANCES),$(firstword $(subst :, ,$(spec))))
+
 MONITORING_PORT := 3010
+
+# Days of invented history posted to the collector by `make backfill`, so the
+# dashboard has a daily series on a cluster that is minutes old. 0 disables it.
+BACKFILL_DAYS ?= 3
 
 # Isolated kubeconfig — never touches ~/.kube/config.
 export KUBECONFIG := $(CURDIR)/.kubeconfig
@@ -49,12 +55,16 @@ up: cluster images install ## Full setup: cluster + images + deploy + port-forwa
 	@# always torn down and re-established rather than reused.
 	@$(MAKE) unforward
 	@$(MAKE) forward
-	@# Seeding talks to the instances over the forwards, so it comes last.
+	@# Seeding and backfilling talk to the instances over the forwards, so they
+	@# come last. Neither is fatal: the cluster is still usable without them.
 	@$(MAKE) seed || echo "==> Warning: seeding failed — run 'make seed' once the instances are up"
+	@$(MAKE) backfill || echo "==> Warning: backfill failed — run 'make backfill' to retry"
 	@echo ""
-	@echo "  n8n-1 (axolotl)     http://localhost:$(N8N_1_PORT)"
-	@echo "  n8n-2 (narwhal)     http://localhost:$(N8N_2_PORT)"
-	@echo "  monitoring          http://localhost:$(MONITORING_PORT)"
+	@for spec in $(INSTANCES); do \
+		ns=$${spec%%:*}; rest=$${spec#*:}; port=$${rest%%:*}; identifier=$${spec##*:}; \
+		printf '  %-20s http://localhost:%s\n' "$$ns ($$identifier)" "$$port"; \
+	done
+	@printf '  %-20s http://localhost:%s\n' "monitoring" "$(MONITORING_PORT)"
 	@echo ""
 	@echo "  n8n login           $(OWNER_EMAIL) / $(OWNER_PASSWORD)"
 	@echo "  dashboard token     $(DASHBOARD_TOKEN)"
@@ -121,11 +131,8 @@ install-monitoring: ## Deploy the airgap-monitoring service
 # the credentials it has written to the volume, so regenerating it on every run
 # would make that data undecryptable after a restart.
 install-n8n: ## Deploy both n8n instances
-	@for ns in $(NAMESPACES); do \
-		case $$ns in \
-			n8n-1) identifier=axolotl ;; \
-			n8n-2) identifier=narwhal ;; \
-		esac; \
+	@for spec in $(INSTANCES); do \
+		ns=$${spec%%:*}; identifier=$${spec##*:}; \
 		echo "==> Installing $$ns (identifier: $$identifier)"; \
 		kubectl create namespace $$ns --dry-run=client -o yaml | kubectl apply -f -; \
 		enc_key=$$(kubectl get secret n8n-secrets -n $$ns -o jsonpath='{.data.N8N_ENCRYPTION_KEY}' 2>/dev/null | base64 -d); \
@@ -179,14 +186,30 @@ status: ## Show pod status across all namespaces
 # Every 10 seconds is deliberately noisy: billable numbers move within a minute
 # instead of after an hour of waiting.
 seed: ## Create and activate the schedule-trigger workflow on both instances
-	@for ns in $(NAMESPACES); do \
-		case $$ns in \
-			n8n-1) port=$(N8N_1_PORT) ;; \
-			n8n-2) port=$(N8N_2_PORT) ;; \
-		esac; \
+	@for spec in $(INSTANCES); do \
+		rest=$${spec#*:}; port=$${rest%%:*}; \
 		./seed-workflow.py http://localhost:$$port $(OWNER_EMAIL) $(OWNER_PASSWORD) \
 			workflows/schedule-demo.json || exit 1; \
 	done
+
+.PHONY: backfill
+# Only the collector is backfilled, not n8n's own insights tables. n8n therefore
+# still reports yesterday as 0 until it has run across a UTC midnight, which is
+# why the invented days stop at the day before yesterday — see backfill-reports.py.
+backfill: ## Post BACKFILL_DAYS of invented daily history to the collector
+	@if [ "$(BACKFILL_DAYS)" -lt 1 ]; then \
+		echo "==> BACKFILL_DAYS=$(BACKFILL_DAYS), skipping backfill"; \
+	else \
+		for spec in $(INSTANCES); do \
+			ns=$${spec%%:*}; rest=$${spec#*:}; port=$${rest%%:*}; identifier=$${spec##*:}; \
+			N8N_EMAIL=$(OWNER_EMAIL) \
+			N8N_PASSWORD=$(OWNER_PASSWORD) \
+			INSTANCE_TOKEN=$(INSTANCE_TOKEN) \
+			N8N_ENCRYPTION_KEY=$$(kubectl get secret n8n-secrets -n $$ns -o jsonpath='{.data.N8N_ENCRYPTION_KEY}' | base64 -d) \
+			./backfill-reports.py http://localhost:$$port http://localhost:$(MONITORING_PORT) \
+				$$identifier $(BACKFILL_DAYS) || exit 1; \
+		done; \
+	fi
 
 .PHONY: reports
 reports: ## Print the reports the monitoring service has received so far
@@ -209,11 +232,8 @@ forward: ## Start background port-forwards (3003, 3004, 3010)
 		fi; \
 	fi
 	@mkdir -p logs
-	@for ns in $(NAMESPACES); do \
-		case $$ns in \
-			n8n-1) port=$(N8N_1_PORT) ;; \
-			n8n-2) port=$(N8N_2_PORT) ;; \
-		esac; \
+	@for spec in $(INSTANCES); do \
+		ns=$${spec%%:*}; rest=$${spec#*:}; port=$${rest%%:*}; \
 		echo "==> Forwarding localhost:$$port → $$ns/n8n:5678"; \
 		kubectl port-forward svc/n8n -n $$ns $$port:5678 > logs/$$ns.log 2>&1 & \
 		echo $$! >> $(PIDS_FILE); \
