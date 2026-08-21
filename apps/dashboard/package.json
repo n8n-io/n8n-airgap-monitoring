@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:full": "run-p -r dev dev:api",
+    "dev:api": "N8N_INSTANCE_AUTH_TOKEN=dev-instance-token N8N_DASHBOARD_AUTH_TOKEN=dev-secret pnpm --filter api start",
     "build": "run-p typecheck \"build-only {@}\" --",
     "test": "vitest run",
     "build-only": "vite build",

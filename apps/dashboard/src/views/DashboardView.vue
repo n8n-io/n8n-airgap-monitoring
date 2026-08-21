@@ -29,12 +29,17 @@ function onLogout(): void {
 <template>
   <main class="dashboard">
     <header class="dashboard-header">
-      <h1>Instance reports</h1>
+      <div>
+        <h1>Instance reports</h1>
+        <p class="dashboard-subtitle">Latest metrics reported by each air-gapped instance.</p>
+      </div>
       <button type="button" @click="onLogout">Log out</button>
     </header>
 
-    <p v-if="isLoading">Loading…</p>
-    <p v-else-if="error" class="error" role="alert">Could not load instance reports: {{ error }}</p>
+    <p v-if="isLoading" class="status">Loading…</p>
+    <p v-else-if="error" class="status error" role="alert">
+      Could not load instance reports: {{ error }}
+    </p>
     <InstancesTable
       v-else
       :instances="instances"
@@ -51,17 +56,38 @@ function onLogout(): void {
 
 <style scoped>
 .dashboard {
-  padding: 1.5rem;
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-subtitle {
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.status {
+  color: var(--color-text-muted);
+  padding: 1.5rem;
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .error {
-  color: #b91c1c;
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border-color: transparent;
+  box-shadow: none;
 }
 </style>

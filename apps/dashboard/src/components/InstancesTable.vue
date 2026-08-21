@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  ScrollAreaRoot,
-  ScrollAreaScrollbar,
-  ScrollAreaThumb,
-  ScrollAreaViewport,
-} from 'reka-ui'
+import { ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewport } from 'reka-ui'
 import type { InstanceSummary, MetricHistory } from '@/api-client/types'
 import type { MetricHistoryTarget } from '@/composables/useMetricHistory'
 import MetricHistoryPanel from './MetricHistoryPanel.vue'
@@ -97,8 +92,22 @@ function formatReceivedAt(receivedAt: string): string {
 </template>
 
 <style scoped>
+.empty-state {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+}
+
 .instances-scroll-area {
   width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
 .instances-scroll-viewport {
@@ -109,24 +118,27 @@ function formatReceivedAt(receivedAt: string): string {
   display: flex;
   height: 0.625rem;
   padding: 0.125rem;
+  background: var(--color-surface-muted);
+  border-top: 1px solid var(--color-border);
 }
 
 .instances-scrollbar-thumb {
   flex: 1;
-  background: #d1d5db;
+  background: var(--color-border-strong);
   border-radius: 9999px;
 }
 
-.instances-table {
-  border-collapse: collapse;
-  width: 100%;
+.instances-scrollbar-thumb:hover {
+  background: var(--color-text-subtle);
 }
 
-.instances-table th,
+.instances-table tbody tr:hover > td {
+  background: var(--color-surface-muted);
+}
+
 .instances-table td {
-  border: 1px solid #d1d5db;
-  padding: 0.5rem 0.75rem;
-  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 .instance-column {
@@ -134,22 +146,38 @@ function formatReceivedAt(receivedAt: string): string {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .metric-cell {
   background: none;
   border: none;
-  padding: 0;
-  color: #2563eb;
+  border-radius: var(--radius-sm);
+  padding: 0.125rem 0.375rem;
+  margin: -0.125rem -0.375rem;
+  color: inherit;
   cursor: pointer;
   font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+/* No accent colour: the values read as plain data, and the hover tint plus
+   pointer cursor are what signal that a cell opens its history. */
+.metric-cell:hover:not(:disabled) {
+  background: var(--color-border);
+  border-color: transparent;
 }
 
 .empty-cell {
-  color: #9ca3af;
+  color: var(--color-text-subtle);
 }
 
 .history-row {
-  background: #f9fafb;
+  background: var(--color-surface-muted);
+  padding: 0;
+}
+
+.instances-table tbody tr:hover > td.history-row {
+  background: var(--color-surface-muted);
 }
 </style>

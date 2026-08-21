@@ -73,37 +73,52 @@ const emit = defineEmits<{
 
 <style scoped>
 .history-panel {
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
   padding: 1rem;
-  margin-top: 1rem;
+  margin: 0.875rem;
 }
 
 .history-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.history-header h2 {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  word-break: break-all;
 }
 
 .history-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-top: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
 }
 
-.history-table th,
-.history-table td {
-  border: 1px solid #d1d5db;
-  padding: 0.5rem 0.75rem;
-  text-align: left;
+/* Tables clip children unreliably, so the corners are rounded per header cell
+   instead of with overflow: hidden on the table itself. */
+.history-table th:first-child {
+  border-top-left-radius: var(--radius-sm);
+}
+
+.history-table th:last-child {
+  border-top-right-radius: var(--radius-sm);
 }
 
 .empty-state {
-  color: #9ca3af;
+  color: var(--color-text-subtle);
   text-align: center;
+  padding: 1.5rem;
 }
 
 .error {
-  color: #b91c1c;
+  color: var(--color-danger);
 }
 </style>

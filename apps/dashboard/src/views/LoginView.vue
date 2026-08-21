@@ -35,7 +35,10 @@ async function onSubmit(): Promise<void> {
 <template>
   <main class="login">
     <form class="login-form" @submit.prevent="onSubmit">
-      <h1>Sign in</h1>
+      <div class="login-heading">
+        <h1>Sign in</h1>
+        <p>Enter the dashboard secret to continue.</p>
+      </div>
       <label for="secret">Dashboard secret</label>
       <input
         id="secret"
@@ -45,7 +48,7 @@ async function onSubmit(): Promise<void> {
         required
         autofocus
       />
-      <button type="submit" :disabled="isSubmitting || candidate === ''">
+      <button type="submit" class="primary" :disabled="isSubmitting || candidate === ''">
         {{ isSubmitting ? 'Signing in…' : 'Sign in' }}
       </button>
       <p v-if="error" class="error" role="alert">{{ error }}</p>
@@ -59,17 +62,38 @@ async function onSubmit(): Promise<void> {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  padding: 1.5rem;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  width: 20rem;
+  width: 22rem;
+  max-width: 100%;
+  padding: 2rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.login-heading {
+  margin-bottom: 1rem;
+}
+
+.login-heading p {
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.login-form button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .error {
-  color: #b91c1c;
+  color: var(--color-danger);
   margin: 0;
 }
 </style>
