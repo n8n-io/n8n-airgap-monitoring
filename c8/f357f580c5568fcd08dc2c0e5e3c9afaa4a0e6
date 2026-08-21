@@ -1,0 +1,26 @@
+apps/dashboard/src/components/MetricHistoryPanel.vue
+  s_e41f8901cd5eba::t_43c49d0eda5737 126
+apps/dashboard/src/assets/main.css
+  s_e41f8901cd5eba::t_ab227eee4d2227 122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "c8f357f580c5568fcd08dc2c0e5e3c9afaa4a0e6",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_e41f8901cd5eba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef0a6b2e-0a42-4b61-8ee1-0439228c702d",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
