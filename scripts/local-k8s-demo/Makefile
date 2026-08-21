@@ -83,9 +83,13 @@ nuke: down delete-cluster ## Full destruction: teardown + delete the kind cluste
 # ── Cluster ───────────────────────────────────────────────────────────────────
 
 .PHONY: cluster
+# The kubeconfig is re-exported even when the cluster already exists: it can go
+# missing while the cluster lives on (a stray `rm`, a checkout without it), and
+# then every kubectl below falls back to localhost:8080 and fails.
 cluster: ## Create the kind cluster (no-op if it already exists)
 	@if kind get clusters 2>/dev/null | grep -qx $(CLUSTER); then \
 		echo "==> Cluster $(CLUSTER) already exists. Skipping creation."; \
+		kind export kubeconfig --name $(CLUSTER) --kubeconfig $(KUBECONFIG) >/dev/null; \
 	else \
 		kind create cluster --name $(CLUSTER) --kubeconfig $(KUBECONFIG); \
 	fi
@@ -241,14 +245,31 @@ forward: ## Start background port-forwards (3003, 3004, 3010)
 	@echo "==> Forwarding localhost:$(MONITORING_PORT) → $(MONITORING_NS)/airgap-monitoring:3000"
 	@kubectl port-forward svc/airgap-monitoring -n $(MONITORING_NS) $(MONITORING_PORT):3000 > logs/monitoring.log 2>&1 & \
 		echo $$! >> $(PIDS_FILE)
+	@# kubectl exits within milliseconds when a port is taken or the pod is gone,
+	@# so the forwards are confirmed alive rather than assumed to be.
+	@sleep 2
+	@dead=0; \
+	while IFS= read -r pid; do kill -0 "$$pid" 2>/dev/null || dead=1; done < $(PIDS_FILE); \
+	if [ $$dead -eq 1 ]; then \
+		echo "ERROR: at least one port-forward exited immediately. Logs:"; \
+		tail -n 3 logs/*.log; \
+		$(MAKE) --no-print-directory unforward >/dev/null; \
+		exit 1; \
+	fi
 	@echo "Port-forwards started. Logs in ./logs/. Stop with 'make unforward'."
 
 .PHONY: unforward
+# Forwards are also killed by command line, not just by PID: a lost $(PIDS_FILE)
+# used to strand them holding the ports, which made the next `make forward` fail
+# to bind while the stale ones served a pod that no longer existed.
 unforward: ## Stop all background port-forwards
-	@if [ ! -f $(PIDS_FILE) ]; then \
-		echo "No port-forwards running ($(PIDS_FILE) not found)."; \
-	else \
+	@if [ -f $(PIDS_FILE) ]; then \
 		while IFS= read -r pid; do kill "$$pid" 2>/dev/null || true; done < $(PIDS_FILE); \
 		rm -f $(PIDS_FILE); \
-		echo "Port-forwards stopped."; \
 	fi
+	@for spec in $(INSTANCES); do \
+		ns=$${spec%%:*}; rest=$${spec#*:}; port=$${rest%%:*}; \
+		pkill -f "port-forward svc/n8n -n $$ns $$port:5678" 2>/dev/null || true; \
+	done
+	@pkill -f "port-forward svc/airgap-monitoring -n $(MONITORING_NS) $(MONITORING_PORT):3000" 2>/dev/null || true
+	@echo "Port-forwards stopped."
