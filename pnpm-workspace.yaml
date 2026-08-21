@@ -1,6 +1,5 @@
 packages:
   - "apps/*"
-  - "tools/*"
 
 # Only resolve package versions published at least 3 days ago, so a compromised
 # or broken release has time to be pulled before it can enter the lockfile.
