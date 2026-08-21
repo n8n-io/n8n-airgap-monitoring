@@ -1,0 +1,196 @@
+apps/dashboard/README.md
+  s_ab64c9c23e8a70::t_aff4da4c5d1ca1 22-23,26-30
+  s_b409a70804a651::t_1d16ef5e802a62 11-15,18-21
+  h_c63dce324dfc7b 16-17,24-25
+apps/dashboard/src/api-client/client.test.ts
+  s_9bc06f39065140::t_d2b92750f3d0da 6-8,16,23,25,27-29,35-64
+  s_9bc06f39065140::t_918a99964068ef 1-3
+  s_9bc06f39065140::t_bc4237206a2cce 4-5
+  s_9bc06f39065140::t_a468c0d4bf5d07 9-11,13-15
+  s_9bc06f39065140::t_16c37250cdb670 17-22
+  s_9bc06f39065140::t_791a312d904166 24
+  s_9bc06f39065140::t_d4c49cf91ee300 26
+  s_9bc06f39065140::t_9e68d686018b4c 30-34
+  h_c63dce324dfc7b 12
+apps/api/src/routes/v1/auth-check.route.test.ts
+  s_b409a70804a651::t_9f33f35552e038 1-51
+apps/dashboard/src/components/MetricHistoryPanel.test.ts
+  s_b409a70804a651::t_ada8d306834f9e 1-59
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  h_c63dce324dfc7b 5-6
+apps/dashboard/src/App.vue
+  s_b409a70804a651::t_fb1c2e83ddaec0 4
+apps/api/src/plugins/config.ts
+  s_b409a70804a651::t_7078b17428769b 6,20,22-27,32
+  s_b409a70804a651::t_fe349390c2b1a7 5,21,31
+apps/dashboard/src/composables/useInstanceReports.ts
+  s_b409a70804a651::t_7c9707fa7378ac 1,4-6,8-23,25-26,28-39
+  s_9bc06f39065140::t_f32bb7efc3c0ee 24
+  h_c63dce324dfc7b 2-3
+  s_9bc06f39065140::t_349812eb2aa036 7
+  s_b409a70804a651::t_afc7fd35d4e3de 27
+apps/dashboard/src/router/index.ts
+  s_b409a70804a651::t_6fb70e4a1d5581 2,6-36
+apps/dashboard/src/composables/useAuth.test.ts
+  s_b409a70804a651::t_fb0bb259db5d4e 1-11,13-32,34-43
+  s_b409a70804a651::t_566e7dd027a4d5 12,33
+apps/dashboard/src/views/LoginView.vue
+  s_b409a70804a651::t_d8aca9291a2eda 1-75
+apps/api/src/routes/v1/instance-reports/get-instance-reports.route.test.ts
+  s_0bd6666ff2a83d::t_7de2cdc9c1f7b1 32
+  s_0bd6666ff2a83d::t_00f994fbd6cd17 23
+  s_0bd6666ff2a83d::t_ebd74f3a38fe42 50-60
+  s_0bd6666ff2a83d::t_3b44e3354c42f2 86-88
+  s_ab64c9c23e8a70::t_ec52dd3567f204 1-22,24-31,33-49,61-85,89-111,115-136,140-178
+  s_0bd6666ff2a83d::t_78c179d7dd7b21 112-114
+  s_0bd6666ff2a83d::t_915d6c30e0e8bb 137-139
+apps/dashboard/vite.config.ts
+  s_b409a70804a651::t_ef0bdf72acc49d 18-22
+apps/api/src/instance-report/instance-report.repository.ts
+  s_0bd6666ff2a83d::t_b4b95bc45b6d1d 22-40,48
+  s_ab64c9c23e8a70::t_d581a93656ff72 13-21,47,56-63,91-93,95
+  s_0bd6666ff2a83d::t_cbe389b05aa190 64-74
+  s_0bd6666ff2a83d::t_e4e593b0205aed 94,96-104
+apps/api/src/routes/v1/auth-check.route.ts
+  s_b409a70804a651::t_e1147f4bb9b5b7 1-22
+apps/api/src/instance-report/instance-report.service.ts
+  s_0bd6666ff2a83d::t_c078be881d0c82 64-74,76
+  s_ab64c9c23e8a70::t_c4a21a5427af0d 55-63,88-130
+  s_0bd6666ff2a83d::t_00f994fbd6cd17 75
+  s_0bd6666ff2a83d::t_c48fbbe1ce2c0a 131-178
+apps/dashboard/src/components/InstancesTable.test.ts
+  s_b409a70804a651::t_6e6b973e50c63b 1-45
+apps/api/src/routes/v1/index.ts
+  h_c63dce324dfc7b 3,6
+  s_b409a70804a651::t_a6135aa79826c3 2,7
+apps/api/src/testing/build-app.ts
+  s_b409a70804a651::t_00888391077aaf 9-10
+apps/dashboard/src/views/DashboardView.vue
+  s_b409a70804a651::t_3a44b34c9710a4 1-72
+apps/api/package.json
+  s_ab64c9c23e8a70::t_e88cd710b66029 10
+apps/dashboard/src/composables/useMetricHistory.test.ts
+  s_0bd6666ff2a83d::t_ba5e27002b1653 1-37
+apps/api/src/routes/v1/instance-reports/get-instance-report-metric-history.route.ts
+  s_0bd6666ff2a83d::t_c6c6e6f549f2e9 1-16,18-55,64-96,98-101
+  s_0bd6666ff2a83d::t_94aa88ce34bb75 17,56-63
+  s_0bd6666ff2a83d::t_00f994fbd6cd17 102
+  s_0bd6666ff2a83d::t_e50a82d1138060 97
+apps/dashboard/src/components/MetricHistoryPanel.vue
+  h_c63dce324dfc7b 2
+  s_b409a70804a651::t_09a877e92bb2b4 1,3-102
+apps/api/src/routes/v1/instance-reports/get-instance-report-metric-history.route.test.ts
+  s_0bd6666ff2a83d::t_2cc7272eb37736 119-122
+  s_0bd6666ff2a83d::t_fcf1ea8453ecbd 183-189
+  s_0bd6666ff2a83d::t_4306594f75199a 220-223
+  s_0bd6666ff2a83d::t_9c9d1f98c639c3 149-151
+  s_0bd6666ff2a83d::t_bd4dc27015c2b9 1-25,27-84,92-118,123-148,152-182,190-219,224-257
+  s_0bd6666ff2a83d::t_51ea473d53f5e4 85-91
+  s_0bd6666ff2a83d::t_00f994fbd6cd17 26
+apps/dashboard/src/components/InstancesTable.vue
+  s_b409a70804a651::t_ad98f36785033a 1,3-71
+  h_c63dce324dfc7b 2
+apps/dashboard/src/api-client/auth-state.ts
+  s_9bc06f39065140::t_2e6b4101ead016 1-21
+apps/api/tsconfig.build.json
+  s_ab64c9c23e8a70::t_555b922d5bd76e 2-4,6
+apps/api/tsconfig.json
+  s_ab64c9c23e8a70::t_7ce523a057b08c 8
+README.md
+  s_b409a70804a651::t_a2db0036b0b2e9 66-81
+  s_b409a70804a651::t_7a03d1443ce0fb 22
+  s_b409a70804a651::t_553e9970c3e451 11
+  s_b409a70804a651::t_ef4dea57ce1c2b 12
+apps/api/src/routes/v1/instance-reports/get-instance-reports.route.ts
+  s_0bd6666ff2a83d::t_065dcbc5db8cc9 18,20-26
+  s_0bd6666ff2a83d::t_961eb70771347c 43
+  s_ab64c9c23e8a70::t_18eaadb2bc623f 1-17,19,27-42,44-48
+apps/api/src/routes/v1/instance-reports/index.ts
+  s_0bd6666ff2a83d::t_8ec581ff0a1409 3,13
+  s_ab64c9c23e8a70::t_d5c666e16580ce 4-12
+apps/dashboard/src/composables/useAuth.ts
+  h_c63dce324dfc7b 3
+  s_b409a70804a651::t_1e2999e755e8b9 4-8,10-17,19-23,25-29
+  s_9bc06f39065140::t_3bc517cda42163 1-2,18,24
+  s_b409a70804a651::t_e6172185f5ccf4 9
+apps/dashboard/src/api-client/client.ts
+  s_0bd6666ff2a83d::t_d5516be55a1c77 46-47,54,57
+  s_9bc06f39065140::t_12b2dd08796fad 1-45,50,55
+  s_0bd6666ff2a83d::t_2c8d5b4d7bae81 58
+  s_9bc06f39065140::t_0a84d2d08dda44 48-49,51-53,56
+apps/dashboard/src/composables/useMetricHistory.ts
+  s_0bd6666ff2a83d::t_21f967255541b7 1
+  s_b409a70804a651::t_1ca07c77f51d2b 4-11,13-19,21-27,29-62
+  h_c63dce324dfc7b 2-3
+  s_9bc06f39065140::t_1a9f248cc2bf92 28
+  s_0bd6666ff2a83d::t_1aaecad0238b05 20
+  s_9bc06f39065140::t_b71c5462a9b249 12
+apps/api/src/scripts/seed-reports.mts
+  s_ab64c9c23e8a70::t_8535dd25d71dac 13
+  s_ab64c9c23e8a70::t_eda6970e9f6838 10-12
+  s_ab64c9c23e8a70::t_3c0756df6b4c05 14-16
+  s_ab64c9c23e8a70::t_5f26ceae9d5ee3 1-9,17-95
+apps/dashboard/src/composables/useInstanceReports.test.ts
+  s_b409a70804a651::t_a1a9d800e3d868 1-17,36-51,64-74,76-87
+  s_0bd6666ff2a83d::t_fbaa15a99e7e56 18-35
+  s_0bd6666ff2a83d::t_bd2ad010deee38 52-63
+  s_b409a70804a651::t_04dc8467ae0625 75
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_0bd6666ff2a83d::t_5a173eda5fb008 3
+  s_0bd6666ff2a83d::t_41cd391664ac69 60-83,85-151
+  s_0bd6666ff2a83d::t_00f994fbd6cd17 84
+apps/dashboard/src/views/LoginView.test.ts
+  s_b409a70804a651::t_c47b5e615a8521 1-28,30-51
+  s_b409a70804a651::t_20cbf62ed09c3b 29
+apps/dashboard/src/router/index.test.ts
+  s_b409a70804a651::t_d860d210f65ecb 1-34
+apps/dashboard/src/api-client/types.ts
+  s_b409a70804a651::t_8891d9fc630865 1-21
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.ts
+  s_b409a70804a651::t_27997eee3fe0c9 60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "2e67ccde5c95058b8180ebea7347ac7e9d7b7f74",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_0bd6666ff2a83d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1bfc3b9a-2bde-4a68-b565-b0f92e7afe2e",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_9bc06f39065140": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d66e4a23-e0cd-4e93-bd78-9dc4e859830c",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_ab64c9c23e8a70": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b061d0fa-6d46-470c-a621-36f8a1bff81c",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_b409a70804a651": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36da1598-810e-491f-a0fb-1e42f2ca92cf",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
