@@ -1,0 +1,25 @@
+apps/dashboard/src/utils/formatDate.ts
+  s_fca83933a4c84b::t_4fa65a70e7b430 13-14,22-23,31-35,37
+  s_fca83933a4c84b::t_d6f97d001090e4 11-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "f7128ebbe74cb84da3b7adc72ff7e597cd4015d6",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_fca83933a4c84b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1fd29028-bf93-4997-9f67-f02ae4971c75",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
