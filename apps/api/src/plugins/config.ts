@@ -5,6 +5,11 @@ export interface Config {
   instanceAuthToken: string;
   dashboardAuthToken: string;
   dbPath: string;
+  /**
+   * Directory holding the built dashboard SPA. Set by the Docker image; unset
+   * when the API runs on its own, in which case nothing static is served.
+   */
+  dashboardDistPath: string | undefined;
 }
 
 /**
@@ -31,6 +36,7 @@ export default fp(
       instanceAuthToken,
       dashboardAuthToken,
       dbPath: process.env.N8N_DB_PATH?.trim() || "./data/cmfae.sqlite",
+      dashboardDistPath: process.env.N8N_DASHBOARD_DIST?.trim() || undefined,
     };
 
     fastify.decorate("config", config);

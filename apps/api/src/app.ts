@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import instanceReport from "./instance-report/instance-report.plugin";
 import config from "./plugins/config";
+import dashboard from "./plugins/dashboard";
 import db from "./plugins/db";
 import sensible from "./plugins/sensible";
 import { healthRoutes } from "./routes/health";
@@ -29,10 +30,18 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, _opts): Promise<void
   // module keeps its plugin next to the service and repository it composes.
   void fastify.register(instanceReport);
 
-  // TODO: add cors later
+  // No CORS plugin on purpose. The dashboard is served from this same origin,
+  // so it never needs one, and sending no CORS headers is the restrictive
+  // default: a foreign page cannot read any response. Registering @fastify/cors
+  // could only widen that. Access control is the bearer tokens, which also
+  // covers the reporting instances — they are servers, and CORS means nothing
+  // to a non-browser client.
 
   void fastify.register(healthRoutes);
   void fastify.register(v1Routes, { prefix: "/api/v1" });
+
+  // Last, so the SPA fallback only sees paths no API route claimed.
+  void fastify.register(dashboard);
 };
 
 export default app;
