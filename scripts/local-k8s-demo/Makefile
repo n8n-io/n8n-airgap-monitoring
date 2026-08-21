@@ -49,6 +49,8 @@ up: cluster images install ## Full setup: cluster + images + deploy + port-forwa
 	@# always torn down and re-established rather than reused.
 	@$(MAKE) unforward
 	@$(MAKE) forward
+	@# Seeding talks to the instances over the forwards, so it comes last.
+	@$(MAKE) seed || echo "==> Warning: seeding failed — run 'make seed' once the instances are up"
 	@echo ""
 	@echo "  n8n-1 (axolotl)     http://localhost:$(N8N_1_PORT)"
 	@echo "  n8n-2 (narwhal)     http://localhost:$(N8N_2_PORT)"
@@ -171,6 +173,19 @@ status: ## Show pod status across all namespaces
 		echo "==> $$ns"; \
 		kubectl get pods -n $$ns 2>/dev/null || echo "  (namespace not found)"; \
 		echo ""; \
+	done
+
+.PHONY: seed
+# Every 10 seconds is deliberately noisy: billable numbers move within a minute
+# instead of after an hour of waiting.
+seed: ## Create and activate the schedule-trigger workflow on both instances
+	@for ns in $(NAMESPACES); do \
+		case $$ns in \
+			n8n-1) port=$(N8N_1_PORT) ;; \
+			n8n-2) port=$(N8N_2_PORT) ;; \
+		esac; \
+		./seed-workflow.py http://localhost:$$port $(OWNER_EMAIL) $(OWNER_PASSWORD) \
+			workflows/schedule-demo.json || exit 1; \
 	done
 
 .PHONY: reports
