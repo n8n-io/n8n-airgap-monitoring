@@ -1,0 +1,33 @@
+scripts/local-k8s-demo/README.md
+  s_2dabea2c901ea6::t_ef7e33bbbded2d 45,47-50,52-56,58-59,61-65
+  s_2dabea2c901ea6::t_49160d02419203 18,21
+scripts/local-k8s-demo/seed-workflow.py
+  s_2dabea2c901ea6::t_2c86310ca93134 13-16
+  s_2dabea2c901ea6::t_22746aee393594 1-12,17-85
+scripts/local-k8s-demo/workflows/schedule-demo.json
+  s_2dabea2c901ea6::t_89ff7bec6e308f 1-48
+scripts/local-k8s-demo/Makefile
+  s_2dabea2c901ea6::t_59aa71e2352c5f 178-190
+  s_2dabea2c901ea6::t_a2c954bef53cce 52-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "7357c15d1c5b70e5fdba3fb638d05223b8a38a09",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_2dabea2c901ea6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55fece23-7bcc-4da4-be4f-97f0dac96131",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
