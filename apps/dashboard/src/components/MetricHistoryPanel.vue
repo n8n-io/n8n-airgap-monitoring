@@ -34,6 +34,14 @@ const emit = defineEmits<{
       <p v-if="isLoading">Loading…</p>
       <p v-else-if="error" class="error" role="alert">Could not load history: {{ error }}</p>
       <template v-else-if="history">
+        <p class="history-help">
+          <template v-if="history.kind === 'daily'">
+            Each row shows the value reported for that specific calendar day.
+          </template>
+          <template v-else>
+            Each row shows the running total as of the time it was received.
+          </template>
+        </p>
         <table class="history-table">
           <thead>
             <tr v-if="history.kind === 'daily'">
@@ -120,6 +128,12 @@ const emit = defineEmits<{
 
 .history-table th:last-child {
   border-top-right-radius: var(--radius-sm);
+}
+
+.history-help {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  margin: 0 0 0.5rem;
 }
 
 .empty-state {
