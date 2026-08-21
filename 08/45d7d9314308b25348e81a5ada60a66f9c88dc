@@ -1,0 +1,26 @@
+apps/dashboard/src/composables/useMetricHistory.test.ts
+  s_573248951853e2::t_b2367ad1371da1 37-58
+apps/dashboard/src/composables/useMetricHistory.ts
+  s_573248951853e2::t_78b7c325dd49fc 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "0845d7d9314308b25348e81a5ada60a66f9c88dc",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_573248951853e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e449cbb0-f499-45ac-ac6e-4d6be4f28b2e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
