@@ -1,0 +1,43 @@
+scripts/local-k8s-demo/k8s/n8n-instance.template.yaml
+  s_2dabea2c901ea6::t_e6d4c22fba62b3 63-66,68-72
+  s_2dabea2c901ea6::t_4df99e56cc4700 118-122,129
+  s_2dabea2c901ea6::t_2b59186ca51505 126,128
+  s_2dabea2c901ea6::t_fa5718c8fedae7 1-62,67,73-117,123-125,127,130-161
+scripts/local-k8s-demo/README.md
+  s_2dabea2c901ea6::t_8cdfeaf3965791 1-45,81-91
+  s_2dabea2c901ea6::t_355a81896f7f2e 46-80
+scripts/local-k8s-demo/k8s/monitoring.yaml
+  s_2dabea2c901ea6::t_48e1a368076187 26-30
+  s_2dabea2c901ea6::t_3853e11fb7ac41 1-25,31-90
+scripts/local-k8s-demo/Makefile
+  s_2dabea2c901ea6::t_f0b2ff041e3cec 186
+  s_2dabea2c901ea6::t_6e0568d276b03d 53-54
+  s_2dabea2c901ea6::t_ad7bd97de22c4d 41
+  s_2dabea2c901ea6::t_5ced1b009e54e2 199-200
+  s_2dabea2c901ea6::t_d2d0328a378ee5 1-29,32-40,42-47,51-52,55-185,187-198,201-219
+  s_2dabea2c901ea6::t_336749025b8c50 30-31
+  s_2dabea2c901ea6::t_9d8996672f9404 48-50
+scripts/local-k8s-demo/.gitignore
+  s_2dabea2c901ea6::t_855ee157dcb4df 1-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "8aa3a1cc1d3b603b937e7a7663e1447dcf36a572",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_2dabea2c901ea6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55fece23-7bcc-4da4-be4f-97f0dac96131",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
