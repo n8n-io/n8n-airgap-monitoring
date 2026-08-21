@@ -123,7 +123,7 @@ const emit = defineEmits<{
 }
 
 .empty-state {
-  color: var(--color-text-subtle);
+  color: var(--color-text-muted);
   text-align: center;
   padding: 1.5rem;
 }

@@ -119,7 +119,7 @@ button:disabled {
 }
 
 button.primary {
-  color: #fff;
+  color: var(--color-text);
   background: var(--color-accent);
   border-color: transparent;
   font-weight: 600;
