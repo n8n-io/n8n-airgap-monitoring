@@ -1,0 +1,26 @@
+scripts/local-k8s-demo/Makefile
+  s_327f0c272a54eb::t_8f5ddb662a478b 248-258,262-264,266,270-275
+  s_327f0c272a54eb::t_f48161f1982ddb 86-88
+  s_327f0c272a54eb::t_fb8e3e45671f50 92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "3b5f6ba80c91e4059e994d4b53ef9ee09ee045d1",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_327f0c272a54eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1868f2fc-6a4e-4b15-8048-0645343bc33f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
