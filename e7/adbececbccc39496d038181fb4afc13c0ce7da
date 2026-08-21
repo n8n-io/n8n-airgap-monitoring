@@ -1,0 +1,44 @@
+apps/dashboard/src/views/DashboardView.vue
+  h_c63dce324dfc7b 34
+apps/dashboard/src/components/InstancesTable.vue
+  s_2b87ecabb70d17::t_d9afc19c730bd7 5
+  h_c63dce324dfc7b 45
+apps/dashboard/src/components/MetricHistoryPanel.vue
+  s_2b87ecabb70d17::t_6aeeaca2febfab 64
+  s_2b87ecabb70d17::t_38798d9e3a196e 83-91
+  s_2b87ecabb70d17::t_fa13c5d87d1043 5
+  h_c63dce324dfc7b 57
+  s_2b87ecabb70d17::t_ebf1696429736e 33
+apps/dashboard/src/utils/formatDate.ts
+  s_a9ae99c52398d2::t_9aae70b92eac32 3,7-12,18-23,25-27
+  s_2b87ecabb70d17::t_c0ca8e275049f1 1-2,4-6,13-17,24,28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "e7adbececbccc39496d038181fb4afc13c0ce7da",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_2b87ecabb70d17": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "def9d3e2-fc34-4ad2-8ff8-4b70301053f3",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_a9ae99c52398d2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2db4c916-c821-4854-a0ff-0370452cd3f6",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
