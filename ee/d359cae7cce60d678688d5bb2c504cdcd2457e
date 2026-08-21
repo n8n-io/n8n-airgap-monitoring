@@ -1,0 +1,47 @@
+apps/dashboard/src/main.ts
+  s_82db9947dad4d4::t_77ca24f7e2819b 4
+apps/dashboard/src/components/InstancesTable.vue
+  s_82db9947dad4d4::t_c4f72316f3f629 2
+  s_82db9947dad4d4::t_5a85cb8aa6049c 95-103,106-110,121-122,127,131-136,140-141,149,155-157,161-163,166,168,172,176-181
+  s_82db9947dad4d4::t_9ec2d811394997 158,164-165,167
+apps/dashboard/src/components/MetricHistoryPanel.vue
+  s_82db9947dad4d4::t_a59421c386b611 105-108,111-112
+  s_82db9947dad4d4::t_e19101dcfd8574 76-79,81,88-97,101-102,116,118,122
+  s_82db9947dad4d4::t_3be946f12220b1 103-104
+apps/dashboard/src/views/DashboardView.vue
+  s_82db9947dad4d4::t_9f31d2c718a174 32-35,39-42
+  s_82db9947dad4d4::t_69e1a9fc7a0d7b 59-61,67-84,88-91
+apps/dashboard/src/views/LoginView.vue
+  s_82db9947dad4d4::t_b3ba219c7d27b8 51
+  s_82db9947dad4d4::t_19633fdda0b2a9 65,72-92,96
+  s_82db9947dad4d4::t_4bde22645dcb4f 38-41
+apps/dashboard/package.json
+  s_82db9947dad4d4::t_8b2ade1efced7a 8
+  s_82db9947dad4d4::t_fd78ce77f475eb 9
+apps/dashboard/src/assets/main.css
+  s_82db9947dad4d4::t_c4f72316f3f629 32
+  s_82db9947dad4d4::t_e87073a6e06757 1-31,33-188
+apps/dashboard/index.html
+  s_82db9947dad4d4::t_418187864ab38b 2,7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "eed359cae7cce60d678688d5bb2c504cdcd2457e",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_82db9947dad4d4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2bbe44ff-2f62-4458-9791-9ff15c6de3e5",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
