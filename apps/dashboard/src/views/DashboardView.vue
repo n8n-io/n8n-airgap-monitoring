@@ -2,7 +2,6 @@
 import { onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import InstancesTable from '@/components/InstancesTable.vue'
-import MetricHistoryPanel from '@/components/MetricHistoryPanel.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useInstanceReports } from '@/composables/useInstanceReports'
 import { useMetricHistory } from '@/composables/useMetricHistory'
@@ -40,16 +39,12 @@ function onLogout(): void {
       v-else
       :instances="instances"
       :metric-names="metricNames"
-      @select-metric="history.open"
-    />
-
-    <MetricHistoryPanel
-      v-if="history.target.value"
-      :target="history.target.value"
+      :active-target="history.target.value"
       :history="history.history.value"
-      :is-loading="history.isLoading.value"
-      :error="history.error.value"
-      @close="history.close"
+      :is-history-loading="history.isLoading.value"
+      :history-error="history.error.value"
+      @select-metric="history.open"
+      @close-history="history.close"
     />
   </main>
 </template>

@@ -56,4 +56,13 @@ describe('MetricHistoryPanel', () => {
 
     expect(wrapper.emitted('close')).toHaveLength(1)
   })
+
+  it('renders nothing visible when there is no target', () => {
+    const wrapper = mount(MetricHistoryPanel, {
+      props: { target: null, isLoading: false, error: null, history: null },
+    })
+
+    expect(wrapper.find('button').exists()).toBe(false)
+    expect(wrapper.text()).toBe('')
+  })
 })

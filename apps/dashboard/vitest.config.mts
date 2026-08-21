@@ -9,6 +9,7 @@ export default mergeConfig(
     test: {
       name: 'dashboard',
       environment: 'jsdom',
+      setupFiles: ['./src/testing/setup.ts'],
     },
   }),
 )
