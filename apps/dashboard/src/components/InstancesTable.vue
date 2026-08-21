@@ -2,6 +2,7 @@
 import { ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewport } from 'reka-ui'
 import type { InstanceSummary, MetricHistory } from '@/api-client/types'
 import type { MetricHistoryTarget } from '@/composables/useMetricHistory'
+import { formatReceivedAt } from '@/utils/formatDate'
 import MetricHistoryPanel from './MetricHistoryPanel.vue'
 
 const props = defineProps<{
@@ -19,22 +20,6 @@ const emit = defineEmits<{
 }>()
 
 const columnCount = 3 + props.metricNames.length
-
-// Month spelled out (not numeric) so the date reads the same regardless of
-// whether a country orders day/month or month/day.
-const receivedAtFormatter = new Intl.DateTimeFormat('en-GB', {
-  year: 'numeric',
-  month: 'short',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false,
-})
-
-function formatReceivedAt(receivedAt: string): string {
-  const date = new Date(receivedAt)
-  return Number.isNaN(date.getTime()) ? receivedAt : receivedAtFormatter.format(date)
-}
 </script>
 
 <template>
@@ -57,7 +42,7 @@ function formatReceivedAt(receivedAt: string): string {
                 {{ instance.label ?? instance.instanceId }}
               </td>
               <td>{{ instance.n8nVersion }}</td>
-              <td>{{ formatReceivedAt(instance.receivedAt) }}</td>
+              <td>{{ formatReceivedAt(instance.receivedAt, false) }}</td>
               <td v-for="name in metricNames" :key="name">
                 <button
                   v-if="instance.metrics[name] !== undefined"

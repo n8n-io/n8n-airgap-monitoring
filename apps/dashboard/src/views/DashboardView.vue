@@ -31,7 +31,7 @@ function onLogout(): void {
     <header class="dashboard-header">
       <div>
         <h1>Instance reports</h1>
-        <p class="dashboard-subtitle">Latest metrics reported by each air-gapped instance.</p>
+        <p class="dashboard-subtitle">Latest metrics reported by each instance.</p>
       </div>
       <button type="button" @click="onLogout">Log out</button>
     </header>

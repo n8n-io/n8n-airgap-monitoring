@@ -2,6 +2,7 @@
 import { CollapsibleContent, CollapsibleRoot, CollapsibleTrigger } from 'reka-ui'
 import type { MetricHistory } from '@/api-client/types'
 import type { MetricHistoryTarget } from '@/composables/useMetricHistory'
+import { formatReceivedAt } from '@/utils/formatDate'
 
 defineProps<{
   target: MetricHistoryTarget | null
@@ -29,7 +30,7 @@ const emit = defineEmits<{
       <CollapsibleTrigger as="button" type="button">Close</CollapsibleTrigger>
     </div>
 
-    <CollapsibleContent>
+    <CollapsibleContent class="history-content">
       <p v-if="isLoading">Loading…</p>
       <p v-else-if="error" class="error" role="alert">Could not load history: {{ error }}</p>
       <template v-else-if="history">
@@ -53,14 +54,14 @@ const emit = defineEmits<{
             </tr>
             <template v-else-if="history.kind === 'daily'">
               <tr v-for="point in history.points" :key="point.batchId">
-                <td>{{ point.date }}</td>
+                <td>{{ formatReceivedAt(point.date, false) }}</td>
                 <td>{{ point.value }}</td>
                 <td>{{ point.batchId }}</td>
               </tr>
             </template>
             <template v-else>
               <tr v-for="point in history.points" :key="point.receivedAt">
-                <td>{{ point.receivedAt }}</td>
+                <td>{{ formatReceivedAt(point.receivedAt) }}</td>
                 <td>{{ point.value }}</td>
               </tr>
             </template>
@@ -79,6 +80,15 @@ const emit = defineEmits<{
   box-shadow: var(--shadow-xs);
   padding: 1rem;
   margin: 0.875rem;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Only the table scrolls, so the header stays visible while the panel is capped. */
+.history-content {
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .history-header {
