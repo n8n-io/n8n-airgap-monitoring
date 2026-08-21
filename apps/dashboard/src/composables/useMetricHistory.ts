@@ -55,6 +55,7 @@ export function useMetricHistory() {
   function close(): void {
     target.value = null
     history.value = null
+    isLoading.value = false
     error.value = null
   }
 

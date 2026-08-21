@@ -34,4 +34,26 @@ describe('useMetricHistory', () => {
     expect(isLoading.value).toBe(false)
     expect(error.value).not.toBeNull()
   })
+
+  it('clears isLoading when closed while a request is in flight', async () => {
+    let resolveFetch: (value: unknown) => void = () => {}
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockReturnValue(
+        new Promise((resolve) => {
+          resolveFetch = resolve
+        }),
+      ),
+    )
+
+    const { isLoading, open, close } = useMetricHistory()
+    const pending = open('instance-1', 'activeWorkflows')
+    expect(isLoading.value).toBe(true)
+
+    close()
+    resolveFetch({ ok: true, json: async () => ({ data: { kind: 'cumulative', points: [] } }) })
+    await pending
+
+    expect(isLoading.value).toBe(false)
+  })
 })
