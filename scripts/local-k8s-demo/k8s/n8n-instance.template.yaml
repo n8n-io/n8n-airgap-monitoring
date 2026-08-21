@@ -102,6 +102,12 @@ spec:
             # instead of only showing its generated instanceId.
             - name: N8N_INSTANCE_REPORTING_IDENTIFIER
               value: __IDENTIFIER__
+            # The daily figure comes from insights, which only aggregates raw
+            # execution rows every 60 minutes by default — the reporter would keep
+            # sending stale numbers for most of a demo. One minute matches the
+            # reporting interval above.
+            - name: N8N_INSIGHTS_COMPACTION_INTERVAL_MINUTES
+              value: "1"
           envFrom:
             # Holds N8N_ENCRYPTION_KEY, which the Makefile keeps stable across
             # reinstalls so data already on the volume stays decryptable.
