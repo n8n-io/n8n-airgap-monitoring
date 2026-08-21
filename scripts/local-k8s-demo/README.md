@@ -15,9 +15,10 @@ cluster, which is the point of the setup.
 ## Usage
 
 ```sh
-make up      # cluster + images + deploy + port-forwards
+make up      # cluster + images + deploy + port-forwards + demo workflow
 make status  # pod status across all namespaces
 make reports # what the monitoring service has received so far
+make seed    # (re-)create the demo workflow on both instances
 make down    # stop forwards and remove workloads, keep the cluster
 make nuke    # ... and delete the cluster
 ```
@@ -40,43 +41,28 @@ makes reports meaningful.
 Reports are sent every minute (`REPORT_INTERVAL_MINUTES` in the Makefile) to
 `http://airgap-monitoring.monitoring.svc.cluster.local:3000/api/v1/instance-reports`.
 The first one lands one interval after an instance boots — n8n does not send on startup.
-Note that a report covers *yesterday's* completed UTC day plus a lifetime total, so on a
-freshly created instance the daily value is legitimately 0.
 
-## Known issue: reports never arrive (n8n-side bug)
+## Where the numbers come from
 
-As of the n8n revision this was tested against, the instances send nothing and log
-`AuthPrincipal does not have a role defined` once per interval. The demo setup is fine —
-the cause is upstream, in `OwnershipService.getInstanceOwner()`
-(`packages/cli/src/services/ownership.service.ts`): it filters users *by* role but does
-not load the relation, so the `User` it hands to `InsightsService.getInsightsSummary()`
-has no `role` and permission resolution throws. The sibling query lower in that same file
-does the identical lookup with `relations: ['role']`; `getInstanceOwner()` just omits it.
+`make up` seeds each instance with [workflows/schedule-demo.json](workflows/schedule-demo.json)
+— a schedule trigger firing every 10 seconds into a Set node — so the instances produce
+production executions on their own and the reports are not all zeroes. `make seed` runs
+the same step on demand and skips instances that already have the workflow.
 
-Until that is fixed in the n8n checkout the image is built from, you can verify that
-everything this demo owns works — cluster DNS, the internal URL, the shared token, and
-the payload schema — by sending a report by hand from inside an instance:
+Two settings exist purely to compress the demo's timescale, both in the deployment
+template: reports go out every minute instead of every 60, and
+`N8N_INSIGHTS_COMPACTION_INTERVAL_MINUTES=1` makes insights aggregate raw execution rows
+every minute rather than hourly. Without the second one the daily figure would lag behind
+by up to an hour.
 
-```sh
-export KUBECONFIG=$PWD/.kubeconfig
-pod=$(kubectl get pod -n n8n-1 -l app=n8n -o jsonpath='{.items[0].metadata.name}')
-kubectl exec -n n8n-1 $pod -- node -e '
-fetch(process.env.N8N_INSTANCE_REPORTING_WEBHOOK_URL, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer " + process.env.N8N_INSTANCE_REPORTING_AUTH_TOKEN,
-  },
-  body: JSON.stringify({
-    instanceId: "demo-instance-axolotl",
-    label: process.env.N8N_INSTANCE_REPORTING_IDENTIFIER,
-    n8nVersion: "2.99.0",
-    dataPoints: [{ kind: "cumulative", name: "billableExecutionTotal", value: 42 }],
-  }),
-}).then(async r => console.log(r.status, await r.text()))'
-```
+The two metrics behave differently, which is worth knowing before concluding something is
+broken:
 
-That returns `201` and the report then shows up in `make reports`.
+- `billableExecutionTotal` is a lifetime cumulative count and starts moving within a
+  minute or two of seeding.
+- `billableExecutionPerDay` covers **yesterday's** completed UTC day. n8n deliberately
+  never reports a partial day, so on a cluster created today this reads 0 no matter how
+  many executions run — it turns non-zero after the first UTC midnight.
 
 ## Notes
 
