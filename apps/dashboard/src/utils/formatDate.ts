@@ -8,12 +8,18 @@ const dateOptions: Intl.DateTimeFormatOptions = {
 
 const dateFormatter = new Intl.DateTimeFormat('en-GB', dateOptions)
 
+// UTC so a date-only value like '2026-03-25' (parsed as UTC midnight) doesn't
+// shift back a day when rendered in timezones west of UTC.
+const utcDateFormatter = new Intl.DateTimeFormat('en-GB', { ...dateOptions, timeZone: 'UTC' })
+
 const dateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
   ...dateOptions,
   hour: '2-digit',
   minute: '2-digit',
   hour12: false,
 })
+
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/
 
 /**
  * Pass `includeTime: false` for a report whose metrics are all `daily`: those
@@ -22,7 +28,11 @@ const dateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
  */
 export function formatReceivedAt(receivedAt: string, includeTime = true): string {
   const date = new Date(receivedAt)
-  const formatter = includeTime ? dateTimeFormatter : dateFormatter
+  if (Number.isNaN(date.getTime())) return receivedAt
 
-  return Number.isNaN(date.getTime()) ? receivedAt : formatter.format(date)
+  if (!includeTime) {
+    return (DATE_ONLY.test(receivedAt) ? utcDateFormatter : dateFormatter).format(date)
+  }
+
+  return dateTimeFormatter.format(date)
 }
