@@ -57,7 +57,7 @@ const successResponseSchema = {
 
 const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> => {
   await fastify.register(bearerAuth, {
-    keys: new Set([fastify.config.authToken]),
+    keys: new Set([fastify.config.instanceAuthToken]),
   });
 
   fastify.post<{ Body: CreateInstanceReport }>(

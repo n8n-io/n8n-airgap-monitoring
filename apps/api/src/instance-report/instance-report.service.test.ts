@@ -1,6 +1,6 @@
 import * as assert from "node:assert";
 import { test } from "vitest";
-import type { InstanceReport, InstanceReportRepository } from "./instance-report.repository";
+import type { InstanceReport, InstanceReportRepository, InstanceReportRow } from "./instance-report.repository";
 import { type CreateInstanceReport, InstanceReportService } from "./instance-report.service";
 
 const report: CreateInstanceReport = {
@@ -56,4 +56,96 @@ test("returns the id assigned by the repository", async () => {
 
   assert.deepEqual(service.recordReport(report), { id: 1 });
   assert.deepEqual(service.recordReport(report), { id: 2 });
+});
+
+/** A repository stub that only serves findByInstanceId, pre-seeded with rows. */
+function fakeRepositoryWithRows(rows: InstanceReportRow[]) {
+  const repository = {
+    findByInstanceId(instanceId: string) {
+      return rows.filter((row) => row.instanceId === instanceId);
+    },
+  };
+
+  return repository as unknown as InstanceReportRepository;
+}
+
+function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
+  return {
+    instanceId: "instance-1",
+    label: null,
+    n8nVersion: "1.99.0",
+    dataPoints: [],
+    receivedAt: "2026-03-25T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+test("getMetricHistory returns null for an instance with no matching metric", () => {
+  const repository = fakeRepositoryWithRows([row({ dataPoints: [{ kind: "cumulative", name: "other", value: 1 }] })]);
+
+  assert.equal(new InstanceReportService(repository).getMetricHistory("instance-1", "activeWorkflows"), null);
+});
+
+test("getMetricHistory sorts daily points by date and dedupes retried batchIds", () => {
+  const repository = fakeRepositoryWithRows([
+    row({
+      receivedAt: "2026-03-26T00:00:00.000Z",
+      dataPoints: [{ kind: "daily", name: "prodExecutions", value: 5, batchId: "batch-2", date: "2026-03-26" }],
+    }),
+    row({
+      receivedAt: "2026-03-25T00:00:00.000Z",
+      dataPoints: [{ kind: "daily", name: "prodExecutions", value: 3, batchId: "batch-1", date: "2026-03-25" }],
+    }),
+    row({
+      receivedAt: "2026-03-25T01:00:00.000Z",
+      dataPoints: [{ kind: "daily", name: "prodExecutions", value: 4, batchId: "batch-1", date: "2026-03-25" }],
+    }),
+  ]);
+
+  assert.deepEqual(new InstanceReportService(repository).getMetricHistory("instance-1", "prodExecutions"), {
+    kind: "daily",
+    points: [
+      { date: "2026-03-25", value: 4, batchId: "batch-1" },
+      { date: "2026-03-26", value: 5, batchId: "batch-2" },
+    ],
+  });
+});
+
+test("getMetricHistory returns cumulative points in receipt order", () => {
+  const repository = fakeRepositoryWithRows([
+    row({
+      receivedAt: "2026-03-25T00:00:00.000Z",
+      dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 10 }],
+    }),
+    row({
+      receivedAt: "2026-03-26T00:00:00.000Z",
+      dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 4 }],
+    }),
+  ]);
+
+  assert.deepEqual(new InstanceReportService(repository).getMetricHistory("instance-1", "activeWorkflows"), {
+    kind: "cumulative",
+    points: [
+      { receivedAt: "2026-03-25T00:00:00.000Z", value: 10 },
+      { receivedAt: "2026-03-26T00:00:00.000Z", value: 4 },
+    ],
+  });
+});
+
+test("getMetricHistory drops points of the losing kind if a metric ever switched kind", () => {
+  const repository = fakeRepositoryWithRows([
+    row({
+      receivedAt: "2026-03-25T00:00:00.000Z",
+      dataPoints: [{ kind: "cumulative", name: "flexible", value: 10 }],
+    }),
+    row({
+      receivedAt: "2026-03-26T00:00:00.000Z",
+      dataPoints: [{ kind: "daily", name: "flexible", value: 4, batchId: "batch-1", date: "2026-03-26" }],
+    }),
+  ]);
+
+  assert.deepEqual(new InstanceReportService(repository).getMetricHistory("instance-1", "flexible"), {
+    kind: "daily",
+    points: [{ date: "2026-03-26", value: 4, batchId: "batch-1" }],
+  });
 });

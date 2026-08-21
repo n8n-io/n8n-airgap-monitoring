@@ -2,8 +2,8 @@ import * as assert from "node:assert";
 import { test } from "vitest";
 import { build } from "../../../testing/build-app";
 
-const URL = "/api/v1/instance-report";
-const AUTHORIZED = { authorization: "Bearer test-token" };
+const URL = "/api/v1/instance-reports";
+const AUTHORIZED = { authorization: "Bearer test-instance-token" };
 
 const validReport = {
   instanceId: "instance-1",

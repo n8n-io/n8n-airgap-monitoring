@@ -2,7 +2,8 @@ import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 
 export interface Config {
-  authToken: string;
+  instanceAuthToken: string;
+  dashboardAuthToken: string;
   dbPath: string;
 }
 
@@ -16,13 +17,19 @@ export interface Config {
  */
 export default fp(
   async (fastify: FastifyInstance) => {
-    const authToken = process.env.N8N_AUTH_TOKEN?.trim();
-    if (!authToken) {
-      throw new Error("N8N_AUTH_TOKEN must be set to a non-empty value");
+    const instanceAuthToken = process.env.N8N_INSTANCE_AUTH_TOKEN?.trim();
+    if (!instanceAuthToken) {
+      throw new Error("N8N_INSTANCE_AUTH_TOKEN must be set to a non-empty value");
+    }
+
+    const dashboardAuthToken = process.env.N8N_DASHBOARD_AUTH_TOKEN?.trim();
+    if (!dashboardAuthToken) {
+      throw new Error("N8N_DASHBOARD_AUTH_TOKEN must be set to a non-empty value");
     }
 
     const config: Config = {
-      authToken,
+      instanceAuthToken,
+      dashboardAuthToken,
       dbPath: process.env.N8N_DB_PATH?.trim() || "./data/cmfae.sqlite",
     };
 

@@ -8,7 +8,8 @@ customer-hosted instance can aggregate usage numbers for many n8n instances.
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `N8N_AUTH_TOKEN` | yes | — | Shared bearer token that reporting n8n instances must present. The service refuses to start without it. |
+| `N8N_INSTANCE_AUTH_TOKEN` | yes | — | Shared bearer token that reporting n8n instances must present. The service refuses to start without it. |
+| `N8N_DASHBOARD_AUTH_TOKEN` | yes | — | Bearer token the dashboard UI must present to read instance reports. Separate from the instance token so a leaked dashboard login can't be used to forge billing reports. |
 | `N8N_DB_PATH` | no | `./data/cmfae.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 
 ## Reporting usage
@@ -18,7 +19,7 @@ service's `POST /api/v1/instance-report` endpoint and sends one report per day:
 
 ```http
 POST /api/v1/instance-report
-Authorization: Bearer <N8N_AUTH_TOKEN>
+Authorization: Bearer <N8N_INSTANCE_AUTH_TOKEN>
 Content-Type: application/json
 
 {
@@ -61,6 +62,22 @@ Responses are `201` with the stored event id, `400` for a malformed report,
 and `401` for a missing or wrong token. Every report is appended as its own
 event rather than overwriting the previous one, so usage history stays
 auditable; a reporting UI would read the newest event per instance.
+
+## Dashboard authentication
+
+The dashboard UI checks a typed secret against `GET /api/v1/auth/check`
+before treating a login as successful:
+
+```http
+GET /api/v1/auth/check
+Authorization: Bearer <N8N_DASHBOARD_AUTH_TOKEN>
+```
+
+`204` means the token is valid; `401` means it is missing or wrong. This is a
+dedicated endpoint rather than reusing a data endpoint so that checking a
+login never has the side effect of fetching (or requiring) the full instance
+report list. Every other dashboard-facing endpoint is guarded by the same
+`N8N_DASHBOARD_AUTH_TOKEN`.
 
 ## Available Scripts
 
