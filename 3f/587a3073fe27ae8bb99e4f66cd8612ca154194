@@ -1,0 +1,51 @@
+apps/dashboard/src/testing/setup.ts
+  s_c9b65e58d14457::t_931b7a9b781848 1-7
+apps/dashboard/src/components/MetricHistoryPanel.vue
+  s_c9b65e58d14457::t_acbfa7669ecc97 2,7,13,19-24,29,32-41,43-45,47-71
+apps/dashboard/vitest.config.mts
+  s_c9b65e58d14457::t_507e1584b85ea0 12
+apps/dashboard/src/views/DashboardView.vue
+  s_c9b65e58d14457::t_c06d47a8a59763 42,44-47
+apps/dashboard/package.json
+  s_c9b65e58d14457::t_ecde217c1a7f8e 18
+apps/dashboard/src/components/InstancesTable.vue
+  s_c9b65e58d14457::t_ffb8dcaaf05400 47-51,53-58,90-96
+  s_c9b65e58d14457::t_b63d4ea1c694eb 52,61-63
+  s_c9b65e58d14457::t_bf450176c887cf 40-41
+  s_c9b65e58d14457::t_fa77b4e8c7ffe8 2-7
+  s_c9b65e58d14457::t_4a976c6e8c7b39 27-39,42
+  s_c9b65e58d14457::t_87df01354ddb52 65
+  s_c9b65e58d14457::t_770fe8e707ddcd 132-138
+  s_c9b65e58d14457::t_15747c38197f4b 151-154
+  s_c9b65e58d14457::t_8d6e80355ce4c3 100-119
+  s_c9b65e58d14457::t_34aa4d46be2740 8-10,12,15-18,23,25-26,59-60,64,66-89
+apps/dashboard/src/components/MetricHistoryPanel.test.ts
+  s_c9b65e58d14457::t_39782ec77bab40 59-67
+apps/dashboard/src/components/InstancesTable.test.ts
+  s_c9b65e58d14457::t_4bcedbe41b0770 86-88
+  s_c9b65e58d14457::t_1a59d9e99fa9cd 84
+  s_c9b65e58d14457::t_c78ce82594c2b6 5-11,14-16,28,48,56-83,85,89-114
+pnpm-lock.yaml
+  s_c9b65e58d14457::t_65b33727074aff 73-75,649-660,681-686,957-967,1028-1030,1402-1414,1473-1476,1658-1660,2489-2493,2977-2987,3569-3588,3605-3612,3769-3779,3827-3828,4241-4253,4298-4301,4464-4465,5300-5315,5744-5747
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "3f587a3073fe27ae8bb99e4f66cd8612ca154194",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_c9b65e58d14457": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6cdada23-1902-4ea2-bbe5-8e414bc3cce7",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
