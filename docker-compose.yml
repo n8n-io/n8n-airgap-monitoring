@@ -1,0 +1,17 @@
+# Runs the real production image locally. This is not a hot-reload setup —
+# `pnpm dev` remains the dev workflow.
+services:
+  airgap-monitoring:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      N8N_INSTANCE_AUTH_TOKEN: dev-instance-token
+      N8N_DASHBOARD_AUTH_TOKEN: dev-dashboard-token
+    volumes:
+      # A named volume, not a bind mount: the container runs as `node` and a
+      # bind-mounted host directory hits uid mismatches.
+      - cmfae-data:/data
+
+volumes:
+  cmfae-data:

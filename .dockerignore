@@ -1,0 +1,22 @@
+# Installed and built inside the image instead of copied in, so host artifacts
+# (wrong platform, stale output) never leak into the build.
+node_modules
+**/node_modules
+**/dist
+.turbo
+**/.turbo
+
+# Local SQLite database
+data
+
+.git
+.gitignore
+.env
+.DS_Store
+.idea
+.vscode
+*.log
+
+Dockerfile
+.dockerignore
+docker-compose.yml
