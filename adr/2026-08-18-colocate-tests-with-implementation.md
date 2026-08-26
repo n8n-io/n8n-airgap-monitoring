@@ -18,7 +18,6 @@ Feature modules own their wiring: `src/instance-report/` holds `instance-report.
 
 ## Consequences
 
-- Both autoload calls need `ignorePattern: /\.test\.(?:ts|js)$/`; without it autoload registers test files as plugins and routes.
 - `tsconfig.build.json` excludes `**/*.test.ts` and `src/testing/**` so tests do not reach `dist`; `tsconfig.json` still covers them for the editor and `pnpm typecheck`. A bare `tsc` (no `-p`) would emit tests — use `pnpm build:ts`.
 - Coverage is not wired up yet; if added, the vitest/coverage config must exclude `**/*.test.ts` and `src/testing/**` so tests do not leak into the coverage report.
 - Each new feature module costs one `register` call in `app.ts`. If that becomes tedious, autoload `*.plugin.*` files by convention instead.
