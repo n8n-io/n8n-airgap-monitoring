@@ -86,3 +86,45 @@ For production mode
 
 Run the test cases.
 
+## Docker
+
+The [`Dockerfile`](Dockerfile) builds a single image containing the API, so a
+deployment is one container plus one volume for the SQLite file. This service is
+API only — there is no frontend to serve, no second process, and no CORS to
+configure.
+
+Defaults baked into the image:
+
+| | |
+| --- | --- |
+| Port | `3000` |
+| Data | `/data` (declared as a volume, `N8N_DB_PATH=/data/cmfae.sqlite`) |
+| User | `node` (non-root, uid 1000) |
+| Health | `HEALTHCHECK` polling `/healthz` |
+
+`N8N_MONITORING_WRITE_TOKEN` is deliberately **not** set. The service refuses to
+boot without it, so you must supply it.
+
+### Running the image locally
+
+`docker compose up --build` builds the image and starts it on
+[http://localhost:3001](http://localhost:3001) with a throwaway token and a
+named volume:
+
+```sh
+docker compose up --build          # or: docker-compose up --build
+```
+
+The host port is 3001, not 3000, so this can run alongside a `pnpm dev` server
+that already holds 3000. Inside the container the API still listens on 3000.
+
+This runs the real production image — it is not a hot-reload setup. `pnpm dev`
+remains the development workflow; use compose when you want to check that the
+thing you are about to ship actually works. `docker compose down -v` removes the
+container and its data volume.
+
+The compose file uses a named volume rather than a bind mount on purpose: the
+container runs as `node`, and a host directory bind-mounted on macOS or Linux
+generally has the wrong owner, so SQLite fails to create its WAL files.
+
+
