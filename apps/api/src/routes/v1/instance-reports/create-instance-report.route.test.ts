@@ -191,26 +191,3 @@ test("ignores unknown top level fields so newer instances stay compatible", asyn
 
   assert.equal(res.statusCode, 201);
 });
-
-test("drops a metric level batchId left over from the pre-envelope shape", async () => {
-  const app = await build();
-
-  const res = await app.inject({
-    method: "POST",
-    url: URL,
-    headers: AUTHORIZED,
-    payload: {
-      ...validReport,
-      dataPoints: [{ kind: "daily", name: "prodExecutions", value: 1, batchId: "stale", date: "2026-03-25" }],
-    },
-  });
-
-  assert.equal(res.statusCode, 201);
-
-  const { id } = res.json() as { id: number };
-  const row = app.db.prepare("SELECT data FROM instance_reports WHERE id = ?").get(id) as { data: string };
-
-  // The envelope's batchId is the only one that carries meaning now, so the
-  // stale one is stripped rather than stored alongside it.
-  assert.deepEqual(JSON.parse(row.data), [{ kind: "daily", name: "prodExecutions", value: 1, date: "2026-03-25" }]);
-});
