@@ -75,8 +75,11 @@ In the project directory, you can run:
 
 ### `pnpm dev`
 
-To start the app in dev mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+To start the app in dev mode on [http://localhost:3456](http://localhost:3456).
+
+The dev port is deliberately an unpopular one. Port 3000 is the default for a
+long list of tools (Grafana among them) and a silent `EADDRINUSE` at startup
+looks a lot like "the dev server didn't print its URL".
 
 ### `pnpm start`
 
@@ -115,8 +118,8 @@ named volume:
 docker compose up --build          # or: docker-compose up --build
 ```
 
-The host port is 3001, not 3000, so this can run alongside a `pnpm dev` server
-that already holds 3000. Inside the container the API still listens on 3000.
+The host port is 3001, not 3000, since port 3000 is a popular default and often
+already taken. Inside the container the API still listens on 3000.
 
 This runs the real production image — it is not a hot-reload setup. `pnpm dev`
 remains the development workflow; use compose when you want to check that the

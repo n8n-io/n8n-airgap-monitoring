@@ -4,8 +4,8 @@ services:
   airgap-monitoring:
     build: .
     ports:
-      # 3001 on the host, not 3000: `pnpm dev` already holds 3000, so the two
-      # workflows can run side by side.
+      # 3001 on the host, not 3000: port 3000 is a popular default and is
+      # commonly taken by something else already (Grafana, for one).
       - "3001:3000"
     environment:
       N8N_MONITORING_WRITE_TOKEN: dev-write-token
