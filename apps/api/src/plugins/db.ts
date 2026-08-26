@@ -32,18 +32,14 @@ const SCHEMA = `
 export default fp(
   async (fastify: FastifyInstance) => {
     const { dbPath } = fastify.config;
-    const isInMemory = dbPath === ":memory:";
 
-    if (!isInMemory) {
-      mkdirSync(dirname(dbPath), { recursive: true });
-    }
+    mkdirSync(dirname(dbPath), { recursive: true });
 
     const db = new Database(dbPath);
 
-    if (!isInMemory) {
-      // Lets a future reporting UI read while the daily report burst is written.
-      db.pragma("journal_mode = WAL");
-    }
+    // Readers do not block the writer, so a read endpoint stays responsive
+    // while the daily report burst is being written.
+    db.pragma("journal_mode = WAL");
 
     db.exec(SCHEMA);
 
