@@ -1,0 +1,29 @@
+adr/2026-08-18-fastify-over-express.md
+  s_7b9eacb08c45fc::t_ff2226ed04e2ee 42
+  s_7b9eacb08c45fc::t_c73ddb67e60b01 31
+  s_7b9eacb08c45fc::t_ccd7aeff9f778d 47
+  s_7b9eacb08c45fc::t_9ce0345a4b08be 44
+adr/2026-08-26-sqlite-with-synchronous-writes.md
+  s_7b9eacb08c45fc::t_0e6079a2c5bd12 1-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "c06347d29d1cb052706f00ef57e825bb8aa410e9",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_7b9eacb08c45fc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2b8196d7-5d94-41fc-b26c-973034ef4eec",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
