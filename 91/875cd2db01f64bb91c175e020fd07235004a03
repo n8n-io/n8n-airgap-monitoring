@@ -1,0 +1,14 @@
+apps/api/src/instance-report/instance-report.service.ts
+  h_c63dce324dfc7b 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "91875cd2db01f64bb91c175e020fd07235004a03",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
