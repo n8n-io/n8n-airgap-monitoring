@@ -15,9 +15,6 @@ const SCHEMA = `
     received_at TEXT NOT NULL
   );
 
-  CREATE INDEX IF NOT EXISTS idx_instance_reports_instance
-    ON instance_reports (instance_id, received_at DESC);
-
   CREATE UNIQUE INDEX IF NOT EXISTS idx_instance_reports_batch
     ON instance_reports (instance_id, batch_id);
 `;
