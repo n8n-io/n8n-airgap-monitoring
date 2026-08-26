@@ -1,0 +1,14 @@
+apps/api/src/routes/v1/instance-reports/index.ts
+  h_c63dce324dfc7b 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "29442752856df8ed3b8b3a28865a97784fc95dca",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
