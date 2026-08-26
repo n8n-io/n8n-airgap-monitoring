@@ -8,15 +8,6 @@ export interface Config {
 
 /**
  * Reads deployment configuration from the environment.
- *
- * A missing write token aborts startup rather than defaulting to open access:
- * this service is the billing record for airgapped customers, so an
- * unauthenticated collector quietly accepting writes from anything on the
- * internal network would be worse than a container that refuses to boot.
- *
- * The token is scoped to reporting, not to the service: it only authorizes the
- * instance-report write endpoint. Read access gets its own token, so whether a
- * missing read token is fatal is a separate decision from this one.
  */
 export default fp(
   async (fastify: FastifyInstance) => {
