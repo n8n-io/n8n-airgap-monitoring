@@ -12,6 +12,28 @@ export interface InstanceReport {
 }
 
 /**
+ * `(instance_id, batch_id)` is the only unique index on the table, so this code
+ * identifies the collision on its own.
+ */
+function isUniqueConstraintViolation(error: unknown): boolean {
+  return error instanceof Error && (error as { code?: string }).code === "SQLITE_CONSTRAINT_UNIQUE";
+}
+
+/**
+ * A batchId already stored for this instance. Envelopes are immutable, so the
+ * repeat is rejected.
+ */
+export class DuplicateBatchError extends Error {
+  constructor(
+    readonly instanceId: string,
+    readonly batchId: string,
+  ) {
+    super(`Report ${batchId} has already been recorded for instance ${instanceId}`);
+    this.name = "DuplicateBatchError";
+  }
+}
+
+/**
  * Data access for the instance report event store. Holds no business rules: callers decide
  * what to store, this only decides how it is written.
  */
@@ -26,19 +48,29 @@ export class InstanceReportRepository {
     );
   }
 
-  /** Appends one event and returns its id. */
+  /** Appends one event and returns its id. Throws {@link DuplicateBatchError} for a repeated batchId. */
   insert(event: InstanceReport): number {
-    const { lastInsertRowid } = this.#insertEvent.run(
-      event.instanceId,
-      event.batchId,
-      // better-sqlite3 rejects undefined bindings, so an absent label is stored
-      // as SQL NULL.
-      event.label ?? null,
-      event.n8nVersion,
-      JSON.stringify(event.dataPoints),
-      event.receivedAt,
-    );
+    try {
+      const { lastInsertRowid } = this.#insertEvent.run(
+        event.instanceId,
+        event.batchId,
+        // better-sqlite3 rejects undefined bindings, so an absent label is stored
+        // as SQL NULL.
+        event.label ?? null,
+        event.n8nVersion,
+        JSON.stringify(event.dataPoints),
+        event.receivedAt,
+      );
 
-    return Number(lastInsertRowid);
+      return Number(lastInsertRowid);
+    } catch (error) {
+      // The only place that knows about driver error codes, so callers can act
+      // on the collision without depending on better-sqlite3.
+      if (isUniqueConstraintViolation(error)) {
+        throw new DuplicateBatchError(event.instanceId, event.batchId);
+      }
+
+      throw error;
+    }
   }
 }

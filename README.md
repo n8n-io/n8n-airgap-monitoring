@@ -48,7 +48,7 @@ A report is immutable once sent: a retry repeats it verbatim under the same
 accepted `batchId` is never sent again. That contract is what makes two
 instances sharing an `instanceId` detectable — the same day reported under a
 second `batchId` with a conflicting value. Repeating an accepted `batchId` is
-rejected by a unique index rather than silently deduplicated. See
+rejected with `409 Conflict` rather than silently deduplicated. See
 [adr/2026-08-26-report-envelopes-are-immutable.md](adr/2026-08-26-report-envelopes-are-immutable.md).
 
 `dataPoints` is an open array of metric name to value, so instances can report

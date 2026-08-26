@@ -29,8 +29,6 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, _opts): Promise<void
   // module keeps its plugin next to the service and repository it composes.
   void fastify.register(instanceReport);
 
-  // TODO: add cors later
-
   void fastify.register(healthRoutes);
   void fastify.register(v1Routes, { prefix: "/api/v1" });
 };

@@ -1,5 +1,6 @@
 import bearerAuth from "@fastify/bearer-auth";
 import type { FastifyPluginAsync } from "fastify";
+import { DuplicateBatchError } from "../../../instance-report/instance-report.repository";
 import type { CreateInstanceReport } from "../../../instance-report/instance-report.service";
 
 // A running total (kind: cumulative, can regress after a customer DB rollback)
@@ -53,6 +54,16 @@ const successResponseSchema = {
   },
 };
 
+const errorResponseSchema = {
+  type: "object",
+  required: ["statusCode", "error", "message"],
+  properties: {
+    statusCode: { type: "integer" },
+    error: { type: "string" },
+    message: { type: "string" },
+  },
+};
+
 const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> => {
   await fastify.register(bearerAuth, {
     keys: new Set([fastify.config.writeToken]),
@@ -63,13 +74,23 @@ const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> 
     {
       schema: {
         body: instanceReportSchema,
-        response: { 201: successResponseSchema },
+        response: { 201: successResponseSchema, 409: errorResponseSchema },
       },
     },
     async (request, reply) => {
-      reply.code(201);
+      try {
+        reply.code(201);
 
-      return fastify.instanceReportService.recordReport(request.body);
+        return fastify.instanceReportService.recordReport(request.body);
+      } catch (error) {
+        // An envelope is immutable, so a repeat is rejected.
+        // The client sent something it was built never to send.
+        if (error instanceof DuplicateBatchError) {
+          throw fastify.httpErrors.conflict(error.message);
+        }
+
+        throw error;
+      }
     },
   );
 };
