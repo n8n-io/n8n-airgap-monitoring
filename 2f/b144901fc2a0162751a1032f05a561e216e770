@@ -1,0 +1,24 @@
+apps/api/package.json
+  s_d925a14d8215d9::t_19777b83fa5c02 15
+docker-compose.yml
+  s_d925a14d8215d9::t_6afe28fbec938f 7-8
+README.md
+  s_d925a14d8215d9::t_0fa92156f01ec7 78-82
+  s_d925a14d8215d9::t_1a93161ee0ea88 121-122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "2fb144901fc2a0162751a1032f05a561e216e770",
+  "prompts": {},
+  "sessions": {
+    "s_d925a14d8215d9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eab2045c-23fc-4590-b55d-69c6ad546468",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
