@@ -1,0 +1,37 @@
+adr/2026-08-18-daily-metric-combined-with-cumulative.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+adr/2026-08-18-backwards-compatibility-via-n8n-version.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+adr/2026-08-26-report-envelopes-are-immutable.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+adr/2026-08-18-store-datapoints-as-json.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+adr/2026-08-26-sqlite-with-synchronous-writes.md
+  s_35afc62c733c08::t_772d000d823899 3
+  s_35afc62c733c08::t_578399faf4db25 2
+adr/2026-08-18-fastify-over-express.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+adr/2026-08-18-colocate-tests-with-implementation.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "05abbdd2ad4313610ccaf68e40bd59b6058c9c96",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_35afc62c733c08": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4828078-e43d-4d35-b006-560d3029461b",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
