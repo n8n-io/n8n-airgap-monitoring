@@ -4,6 +4,7 @@ import type { Metric } from "./instance-report.service";
 /** One row to append, with every value the caller has already decided on. */
 export interface InstanceReport {
   instanceId: string;
+  batchId: string;
   label?: string;
   n8nVersion: string;
   dataPoints: Metric[];
@@ -20,8 +21,8 @@ export class InstanceReportRepository {
   constructor(db: Database.Database) {
     // Prepared once per process: the daily report burst reuses the same plan.
     this.#insertEvent = db.prepare(
-      `INSERT INTO instance_reports (instance_id, label, n8n_version, data, received_at)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO instance_reports (instance_id, batch_id, label, n8n_version, data, received_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
     );
   }
 
@@ -29,6 +30,7 @@ export class InstanceReportRepository {
   insert(event: InstanceReport): number {
     const { lastInsertRowid } = this.#insertEvent.run(
       event.instanceId,
+      event.batchId,
       // better-sqlite3 rejects undefined bindings, so an absent label is stored
       // as SQL NULL.
       event.label ?? null,

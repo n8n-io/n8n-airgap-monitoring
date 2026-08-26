@@ -23,6 +23,7 @@ Content-Type: application/json
 
 {
   "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
+  "batchId": "a1b2c3d4",
   "label": "prod",
   "n8nVersion": "1.99.0",
   "dataPoints": [
@@ -31,7 +32,6 @@ Content-Type: application/json
       "kind": "daily",
       "name": "prodExecutions",
       "value": 15234,
-      "batchId": "a1b2c3d4",
       "date": "2026-03-25"
     }
   ]
@@ -42,17 +42,24 @@ Content-Type: application/json
 the identity, so relabeling an instance never splits or merges its history. It
 is customer-chosen free text and should be treated as untrusted display data by any consumer.
 
+`batchId` is generated on the reporting instance and identifies this report.
+A report is immutable once sent: a retry repeats it verbatim under the same
+`batchId`, pending reports are never merged or rebuilt into a new one, and an
+accepted `batchId` is never sent again. That contract is what makes two
+instances sharing an `instanceId` detectable — the same day reported under a
+second `batchId` with a conflicting value. Repeating an accepted `batchId` is
+rejected by a unique index rather than silently deduplicated. See
+[adr/2026-08-26-report-envelopes-are-immutable.md](adr/2026-08-26-report-envelopes-are-immutable.md).
+
 `dataPoints` is an open array of metric name to value, so instances can report
 new metrics without a change here. Each entry is one of:
 
 - `cumulative` — a running total maintained by the instance (e.g. lifetime
   execution count). Can regress after a customer-side DB rollback.
 - `daily` — a value covering a single UTC calendar day (e.g. billable
-  executions for that day), identified by a `batchId` (generated on the
-  reporting instance, distinguishes a retry of the same day from two
-  instances that happen to share an `instanceId`) and the `date` it covers.
-  Scoping to a day bounds the damage of a customer-side DB rollback to the
-  affected days instead of corrupting a lifetime counter.
+  executions for that day), identified by the `date` it covers. Scoping to a
+  day bounds the damage of a customer-side DB rollback to the affected days
+  instead of corrupting a lifetime counter.
 
 Values may be counters, percentages or decimals, and may increase or decrease
 between reports.

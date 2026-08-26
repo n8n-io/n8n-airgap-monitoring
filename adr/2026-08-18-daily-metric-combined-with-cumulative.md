@@ -8,7 +8,7 @@ Accepted
 
 ## Context
 
-Billable usage (e.g. `billableExecutions`) is reported as a `DailyMetric`: one value per UTC calendar day, tagged with a `batchId` for retry/duplicate-instance handling (see `apps/api/src/instance-report/instance-report.service.ts`). Scoping each report to a single day bounds the damage of a customer-side DB rollback to the affected days, instead of corrupting a lifetime counter the way a pure running total would.
+Billable usage (e.g. `billableExecutions`) is reported as a `DailyMetric`: one value per UTC calendar day. Scoping each report to a single day bounds the damage of a customer-side DB rollback to the affected days, instead of corrupting a lifetime counter the way a pure running total would.
 
 That bound is not zero, though. If a daily window is never shipped at all — the instance is offline across a reporting cycle, a report is dropped, or an outbox never recovers after a rollback — the gap is invisible from the server's point of view. Nothing distinguishes "this instance had zero billable executions on 2026-03-22" from "this instance's 2026-03-22 report never arrived." Under-billing from a missing window is silent and, unlike a monotonic counter, leaves no numerical trace to notice it by.
 

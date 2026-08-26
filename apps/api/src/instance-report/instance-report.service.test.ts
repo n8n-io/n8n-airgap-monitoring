@@ -5,6 +5,7 @@ import { type CreateInstanceReport, InstanceReportService } from "./instance-rep
 
 const report: CreateInstanceReport = {
   instanceId: "instance-1",
+  batchId: "batch-1",
   n8nVersion: "1.99.0",
   dataPoints: [
     { kind: "cumulative", name: "activeWorkflows", value: 7 },
@@ -12,7 +13,6 @@ const report: CreateInstanceReport = {
       kind: "daily",
       name: "prodExecutions",
       value: 42,
-      batchId: "batch-1",
       date: "2026-03-25",
     },
   ],
@@ -39,6 +39,14 @@ test("stamps the arrival time itself", async () => {
 
   assert.equal(inserted.length, 1);
   assert.ok(!Number.isNaN(Date.parse(inserted[0].receivedAt)));
+});
+
+test("passes the reporting instance's batchId through untouched", async () => {
+  const { inserted, repository } = fakeRepository();
+
+  new InstanceReportService(repository).recordReport(report);
+
+  assert.equal(inserted[0].batchId, "batch-1");
 });
 
 test("ignores a received time supplied by the reporting instance", async () => {

@@ -13,14 +13,6 @@ interface BaseMetric {
 interface DailyMetric extends BaseMetric {
   kind: "daily";
   /**
-   * Generated on the reporting instance, unique per batch. Distinguishes a
-   * retry of the same day (same batchId, drop the duplicate) from two
-   * instances sharing an instanceId (different batchId, keep both).
-   *
-   * See https://app.notion.com/p/n8n/License-Server-Duplicated-Instances-2ed5b6e0c94f80338478cb53103dccff?source=copy_link#2f15b6e0c94f801a8657eabc7cc33112
-   */
-  batchId: string;
-  /**
    * The UTC calendar day this value covers, as YYYY-MM-DD.
    *
    * Days are the only supported window, so one date replaces an explicit
@@ -39,6 +31,16 @@ export type Metric = DailyMetric | CumulativeMetric;
 
 export interface CreateInstanceReport {
   instanceId: string;
+  /**
+   * Generated on the reporting instance, identifying this envelope. An
+   * envelope is immutable once sent: a retry repeats it verbatim under the
+   * same batchId, an accepted batchId is never sent again, and pending
+   * envelopes are never merged, split or rebuilt.
+   *
+   * See adr/2026-08-26-report-envelopes-are-immutable.md and
+   * https://app.notion.com/p/n8n/License-Server-Duplicated-Instances-2ed5b6e0c94f80338478cb53103dccff?source=copy_link#2f15b6e0c94f801a8657eabc7cc33112
+   */
+  batchId: string;
   /**
    * Display name only: instanceId stays the identity, so a relabel never
    * splits or merges an instance's history.

@@ -8,6 +8,7 @@ const SCHEMA = `
   CREATE TABLE IF NOT EXISTS instance_reports (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     instance_id TEXT NOT NULL,
+    batch_id    TEXT NOT NULL,
     label       TEXT,
     n8n_version TEXT NOT NULL,
     data        TEXT NOT NULL,
@@ -16,6 +17,9 @@ const SCHEMA = `
 
   CREATE INDEX IF NOT EXISTS idx_instance_reports_instance
     ON instance_reports (instance_id, received_at DESC);
+
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_instance_reports_batch
+    ON instance_reports (instance_id, batch_id);
 `;
 
 /**
