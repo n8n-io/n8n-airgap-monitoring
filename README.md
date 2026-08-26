@@ -8,16 +8,16 @@ customer-hosted instance can aggregate usage numbers for many n8n instances.
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `N8N_MONITORING_WRITE_TOKEN` | yes | — | Bearer token that reporting n8n instances must present on `POST /api/v1/instance-report`. The service refuses to start without it. |
+| `N8N_MONITORING_WRITE_TOKEN` | yes | — | Bearer token that reporting n8n instances must present on `POST /api/v1/instance-reports`. The service refuses to start without it. |
 | `N8N_DB_PATH` | no | `./data/cmfae.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 
 ## Reporting usage
 
 Each n8n instance sets `N8N_USAGE_METRICS_REPORTING_WEBHOOK_URL` to this
-service's `POST /api/v1/instance-report` endpoint and sends one report per day:
+service's `POST /api/v1/instance-reports` endpoint and sends one report per day:
 
 ```http
-POST /api/v1/instance-report
+POST /api/v1/instance-reports
 Authorization: Bearer <N8N_MONITORING_WRITE_TOKEN>
 Content-Type: application/json
 
