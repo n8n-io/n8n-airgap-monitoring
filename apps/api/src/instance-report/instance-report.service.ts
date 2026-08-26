@@ -2,7 +2,7 @@ import type { InstanceReportRepository } from "./instance-report.repository";
 
 interface BaseMetric {
   name: string;
-  value: number;
+  value: number; // TODO: (in a follow-up) think about how we can support any data type for values and yet still be able to generate nicely formed report downloads.
 }
 
 /**
