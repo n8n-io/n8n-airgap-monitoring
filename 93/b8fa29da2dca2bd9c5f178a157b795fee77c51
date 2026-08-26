@@ -1,0 +1,31 @@
+apps/api/src/routes/v1/instance-reports/index.ts
+  s_461d366f064c7b::t_bdba4a0593ade6 5
+apps/api/src/routes/v1/index.ts
+  s_461d366f064c7b::t_02ab0d78fba883 2,5
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_461d366f064c7b::t_da17e2f282f7ca 5
+README.md
+  s_461d366f064c7b::t_adc754d839c7e3 17,20
+  s_461d366f064c7b::t_051135053c7f27 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "93b8fa29da2dca2bd9c5f178a157b795fee77c51",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_461d366f064c7b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "03a9f8c9-998c-40d0-99fa-a96cc5629123",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
