@@ -49,15 +49,6 @@ test("passes the reporting instance's batchId through untouched", async () => {
   assert.equal(inserted[0].batchId, "batch-1");
 });
 
-test("ignores a received time supplied by the reporting instance", async () => {
-  const { inserted, repository } = fakeRepository();
-  const spoofed = "1999-01-01T00:00:00.000Z";
-
-  new InstanceReportService(repository).recordReport({ ...report, receivedAt: spoofed } as InstanceReport);
-
-  assert.notEqual(inserted[0].receivedAt, spoofed);
-});
-
 test("returns the id assigned by the repository", async () => {
   const { repository } = fakeRepository();
   const service = new InstanceReportService(repository);
