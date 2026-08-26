@@ -6,7 +6,7 @@ import app, { options } from "../app";
 
 // Every test gets its own throwaway database, so nothing has to be cleaned up
 // between runs and no test can observe another test's events.
-process.env.N8N_AUTH_TOKEN = "test-token";
+process.env.N8N_MONITORING_WRITE_TOKEN = "test-token";
 process.env.N8N_DB_PATH = ":memory:";
 
 // Automatically build and tear down our instance
