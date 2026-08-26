@@ -7,7 +7,8 @@
       "outputs": ["dist/**"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^lint"],
+      "cache": false
     },
     "typecheck": {
       "dependsOn": ["^typecheck"]
@@ -19,6 +20,9 @@
     "test": {
       "dependsOn": ["typecheck"],
       "outputs": []
+    },
+    "format": {
+      "cache": false
     }
   }
 }
