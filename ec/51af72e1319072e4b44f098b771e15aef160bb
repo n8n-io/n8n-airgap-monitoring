@@ -1,0 +1,59 @@
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_fcf4c20ebbe33f::t_c315bd600c6dd3 8
+  s_fcf4c20ebbe33f::t_bc0558c5f62712 44-51
+apps/api/src/routes/v1/instance-report/create-instance-report.route.ts
+  s_fcf4c20ebbe33f::t_f18d7dfac6d000 9-10,25-26
+  s_fcf4c20ebbe33f::t_cfae68dd51a798 31,35
+apps/api/src/plugins/db.ts
+  s_fcf4c20ebbe33f::t_f8cccb0f432b4c 11,20-22
+README.md
+  s_fcf4c20ebbe33f::t_408fea0ef9da46 26
+  s_fcf4c20ebbe33f::t_f6ceeffd24a65a 45-53
+  s_fcf4c20ebbe33f::t_aa7cbbc70d88b6 60-62
+adr/2026-08-26-report-envelopes-are-immutable.md
+  s_fcf4c20ebbe33f::t_fd93a0f78f51f7 1-42
+adr/2026-08-18-store-datapoints-as-json.md
+  s_fcf4c20ebbe33f::t_3a8be13036d78a 22
+  s_fcf4c20ebbe33f::t_0e38130e0b852a 27
+adr/2026-08-18-daily-metric-combined-with-cumulative.md
+  h_c63dce324dfc7b 11
+apps/api/src/instance-report/instance-report.repository.ts
+  s_fcf4c20ebbe33f::t_1eda6beec44b98 24,33
+  s_fcf4c20ebbe33f::t_c192e08c61a3e4 7
+  s_fcf4c20ebbe33f::t_a80ad03d1c3769 25
+apps/api/src/instance-report/instance-report.service.ts
+  s_fcf4c20ebbe33f::t_cbfec6ca9902fa 35-36,39-43
+  s_fcf4c20ebbe33f::t_7926ce9c69b021 37-38
+  s_fcf4c20ebbe33f::t_7d9f92d9381a83 34
+apps/api/src/routes/v1/instance-report/create-instance-report.route.test.ts
+  s_fcf4c20ebbe33f::t_4af88e0af4741b 194-214,216
+  s_fcf4c20ebbe33f::t_9ed03df8d7b7de 137,139-142
+  s_fcf4c20ebbe33f::t_c2ce169d3d6dcc 73-77
+  s_fcf4c20ebbe33f::t_df6dae53fee931 10
+  s_fcf4c20ebbe33f::t_f0a4e6fc864a89 94-111
+  s_fcf4c20ebbe33f::t_887738ea2f120c 215
+  s_fcf4c20ebbe33f::t_68454f34eef7f1 151,155,159
+  s_fcf4c20ebbe33f::t_acf08df0f09f19 40
+  s_fcf4c20ebbe33f::t_cdfd31c881b0bb 92-93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "ec51af72e1319072e4b44f098b771e15aef160bb",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_fcf4c20ebbe33f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ea23abc3-2dae-4bb5-905b-20576d824152",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
