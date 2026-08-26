@@ -127,4 +127,10 @@ The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
 
+## Local Kubernetes demo
+
+[`scripts/local-k8s-demo/`](scripts/local-k8s-demo/) runs two n8n instances and
+this service in a [kind](https://kind.sigs.k8s.io/) cluster, with the instances
+reporting over cluster-internal DNS so no traffic leaves the cluster. See its
+[README](scripts/local-k8s-demo/README.md).
 
