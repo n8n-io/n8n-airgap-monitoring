@@ -1,5 +1,7 @@
 # 6. Identify the report envelope with a batchId, and make envelopes immutable
 
+> _This ADR was written by AI and reviewed by a human._
+
 Date: 2026-08-26
 
 ## Status

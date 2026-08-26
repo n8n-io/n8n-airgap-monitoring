@@ -1,5 +1,7 @@
 # 7. Store reports in SQLite, written synchronously on the event loop
 
+> _This ADR was written by AI and reviewed by a human._
+
 Date: 2026-08-26
 
 ## Status

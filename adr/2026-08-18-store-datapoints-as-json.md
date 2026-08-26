@@ -1,5 +1,7 @@
 # 5. Store report dataPoints as JSON rather than normalized metric rows
 
+> _This ADR was written by AI and reviewed by a human._
+
 Date: 2026-08-18
 
 ## Status

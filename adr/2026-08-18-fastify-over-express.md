@@ -1,5 +1,7 @@
 # 2. Use Fastify instead of Express for the airgapped monitoring service
 
+> _This ADR was written by AI and reviewed by a human._
+
 Date: 2026-08-18
 
 ## Status

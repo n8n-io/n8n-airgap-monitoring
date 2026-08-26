@@ -1,5 +1,7 @@
 # 1. Reconcile daily usage metrics with a cumulative checksum
 
+> _This ADR was written by AI and reviewed by a human._
+
 Date: 2026-08-18
 
 ## Status

@@ -1,5 +1,7 @@
 # 4. Handle version skew through the report's n8nVersion, not through collector releases
 
+> _This ADR was written by AI and reviewed by a human._
+
 Date: 2026-08-18
 
 ## Status
