@@ -1,0 +1,167 @@
+# One standalone n8n instance (SQLite, no queue mode) configured to report to
+# the airgap-monitoring service.
+#
+# Not a manifest: the Makefile substitutes the __PLACEHOLDERS__ below and pipes
+# the result to kubectl. The namespace and the n8n-secrets secret are created by
+# the Makefile beforehand.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-data
+  namespace: __NAMESPACE__
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  namespace: __NAMESPACE__
+spec:
+  replicas: 1
+  # Recreate, not RollingUpdate: the SQLite database sits on a ReadWriteOnce
+  # volume that a second pod could not mount while the old one still holds it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+      containers:
+        - name: n8n
+          image: n8nio/n8n:local
+          # Never: the image is built from a local n8n checkout and side-loaded
+          # into kind, so there is nothing to pull.
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 5678
+          env:
+            # 5678 is the port n8n binds inside the pod and is unrelated to the
+            # host port this instance is reachable on — that is handled entirely
+            # by `kubectl port-forward`. Setting the host port here instead would
+            # make the probes below (which check 5678) fail forever.
+            - name: N8N_HOST
+              value: localhost
+            - name: N8N_PORT
+              value: "5678"
+            - name: N8N_PROTOCOL
+              value: http
+            # Caps V8's heap under the container limit below. Without it V8 sizes
+            # its heap off host memory rather than the cgroup limit and can OOM
+            # the pod on a larger machine. Child processes (the JS task runner)
+            # inherit this, so the cap is well under the limit rather than at it.
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=640"
+            # The n8n image ships no Python 3, so the internal Python runner logs
+            # a failure on every boot. JS Code nodes are unaffected.
+            - name: N8N_PYTHON_ENABLED
+              value: "false"
+            # The demo is served over plain http, so the auth cookie cannot carry
+            # the Secure attribute.
+            - name: N8N_SECURE_COOKIE
+              value: "false"
+
+            # Owner provisioned from the environment, so the instance skips the
+            # setup wizard and has an owner from first boot. Instance reporting
+            # reads its numbers as the instance owner, so without one there would
+            # be nothing to report.
+            - name: N8N_INSTANCE_OWNER_MANAGED_BY_ENV
+              value: "true"
+            - name: N8N_INSTANCE_OWNER_EMAIL
+              value: admin@n8n.io
+            # bcrypt hash of "hello1234".
+            - name: N8N_INSTANCE_OWNER_PASSWORD_HASH
+              value: "$2b$10$LbD6Xck7zXofxajs5JKaNeQV37h9B8HhMfTNnuYR5l6hIS.T8VVwS"
+
+            # Instance reporting. The webhook URL resolves through cluster DNS, so
+            # the traffic never leaves the cluster, and the auth token has to match
+            # the service's N8N_MONITORING_WRITE_TOKEN.
+            - name: N8N_INSTANCE_REPORTING_ENABLED
+              value: "true"
+            - name: N8N_INSTANCE_REPORTING_WEBHOOK_URL
+              value: "__INGEST_URL__"
+            - name: N8N_INSTANCE_REPORTING_AUTH_TOKEN
+              value: "__WRITE_TOKEN__"
+            - name: N8N_INSTANCE_REPORTING_INTERVAL_MINUTES
+              value: "__REPORT_INTERVAL_MINUTES__"
+            # Shows up as the report's `label`, so a consumer can name an instance
+            # instead of only showing its generated instanceId.
+            - name: N8N_INSTANCE_REPORTING_IDENTIFIER
+              value: __IDENTIFIER__
+            # The daily figure comes from insights, which only aggregates raw
+            # execution rows every 60 minutes by default — the reporter would keep
+            # sending stale numbers for most of a demo. One minute matches the
+            # reporting interval above.
+            - name: N8N_INSIGHTS_COMPACTION_INTERVAL_MINUTES
+              value: "1"
+          envFrom:
+            # Holds N8N_ENCRYPTION_KEY, which the Makefile keeps stable across
+            # reinstalls so data already on the volume stays decryptable.
+            - secretRef:
+                name: n8n-secrets
+            # Whatever a local .env file contains (a license activation key, for
+            # instance). optional: true so pods start fine when there is none.
+            - secretRef:
+                name: n8n-env-file
+                optional: true
+          volumeMounts:
+            - name: data
+              mountPath: /home/node/.n8n
+          # Measured, not guessed: n8n 2.x plus the internal task runner it spawns
+          # peaks around 820 MiB just booting, and a 512Mi limit OOM-killed it into
+          # a crash loop. The limit leaves room above that peak for actual
+          # executions; the request stays low so both instances schedule on one
+          # kind node.
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              cpu: 1000m
+              memory: 1536Mi
+          # A cold n8n start runs migrations and can take a while, so readiness is
+          # gated behind a generous startup budget (30 x 10s) rather than a short
+          # initialDelay that would restart a pod that is merely slow.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: n8n-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n
+  namespace: __NAMESPACE__
+spec:
+  type: ClusterIP
+  selector:
+    app: n8n
+  ports:
+    - name: http
+      port: 5678
+      targetPort: http
