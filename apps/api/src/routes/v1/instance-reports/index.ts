@@ -1,10 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import createInstanceReport from "./create-instance-report.route";
 
-// Routes in this folder are registered here, not discovered, and the folder name
-// is not the URL: the /instance-reports prefix is applied one level up. Not wrapped
-// in fastify-plugin on purpose, so the bearer-auth hook each route registers stays
-// encapsulated to that route.
+// Routes in this folder are registered manually here, not discovered via autoloading of a directory.
 const instanceReportRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
   void fastify.register(createInstanceReport);
 };
