@@ -1,0 +1,29 @@
+apps/api/src/testing/build-app.ts
+  h_c63dce324dfc7b 15
+  s_ba4fb5fd45bcd8::t_3c5e3086f9d090 2-4,14,16-18,29-32
+apps/api/src/plugins/db.ts
+  s_ba4fb5fd45bcd8::t_b325199327fe88 36,40-42
+adr/2026-08-26-sqlite-with-synchronous-writes.md
+  s_ba4fb5fd45bcd8::t_003ba135e6b987 68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "2d4d685da330f26f51de5394bcf9b177a10cea79",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_ba4fb5fd45bcd8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e56c5199-c2d0-4c95-a99d-24b818bd5a01",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
