@@ -1,0 +1,31 @@
+apps/api/src/testing/build-app.ts
+  s_10ed439547dbf0::t_5eb805bf4203ee 9
+README.md
+  s_10ed439547dbf0::t_3374e905655574 21
+  s_10ed439547dbf0::t_70bf3e4a51d113 11
+apps/api/src/routes/v1/instance-report/create-instance-report.route.ts
+  s_10ed439547dbf0::t_04725fdc51195e 58
+apps/api/src/plugins/config.ts
+  s_10ed439547dbf0::t_026c8e63dd267a 5,12-19,23-25,29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "fc7186a15ccae48588915211196d859de0f120e5",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_10ed439547dbf0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "13bb9814-cae6-454d-a754-92408f873e41",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
