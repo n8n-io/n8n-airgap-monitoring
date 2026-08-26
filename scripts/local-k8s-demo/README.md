@@ -74,11 +74,8 @@ off.
 
 Each backfilled day is its own report with a deterministic `batchId`
 (`backfill-<instance>-<date>`), so a re-run does not stack a second row for the same day:
-the collector's unique index on `(instance_id, batch_id)` rejects the repeat, and the
-script reports it as already present rather than failing. Note that the collector
-currently surfaces that rejection as a `500` carrying the SQLite constraint message, not a
-`409` — the script matches on that message, so it will need a touch-up if the API starts
-handling duplicates explicitly.
+the collector rejects the repeat with a `409`, and the script reports it as already present
+rather than failing.
 
 Only the collector is backfilled; n8n's own insights tables are left alone. That is why
 the invented days stop at the *day before yesterday* — yesterday belongs to the live

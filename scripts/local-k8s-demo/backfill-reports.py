@@ -9,9 +9,9 @@ carries its own `date`, so nothing has to pretend the reports arrived back then.
 One report per day, not one report carrying every day: `batchId` identifies the
 envelope and is deterministic here (`backfill-<instance>-<date>`), so re-running
 `make up` neither stacks a second row for a day nor reshuffles the numbers. The
-collector enforces that with a unique index on (instance_id, batch_id) — a
-repeated day is rejected rather than deduplicated, and this script reports it as
-already backfilled instead of failing.
+collector enforces that per instance — a repeated day is rejected with 409
+rather than deduplicated, and this script reports it as already backfilled
+instead of failing.
 
 Note what this does NOT do: n8n itself still has no insights history, so the
 live reporter keeps sending yesterday's real (zero) figure every minute. The
@@ -139,12 +139,11 @@ def main() -> int:
                 response.read()
             sent.append(f"{day}={volume}")
         except urllib.error.HTTPError as error:
-            body = error.read().decode()
-            # A repeated envelope is rejected by the unique index on
-            # (instance_id, batch_id), which is the intended behaviour on a
-            # re-run — not something to abort over. Anything else is real.
-            if error.code == 401 or "UNIQUE" not in body:
-                print(f"HTTP {error.code} from {error.url}: {body}", file=sys.stderr)
+            # 409 is the collector rejecting a batchId it already holds, which is
+            # the intended outcome on a re-run — not something to abort over.
+            # Any other status is real.
+            if error.code != 409:
+                print(f"HTTP {error.code} from {error.url}: {error.read().decode()}", file=sys.stderr)
                 return 1
             skipped += 1
 
