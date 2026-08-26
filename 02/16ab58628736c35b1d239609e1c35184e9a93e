@@ -1,0 +1,39 @@
+scripts/local-k8s-demo/seed-workflow.py
+  s_dcc2744deb146e::t_7d134adf21b215 1-85
+scripts/local-k8s-demo/.gitignore
+  s_dcc2744deb146e::t_ca474677b766b2 1-4
+scripts/local-k8s-demo/k8s/n8n-instance.template.yaml
+  s_dcc2744deb146e::t_7fe904be103265 1-167
+scripts/local-k8s-demo/k8s/monitoring.yaml
+  s_dcc2744deb146e::t_a06d3ba336cda8 1-89
+scripts/local-k8s-demo/README.md
+  s_dcc2744deb146e::t_b15d748884d3f5 1-112
+scripts/local-k8s-demo/Makefile
+  s_dcc2744deb146e::t_c43e22e4c6d65e 222
+  s_dcc2744deb146e::t_210b84492ffbee 1-221,223-275
+scripts/local-k8s-demo/workflows/schedule-demo.json
+  s_dcc2744deb146e::t_69d090c03b58e7 1-48
+scripts/local-k8s-demo/backfill-reports.py
+  s_dcc2744deb146e::t_c42be24c5a31a8 1-165
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "0216ab58628736c35b1d239609e1c35184e9a93e",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_dcc2744deb146e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0491a072-900e-4e7c-8126-9351d7b170a6",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
