@@ -1,0 +1,30 @@
+DIAGRAMS.md
+  s_af0cc5f1e14366::t_69185918f7a03a 34
+  s_af0cc5f1e14366::t_e297402301d2b1 37-42
+  h_c63dce324dfc7b 1-2,26,77-80
+  s_af0cc5f1e14366::t_fa39290a913cc8 35
+  s_af0cc5f1e14366::t_56e1822fbd9a38 15-19
+  s_af0cc5f1e14366::t_721ede1809158c 10-13
+  s_af0cc5f1e14366::t_bc7439ab049c92 3-9,14,20-25,27-33,36,43-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "0a8ba7392de90651061754b23c2de403a16e0baa",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_af0cc5f1e14366": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6256ed95-b68e-4fdf-a4fc-aec77e83c809",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
