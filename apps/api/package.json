@@ -11,7 +11,7 @@
     "lint": "biome check --no-errors-on-unmatched --write --unsafe src",
     "lint:staged": "biome check --no-errors-on-unmatched --write --unsafe --staged src",
     "watch": "tsc -w -p tsconfig.build.json",
-    "dev": "pnpm run build && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch\" \"npm:dev:start\"",
+    "dev": "pnpm run build && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"pnpm:watch\" \"pnpm:dev:start\"",
     "dev:start": "fastify start --options --ignore-watch=.ts$ -w -l info -P dist/app.js"
   },
   "dependencies": {
