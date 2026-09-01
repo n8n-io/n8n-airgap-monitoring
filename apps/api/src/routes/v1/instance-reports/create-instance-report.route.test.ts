@@ -1,5 +1,4 @@
-import * as assert from "node:assert";
-import { test } from "vitest";
+import { expect, test } from "vitest";
 import { build } from "../../../testing/build-app";
 
 const URL = "/api/v1/instance-reports";
@@ -31,17 +30,17 @@ test("stores an accepted instance report", async () => {
     payload: validReport,
   });
 
-  assert.equal(res.statusCode, 201);
+  expect(res.statusCode).toBe(201);
 
   const { id } = res.json() as { id: number };
   const row = app.db.prepare("SELECT * FROM instance_reports WHERE id = ?").get(id) as Record<string, string>;
 
-  assert.equal(row.instance_id, "instance-1");
-  assert.equal(row.batch_id, "batch-1");
-  assert.equal(row.label, null);
-  assert.equal(row.n8n_version, "1.99.0");
-  assert.deepEqual(JSON.parse(row.data), validReport.dataPoints);
-  assert.ok(!Number.isNaN(Date.parse(row.received_at)));
+  expect(row.instance_id).toBe("instance-1");
+  expect(row.batch_id).toBe("batch-1");
+  expect(row.label).toBe(null);
+  expect(row.n8n_version).toBe("1.99.0");
+  expect(JSON.parse(row.data)).toEqual(validReport.dataPoints);
+  expect(Number.isNaN(Date.parse(row.received_at))).toBe(false);
 });
 
 test("stores the optional label when provided", async () => {
@@ -54,12 +53,12 @@ test("stores the optional label when provided", async () => {
     payload: { ...validReport, label: "Kiwi prod" },
   });
 
-  assert.equal(res.statusCode, 201);
+  expect(res.statusCode).toBe(201);
 
   const { id } = res.json() as { id: number };
   const row = app.db.prepare("SELECT label FROM instance_reports WHERE id = ?").get(id) as Record<string, string>;
 
-  assert.equal(row.label, "Kiwi prod");
+  expect(row.label).toBe("Kiwi prod");
 });
 
 test("appends every report instead of overwriting the instance", async () => {
@@ -76,17 +75,14 @@ test("appends every report instead of overwriting the instance", async () => {
         dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value }],
       },
     });
-    assert.equal(res.statusCode, 201);
+    expect(res.statusCode).toBe(201);
   }
 
   const rows = app.db
     .prepare("SELECT data FROM instance_reports WHERE instance_id = ? ORDER BY id")
     .all("instance-1") as Array<{ data: string }>;
 
-  assert.deepEqual(
-    rows.map((row) => JSON.parse(row.data)[0].value),
-    [10, 25],
-  );
+  expect(rows.map((row) => JSON.parse(row.data)[0].value)).toEqual([10, 25]);
 });
 
 // The uniqueness guard is scoped per instance: two instances picking the same
@@ -101,12 +97,12 @@ test("keeps envelopes that share a batchId across different instances", async ()
       headers: AUTHORIZED,
       payload: { ...validReport, instanceId },
     });
-    assert.equal(res.statusCode, 201);
+    expect(res.statusCode).toBe(201);
   }
 
   const { count } = app.db.prepare("SELECT COUNT(*) AS count FROM instance_reports").get() as { count: number };
 
-  assert.equal(count, 2);
+  expect(count).toBe(2);
 });
 
 test("rejects a repeated batchId as a conflict", async () => {
@@ -114,23 +110,23 @@ test("rejects a repeated batchId as a conflict", async () => {
 
   const post = () => app.inject({ method: "POST", url: URL, headers: AUTHORIZED, payload: validReport });
 
-  assert.equal((await post()).statusCode, 201);
+  expect((await post()).statusCode).toBe(201);
 
   const res = await post();
 
-  assert.equal(res.statusCode, 409);
+  expect(res.statusCode).toBe(409);
 
   const { message } = res.json() as { message: string };
 
-  assert.ok(message.includes("batch-1"));
+  expect(message).toContain("batch-1");
   // The client is told what it did, not how the store is built.
-  assert.ok(!/SQLITE|UNIQUE/i.test(message));
+  expect(/SQLITE|UNIQUE/i.test(message)).toBe(false);
 
   const { count } = app.db
     .prepare("SELECT COUNT(*) AS count FROM instance_reports WHERE instance_id = ? AND batch_id = ?")
     .get("instance-1", "batch-1") as { count: number };
 
-  assert.equal(count, 1);
+  expect(count).toBe(1);
 });
 
 test("rejects a request without a bearer token", async () => {
@@ -138,7 +134,7 @@ test("rejects a request without a bearer token", async () => {
 
   const res = await app.inject({ method: "POST", url: URL, payload: validReport });
 
-  assert.equal(res.statusCode, 401);
+  expect(res.statusCode).toBe(401);
 });
 
 test("rejects a request with the wrong bearer token", async () => {
@@ -151,7 +147,7 @@ test("rejects a request with the wrong bearer token", async () => {
     payload: validReport,
   });
 
-  assert.equal(res.statusCode, 401);
+  expect(res.statusCode).toBe(401);
 });
 
 test("rejects malformed instance reports", async () => {
@@ -195,12 +191,12 @@ test("rejects malformed instance reports", async () => {
       payload: payload as object,
     });
 
-    assert.equal(res.statusCode, 400, `expected 400 for ${description}`);
+    expect(res.statusCode, `expected 400 for ${description}`).toBe(400);
   }
 
   const { count } = app.db.prepare("SELECT COUNT(*) AS count FROM instance_reports").get() as { count: number };
 
-  assert.equal(count, 0);
+  expect(count).toBe(0);
 });
 
 test("ignores unknown top level fields so newer instances stay compatible", async () => {
@@ -213,5 +209,5 @@ test("ignores unknown top level fields so newer instances stay compatible", asyn
     payload: { ...validReport, someFutureField: "ignored" },
   });
 
-  assert.equal(res.statusCode, 201);
+  expect(res.statusCode).toBe(201);
 });

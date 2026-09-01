@@ -1,5 +1,4 @@
-import * as assert from "node:assert";
-import { test } from "vitest";
+import { expect, test } from "vitest";
 import type { InstanceReport, InstanceReportRepository } from "./instance-report.repository";
 import { type CreateInstanceReport, InstanceReportService } from "./instance-report.service";
 
@@ -37,8 +36,8 @@ test("stamps the arrival time itself", async () => {
 
   new InstanceReportService(repository).recordReport(report);
 
-  assert.equal(inserted.length, 1);
-  assert.ok(!Number.isNaN(Date.parse(inserted[0].receivedAt)));
+  expect(inserted.length).toBe(1);
+  expect(Number.isNaN(Date.parse(inserted[0].receivedAt))).toBe(false);
 });
 
 test("passes the reporting instance's batchId through untouched", async () => {
@@ -46,13 +45,13 @@ test("passes the reporting instance's batchId through untouched", async () => {
 
   new InstanceReportService(repository).recordReport(report);
 
-  assert.equal(inserted[0].batchId, "batch-1");
+  expect(inserted[0].batchId).toBe("batch-1");
 });
 
 test("returns the id assigned by the repository", async () => {
   const { repository } = fakeRepository();
   const service = new InstanceReportService(repository);
 
-  assert.deepEqual(service.recordReport(report), { id: 1 });
-  assert.deepEqual(service.recordReport(report), { id: 2 });
+  expect(service.recordReport(report)).toEqual({ id: 1 });
+  expect(service.recordReport(report)).toEqual({ id: 2 });
 });

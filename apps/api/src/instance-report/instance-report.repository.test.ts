@@ -1,5 +1,4 @@
-import * as assert from "node:assert";
-import { test } from "vitest";
+import { expect, test } from "vitest";
 import { build } from "../testing/build-app";
 import { DuplicateBatchError, type InstanceReport, InstanceReportRepository } from "./instance-report.repository";
 
@@ -19,5 +18,5 @@ test("translates a repeated batchId into a DuplicateBatchError", async () => {
 
   repository.insert(event);
 
-  assert.throws(() => repository.insert(event), DuplicateBatchError);
+  expect(() => repository.insert(event)).toThrow(DuplicateBatchError);
 });
