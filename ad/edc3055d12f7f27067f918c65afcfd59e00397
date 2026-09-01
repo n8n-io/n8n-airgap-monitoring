@@ -1,0 +1,36 @@
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_0b3c3a0671cf31::t_5e3cd39a0432e4 194,199
+  s_0b3c3a0671cf31::t_3f6a4361878dd3 100,105
+  s_0b3c3a0671cf31::t_92a2cd673db6d9 150
+  s_0b3c3a0671cf31::t_307240bc44ac88 212
+  s_0b3c3a0671cf31::t_fa411d742223c8 137
+  s_0b3c3a0671cf31::t_630b002cd7839f 113,117,121,123,129
+  s_0b3c3a0671cf31::t_841283f8c91e81 56,61
+  s_0b3c3a0671cf31::t_c47feef070982b 33,38-43
+  s_0b3c3a0671cf31::t_6be175eb77be7a 78,85
+  s_0b3c3a0671cf31::t_501752b6873217 1
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_0b3c3a0671cf31::t_5f9eba926e4ad3 1
+  s_0b3c3a0671cf31::t_0dbb84db54f471 55-56
+  s_0b3c3a0671cf31::t_b0327e600976b9 39-40
+  s_0b3c3a0671cf31::t_13555d9738161f 48
+apps/api/src/instance-report/instance-report.repository.test.ts
+  s_0b3c3a0671cf31::t_ce08cdd36707f2 1
+  s_0b3c3a0671cf31::t_0181aee2077a49 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "adedc3055d12f7f27067f918c65afcfd59e00397",
+  "prompts": {},
+  "sessions": {
+    "s_0b3c3a0671cf31": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8756ecac-b6df-4926-b124-2ebffe0bb6ce",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
