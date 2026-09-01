@@ -1,0 +1,14 @@
+apps/api/package.json
+  h_c63dce324dfc7b 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "4995dd8084f0408dc082a16962eb676c5d0674c2",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
