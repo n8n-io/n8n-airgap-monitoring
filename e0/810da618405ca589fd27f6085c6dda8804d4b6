@@ -1,0 +1,14 @@
+adr/2026-08-18-fastify-over-express.md
+  h_c63dce324dfc7b 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e0810da618405ca589fd27f6085c6dda8804d4b6",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
