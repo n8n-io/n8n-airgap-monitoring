@@ -1,0 +1,30 @@
+apps/api/package.json
+  h_c63dce324dfc7b 8,15
+pnpm-lock.yaml
+  s_ac509a9f607ddb::t_33bc7b1a249ed1 20-22
+apps/api/src/testing/build-app.ts
+  s_ac509a9f607ddb::t_6879f2535ae4ad 8,19-21
+apps/api/src/app.ts
+  h_c63dce324dfc7b 1,13-28,42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "bf816031fb731c10088bb1710b413b2227dc350e",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_ac509a9f607ddb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1d62f6f2-bec9-49a1-84eb-97d5d1b2d553",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
