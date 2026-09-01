@@ -5,14 +5,14 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "start": "pnpm run build && fastify start --options -l info dist/app.js",
+    "start": "pnpm run build && fastify start -l info dist/app.js",
     "build": "tsc -p tsconfig.build.json",
     "format": "biome format --no-errors-on-unmatched --write src",
     "lint": "biome check --no-errors-on-unmatched --write --unsafe src",
     "lint:staged": "biome check --no-errors-on-unmatched --write --unsafe --staged src",
     "watch": "tsc -w -p tsconfig.build.json",
     "dev": "pnpm run build && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"pnpm:watch\" \"pnpm:dev:start\"",
-  "dev:start": "fastify start --options --ignore-watch=\"data .ts$\" -w -l info -P dist/app.js"
+  "dev:start": "fastify start --ignore-watch=\"data .ts$\" -w -l info -P dist/app.js"
   },
   "dependencies": {
     "@fastify/bearer-auth": "10.1.3",

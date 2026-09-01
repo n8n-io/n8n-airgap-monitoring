@@ -1,3 +1,4 @@
+import AjvCompiler from "@fastify/ajv-compiler";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import instanceReport from "./instance-report/instance-report.plugin";
 import config from "./plugins/config";
@@ -8,19 +9,23 @@ import v1Routes from "./routes/v1";
 
 export interface AppOptions extends FastifyServerOptions {}
 
-// Pass --options via CLI arguments in command to enable these options.
-const options: AppOptions = {
-  ajv: {
-    customOptions: {
-      // Ajv coerces by default, which would turn a null or boolean metric value
-      // into 0 or 1 and silently write a wrong number into a instance report metric record.
-      // Reports must be rejected instead, so operators can see the bad payload.
-      coerceTypes: false,
-    },
-  },
-};
-
 const app: FastifyPluginAsync<AppOptions> = async (fastify, _opts): Promise<void> => {
+  fastify.setValidatorCompiler(
+    AjvCompiler()(
+      {},
+      {
+        customOptions: {
+          /**
+           * Ajv coerces by default, which would turn a null or boolean metric value
+           * into 0 or 1 and silently write a wrong number into a instance report metric record.
+           * Reports must be rejected instead, so operators can see the bad payload.
+           */
+          coerceTypes: false,
+        },
+      },
+    ),
+  );
+
   void fastify.register(config);
   void fastify.register(db);
   void fastify.register(sensible);
@@ -34,4 +39,4 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, _opts): Promise<void
 };
 
 export default app;
-export { app, options };
+export { app };

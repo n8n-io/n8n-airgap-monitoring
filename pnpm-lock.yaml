@@ -17,6 +17,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@fastify/ajv-compiler':
+        specifier: 4.0.6
+        version: 4.0.6
       '@fastify/bearer-auth':
         specifier: 10.1.3
         version: 10.1.3

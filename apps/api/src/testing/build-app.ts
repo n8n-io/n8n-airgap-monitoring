@@ -5,7 +5,7 @@ import { join } from "node:path";
 import Fastify from "fastify";
 import fp from "fastify-plugin";
 import { onTestFinished } from "vitest";
-import app, { options } from "../app";
+import app from "../app";
 
 process.env.N8N_MONITORING_WRITE_TOKEN = "test-token";
 
@@ -16,9 +16,9 @@ async function build() {
   const dataDir = mkdtempSync(join(tmpdir(), "cmfae-test-"));
   process.env.N8N_DB_PATH = join(dataDir, "cmfae.sqlite");
 
-  // The app is built with the server options it exports, so tests validate
-  // payloads under the same Ajv settings as production.
-  const fastify = Fastify(options);
+  // The app sets its own validator compiler, so tests validate payloads under
+  // the same Ajv settings as production without configuring anything here.
+  const fastify = Fastify();
 
   // fastify-plugin ensures that all decorators are exposed for testing
   // purposes, this is different from the production setup.
