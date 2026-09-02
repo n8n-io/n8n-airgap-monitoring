@@ -9,7 +9,7 @@ customer-hosted instance can aggregate usage numbers for many n8n instances.
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `N8N_MONITORING_WRITE_TOKEN` | yes | — | Bearer token that reporting n8n instances must present on `POST /api/v1/instance-reports`. The service refuses to start without it. |
-| `N8N_DB_PATH` | no | `./data/cmfae.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
+| `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 
 ## Reporting usage
 
@@ -101,7 +101,7 @@ Defaults baked into the image:
 | | |
 | --- | --- |
 | Port | `3000` |
-| Data | `/data` (declared as a volume, `N8N_DB_PATH=/data/cmfae.sqlite`) |
+| Data | `/data` (declared as a volume, `N8N_DB_PATH=/data/database.sqlite`) |
 | User | `node` (non-root, uid 1000) |
 | Health | `HEALTHCHECK` polling `/healthz` |
 

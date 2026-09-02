@@ -48,7 +48,7 @@ spec:
           ports:
             - name: http
               containerPort: 3000
-          # The image already sets N8N_DB_PATH=/data/cmfae.sqlite; only the write
+          # The image already sets N8N_DB_PATH=/data/database.sqlite; only the write
           # token is deployment-specific, and the API refuses to boot without it.
           envFrom:
             - secretRef:

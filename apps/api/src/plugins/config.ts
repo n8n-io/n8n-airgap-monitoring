@@ -18,7 +18,7 @@ export default fp(
 
     const config: Config = {
       writeToken,
-      dbPath: process.env.N8N_DB_PATH?.trim() || "./data/cmfae.sqlite",
+      dbPath: process.env.N8N_DB_PATH?.trim() || "./data/database.sqlite",
     };
 
     fastify.decorate("config", config);
