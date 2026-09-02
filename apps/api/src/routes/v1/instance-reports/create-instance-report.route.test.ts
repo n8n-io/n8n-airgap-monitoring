@@ -129,30 +129,6 @@ test("rejects a repeated batchId as a conflict", async () => {
   expect(count).toBe(1);
 });
 
-test("rejects a repeated batchId as a conflict", async () => {
-  const app = await build();
-
-  const post = () => app.inject({ method: "POST", url: URL, headers: AUTHORIZED, payload: validReport });
-
-  assert.equal((await post()).statusCode, 201);
-
-  const res = await post();
-
-  assert.equal(res.statusCode, 409);
-
-  const { message } = res.json() as { message: string };
-
-  assert.ok(message.includes("batch-1"));
-  // The client is told what it did, not how the store is built.
-  assert.ok(!/SQLITE|UNIQUE/i.test(message));
-
-  const { count } = app.db
-    .prepare("SELECT COUNT(*) AS count FROM instance_reports WHERE instance_id = ? AND batch_id = ?")
-    .get("instance-1", "batch-1") as { count: number };
-
-  assert.equal(count, 1);
-});
-
 test("rejects a request without a bearer token", async () => {
   const app = await build();
 
