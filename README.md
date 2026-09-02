@@ -9,7 +9,7 @@ customer-hosted instance can aggregate usage numbers for many n8n instances.
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `N8N_MONITORING_WRITE_TOKEN` | yes | — | Bearer token that reporting n8n instances must present on `POST /api/v1/instance-reports`. The service refuses to start without it. |
-| `N8N_DB_PATH` | no | `./data/cmfae.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
+| `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 
 ## Reporting usage
 
@@ -75,8 +75,11 @@ In the project directory, you can run:
 
 ### `pnpm dev`
 
-To start the app in dev mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+To start the app in dev mode on [http://localhost:3456](http://localhost:3456).
+
+The dev port is deliberately an unpopular one. Port 3000 is the default for a
+long list of tools (Grafana among them) and a silent `EADDRINUSE` at startup
+looks a lot like "the dev server didn't print its URL".
 
 ### `pnpm start`
 
@@ -85,4 +88,52 @@ For production mode
 ### `pnpm test`
 
 Run the test cases.
+
+## Docker
+
+The [`Dockerfile`](Dockerfile) builds a single image containing the API, so a
+deployment is one container plus one volume for the SQLite file. This service is
+API only — there is no frontend to serve, no second process, and no CORS to
+configure.
+
+Defaults baked into the image:
+
+| | |
+| --- | --- |
+| Port | `3000` |
+| Data | `/data` (declared as a volume, `N8N_DB_PATH=/data/database.sqlite`) |
+| User | `node` (non-root, uid 1000) |
+| Health | `HEALTHCHECK` polling `/healthz` |
+
+`N8N_MONITORING_WRITE_TOKEN` is deliberately **not** set. The service refuses to
+boot without it, so you must supply it.
+
+### Running the image locally
+
+`docker compose up --build` builds the image and starts it on
+[http://localhost:3001](http://localhost:3001) with a throwaway token and a
+named volume:
+
+```sh
+docker compose up --build          # or: docker-compose up --build
+```
+
+The host port is 3001, not 3000, since port 3000 is a popular default and often
+already taken. Inside the container the API still listens on 3000.
+
+This runs the real production image — it is not a hot-reload setup. `pnpm dev`
+remains the development workflow; use compose when you want to check that the
+thing you are about to ship actually works. `docker compose down -v` removes the
+container and its data volume.
+
+The compose file uses a named volume rather than a bind mount on purpose: the
+container runs as `node`, and a host directory bind-mounted on macOS or Linux
+generally has the wrong owner, so SQLite fails to create its WAL files.
+
+## Local Kubernetes demo
+
+[`scripts/local-k8s-demo/`](scripts/local-k8s-demo/) runs two n8n instances and
+this service in a [kind](https://kind.sigs.k8s.io/) cluster, with the instances
+reporting over cluster-internal DNS so no traffic leaves the cluster. See its
+[README](scripts/local-k8s-demo/README.md).
 

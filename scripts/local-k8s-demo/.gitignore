@@ -1,0 +1,4 @@
+# Runtime state produced by the Makefile.
+.kubeconfig
+.pids
+logs

@@ -14,7 +14,7 @@ async function build() {
   // Every test gets its own throwaway database file, so no test can observe
   // another test's events.
   const dataDir = mkdtempSync(join(tmpdir(), "cmfae-test-"));
-  process.env.N8N_DB_PATH = join(dataDir, "cmfae.sqlite");
+  process.env.N8N_DB_PATH = join(dataDir, "database.sqlite");
 
   // The app sets its own validator compiler, so tests validate payloads under
   // the same Ajv settings as production without configuring anything here.
