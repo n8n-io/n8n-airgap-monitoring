@@ -1,0 +1,17 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "606a7a1c7adc0e241279890a421074903fa854fc",
+  "prompts": {},
+  "sessions": {
+    "s_e038f2f66a0076": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f9b6347a-fce4-4fda-81b2-9687848df50f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

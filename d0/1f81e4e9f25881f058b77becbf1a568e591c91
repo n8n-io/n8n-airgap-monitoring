@@ -1,0 +1,47 @@
+tsconfig.build.json
+  s_e038f2f66a0076::t_d9ff94ae535b42 1-6
+src/routes/api/v1/ingest/ingest.test.ts
+  s_e038f2f66a0076::t_d7d26af7f9a7e9 1-173
+src/usage/usage.service.test.ts
+  s_e038f2f66a0076::t_d7d26af7f9a7e9 1-59
+package.json
+  s_e038f2f66a0076::t_e4509f19a33115 18
+adr/2026-08-18-colocate-tests-with-implementation.md
+  s_e038f2f66a0076::t_87e52f38abfd4a 25
+  s_e038f2f66a0076::t_d4967806f6ec21 1-2,5-18,20-22,23,26
+README.md
+  s_6381d36b2e31c5::t_187845f65ad05f 29-34,35-37,54-59,63-65
+adr/2026-08-18-backwards-compatibility-via-n8n-version.md
+  s_6381d36b2e31c5::t_62a492c8430f98 1-2,5-18,20-45
+adr/2026-08-18-store-datapoints-as-json.md
+  s_6381d36b2e31c5::t_90867da58eb36c 1-2,5-12,14-16,18-23,25-28,30-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d01f81e4e9f25881f058b77becbf1a568e591c91",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_6381d36b2e31c5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "26ffd744-9552-4e54-ab75-e4539ac26bc6",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_e038f2f66a0076": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f9b6347a-fce4-4fda-81b2-9687848df50f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

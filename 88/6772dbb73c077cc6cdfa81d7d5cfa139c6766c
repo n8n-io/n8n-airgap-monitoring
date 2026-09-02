@@ -1,0 +1,50 @@
+turbo.json
+  s_841b58652b4087::t_0b8eab2d80c240 22
+apps/api/package.json
+  s_841b58652b4087::t_a7b966360b9e82 32-33
+  s_841b58652b4087::t_8acc73e9eff261 6
+package.json
+  s_841b58652b4087::t_d69d270a148c95 16-17
+  s_841b58652b4087::t_e4ad798d857a57 12
+apps/api/src/routes/api/v1/ingest/ingest.test.ts
+  s_841b58652b4087::t_04f7b53b21cd60 24-25,46-47,64-65,87-88,95-96,108-109,159-160
+  s_841b58652b4087::t_70460c375d5e3e 2
+apps/api/src/usage/usage.service.test.ts
+  s_841b58652b4087::t_06df890f55addd 2
+apps/api/src/testing/build-app.ts
+  s_841b58652b4087::t_7017e6b76f039b 7,13
+  s_841b58652b4087::t_c374b786478463 5-6,23-26,34,37
+apps/api/vitest.config.mts
+  s_841b58652b4087::t_4fe557150e1cc7 1-7
+pnpm-lock.yaml
+  s_841b58652b4087::t_57e6c142107c60 14-16,60-62,306-308,313-315,319-414,448-456,580-608,631-634,646-649,687-689,705-708,715-717,727-733,778-786,856-929,934-936,955-959,964-967,991-1000,1019-1022,1073-1077,1110-1112,1116-1119,1127-1129,1134-1136,1164-1178,1225-1308,1312-1316,1495-1496,1499-1500,1503-1548,1571-1579,1644-1684,1704-1705,1717-1718,1757-1758,1767-1768,1775-1776,1809-1814,1886-1889,1950-1998,2004-2007,2022-2023,2026-2027,2046-2051,2092-2097,2133-2152,2175-2176,2181-2182,2189-2190,2193-2194,2223-2233,2295-2334,2339-2343
+  s_841b58652b4087::t_87958dfdd2142a 1805,2249
+vitest.config.mts
+  s_841b58652b4087::t_cbbf557edbdcb0 1-7
+apps/api/src/plugins/README.md
+  s_841b58652b4087::t_935b4c133f4240 12-14
+apps/api/src/app.ts
+  s_841b58652b4087::t_5d3c9673a72544 4-6,10
+  s_841b58652b4087::t_ecd48c8abc0bb2 12,29-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "886772dbb73c077cc6cdfa81d7d5cfa139c6766c",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_841b58652b4087": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5d52e319-1b5d-41e4-ac96-fabdd6970deb",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

@@ -1,0 +1,116 @@
+apps/api/src/testing/build-app.ts
+  s_10ed439547dbf0::t_5eb805bf4203ee 10
+  h_c63dce324dfc7b 15
+  s_ba4fb5fd45bcd8::t_3c5e3086f9d090 2-4,14,16-18,29-32
+README.md
+  s_10ed439547dbf0::t_3374e905655574 21
+  s_461d366f064c7b::t_adc754d839c7e3 17,20
+  s_461d366f064c7b::t_051135053c7f27 11
+apps/api/src/routes/v1/instance-report/create-instance-report.route.ts
+  s_10ed439547dbf0::t_04725fdc51195e 58
+apps/api/src/plugins/config.ts
+  s_10ed439547dbf0::t_026c8e63dd267a 5,14-16,20
+apps/api/src/routes/v1/index.ts
+  s_461d366f064c7b::t_02ab0d78fba883 2,5
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_461d366f064c7b::t_da17e2f282f7ca 4
+biome.json
+  s_d3e350c199fe86::t_465ffa19c91dc7 2,21,27
+  s_d3e350c199fe86::t_3ee39664d7f074 4
+apps/api/package.json
+  s_3a9d102dda0f4e::t_3af195c0f12ed6 10
+turbo.json
+  h_c63dce324dfc7b 10-11,24
+  s_3a9d102dda0f4e::t_7e2effbe92e4bd 25-26
+adr/2026-08-18-fastify-over-express.md
+  s_7b9eacb08c45fc::t_ff2226ed04e2ee 44
+  s_7b9eacb08c45fc::t_ccd7aeff9f778d 49
+  s_7b9eacb08c45fc::t_9ce0345a4b08be 46
+  s_35afc62c733c08::t_772d000d823899 3-4
+adr/2026-08-26-sqlite-with-synchronous-writes.md
+  s_7b9eacb08c45fc::t_0e6079a2c5bd12 1-2,5-63,65-67
+  s_35afc62c733c08::t_772d000d823899 3
+  s_35afc62c733c08::t_578399faf4db25 2
+  s_ba4fb5fd45bcd8::t_003ba135e6b987 68
+adr/2026-08-18-daily-metric-combined-with-cumulative.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+adr/2026-08-18-backwards-compatibility-via-n8n-version.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+adr/2026-08-26-report-envelopes-are-immutable.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+adr/2026-08-18-store-datapoints-as-json.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+adr/2026-08-18-colocate-tests-with-implementation.md
+  s_35afc62c733c08::t_772d000d823899 3-4
+apps/api/src/plugins/db.ts
+  s_ba4fb5fd45bcd8::t_b325199327fe88 33,37-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "de6aef7148da5c6f59a1d9ed555471a2c81e7c20",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_10ed439547dbf0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "13bb9814-cae6-454d-a754-92408f873e41",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_35afc62c733c08": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4828078-e43d-4d35-b006-560d3029461b",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_3a9d102dda0f4e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4e49e5d2-2b9f-4ad7-ad40-dfeb903e5f06",
+        "model": "claude-opus-5"
+      },
+      "human_author": null
+    },
+    "s_461d366f064c7b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "03a9f8c9-998c-40d0-99fa-a96cc5629123",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_7b9eacb08c45fc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2b8196d7-5d94-41fc-b26c-973034ef4eec",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_ba4fb5fd45bcd8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e56c5199-c2d0-4c95-a99d-24b818bd5a01",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_d3e350c199fe86": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0817c3f5-15ef-4b8a-b41f-07a529e06960",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

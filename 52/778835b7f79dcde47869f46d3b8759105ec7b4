@@ -1,0 +1,38 @@
+adr/TEMPLATE.md
+  h_c63dce324dfc7b 1-4,8-35
+  s_f4933ea0d4688d::t_3eba00fd887f39 5-7
+adr/daily-metric-combined-with-cumulative.md
+  h_c63dce324dfc7b 11
+  s_7a4514aee3322e::t_8e48246b202d94 1-10,12-39
+adr/2026-08-18-fastify-over-express.md
+  s_f4933ea0d4688d::t_08afe54ad17f32 1-2,5-12,14-32,34-43,45,47-48,50-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "52778835b7f79dcde47869f46d3b8759105ec7b4",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_7a4514aee3322e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6a2cf7a5-db97-4b7c-b0d8-3c92ad01747f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_f4933ea0d4688d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c6b9e5f5-6910-463f-8570-4596fed9f47d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

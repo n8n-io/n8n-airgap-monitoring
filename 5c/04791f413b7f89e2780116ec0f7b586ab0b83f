@@ -1,0 +1,45 @@
+tools/tsconfig/base.json
+  h_c63dce324dfc7b 1-20
+turbo.json
+  h_c63dce324dfc7b 1-9,12-17,20-21,27-29
+  s_bca70c6c7f5c95::t_58d708e19e4923 23
+pnpm-workspace.yaml
+  s_bca70c6c7f5c95::t_289dcc3e4ab9d6 1-2
+  s_bca70c6c7f5c95::t_8ebd6d8c5f3e38 3-6
+tools/tsconfig/package.json
+  h_c63dce324dfc7b 1-9
+.gitignore
+  s_bca70c6c7f5c95::t_ce7fe221e8f786 67-69
+apps/api/package.json
+  s_bca70c6c7f5c95::t_aa787b3935c22e 19-24,28-31
+  h_c63dce324dfc7b 1-5,7,9,13,16-17,25-26,34-35
+package.json
+  s_bca70c6c7f5c95::t_b0a4c21ce1e4fc 6
+  s_bca70c6c7f5c95::t_6eec9ad7766f3f 5,8-9,11,13,28
+  h_c63dce324dfc7b 23-26
+apps/api/src/plugins/sensible.ts
+  s_bca70c6c7f5c95::t_9d580444397576 10
+pnpm-lock.yaml
+  s_bca70c6c7f5c95::t_03c3c598abea3e 10-13,17-18,24,27,30,33,36,39,46,49,52,55,58,63,415-444,1202-1205,1549-1566,2251-2259
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5c04791f413b7f89e2780116ec0f7b586ab0b83f",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_bca70c6c7f5c95": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5d63eb85-48d8-4b0b-a2ce-266dd9f34cab",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

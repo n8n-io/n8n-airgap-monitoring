@@ -1,0 +1,33 @@
+test/routes/ingest.test.ts
+  s_7a4514aee3322e::t_c1129cac1c0f58 123,125-137
+  s_7a4514aee3322e::t_ab101ebb6175c9 15,19
+src/usage/usage.service.ts
+  s_7a4514aee3322e::t_0ffcc187862753 9,11,13-14,17,24-27,30,38
+  h_c63dce324dfc7b 10,28
+test/usage/usage.service.test.ts
+  s_7a4514aee3322e::t_674ac6f7c61764 12,16
+src/routes/api/v1/ingest/index.ts
+  s_7a4514aee3322e::t_f6e100ee048742 39
+  s_7a4514aee3322e::t_9e9c5ab0e4a3d6 6-10,16,20,22-24,26-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "97dc1e0a047e1d1deaac3669447b181ae6a81779",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_7a4514aee3322e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6a2cf7a5-db97-4b7c-b0d8-3c92ad01747f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+.github/workflows/docker-build-push.yml
+  s_9acc10028150e3::t_dc348cd497a8f0 1-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "a356eb52fe59d8fad17ff32bb7282130fcac72ab",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_9acc10028150e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5bd22fe0-9be4-4946-8c93-19fdddcf2aa1",
+        "model": "claude-fable-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
