@@ -63,3 +63,12 @@ test/types/index.js
 
 # compiled app
 dist
+
+# turbo task cache
+.turbo
+
+# local environment overrides
+.env
+
+# local usage event database
+data
