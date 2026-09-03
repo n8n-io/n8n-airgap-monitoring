@@ -48,8 +48,8 @@ spec:
           ports:
             - name: http
               containerPort: 3000
-          # The image already sets N8N_DB_PATH=/data/database.sqlite; only the write
-          # token is deployment-specific, and the API refuses to boot without it.
+          # The image already sets N8N_DB_PATH=/data/database.sqlite; the read and write
+          # tokens are deployment-specific, and the API refuses to boot without them.
           envFrom:
             - secretRef:
                 name: airgap-monitoring-tokens

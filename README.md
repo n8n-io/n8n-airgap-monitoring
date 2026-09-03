@@ -9,6 +9,7 @@ customer-hosted instance can aggregate usage numbers for many n8n instances.
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `N8N_MONITORING_WRITE_TOKEN` | yes | — | Bearer token that reporting n8n instances must present on `POST /api/v1/instance-reports`. The service refuses to start without it. |
+| `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/instance-reports`. The service refuses to start without it. |
 | `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 
 ## Reporting usage
@@ -69,6 +70,46 @@ and `401` for a missing or wrong token. Every report is appended as its own
 event rather than overwriting the previous one, so usage history stays
 auditable; a reporting UI would read the newest event per instance.
 
+## Downloading the report
+
+A customer downloads a JSON report of everything the service has recorded and
+shares it with n8n:
+
+```http
+GET /api/v1/instance-reports
+Authorization: Bearer <N8N_MONITORING_READ_TOKEN>
+```
+
+Its shape is:
+
+```json
+{
+  "data": {
+    "generatedAt": "2026-09-03T14:30:00.000Z",
+    "instances": [
+      {
+        "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
+        "label": "prod",
+        "firstSeen": "2026-03-20",
+        "dataPoints": {
+          "prodExecutions": [
+            { "kind": "daily", "date": "2026-03-25", "value": 15234, "batchId": "a1b2c3d4", "receivedAt": "2026-03-26T02:00:00.000Z" }
+          ],
+          "activeWorkflows": [
+            { "kind": "cumulative", "value": 87, "batchId": "a1b2c3d4", "receivedAt": "2026-03-26T02:00:00.000Z" }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+`dataPoints` here is a map keyed by metric name — note this differs from the
+same field on the ingest payload, which is a flat array. Each key holds value 
+that instance reported for that metric, oldest-first, tagged with the `batchId` 
+and `receivedAt` of the report that carried it.
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -105,8 +146,8 @@ Defaults baked into the image:
 | User | `node` (non-root, uid 1000) |
 | Health | `HEALTHCHECK` polling `/healthz` |
 
-`N8N_MONITORING_WRITE_TOKEN` is deliberately **not** set. The service refuses to
-boot without it, so you must supply it.
+`N8N_MONITORING_WRITE_TOKEN` and `N8N_MONITORING_READ_TOKEN` are deliberately
+**not** set. The service refuses to boot without either, so you must supply both.
 
 ### Running the image locally
 

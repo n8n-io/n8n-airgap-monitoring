@@ -7,7 +7,8 @@ import fp from "fastify-plugin";
 import { onTestFinished } from "vitest";
 import app from "../app";
 
-process.env.N8N_MONITORING_WRITE_TOKEN = "test-token";
+process.env.N8N_MONITORING_WRITE_TOKEN = "test-write-token";
+process.env.N8N_MONITORING_READ_TOKEN = "test-read-token";
 
 // Automatically build and tear down our instance
 async function build() {

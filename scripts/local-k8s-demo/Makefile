@@ -13,6 +13,9 @@ PIDS_FILE        := .pids
 # handshake: the instances send it as a bearer token and the service checks it
 # against its own N8N_MONITORING_WRITE_TOKEN, so the two must stay equal.
 WRITE_TOKEN      := demo-write-token
+# READ_TOKEN guards the report download. Only the monitoring service needs it,
+# but the service refuses to boot without it, so it must be in the secret.
+READ_TOKEN       := demo-read-token
 OWNER_EMAIL      := admin@n8n.io
 OWNER_PASSWORD   := hello1234
 
@@ -67,6 +70,7 @@ up: cluster images install ## Full setup: cluster + images + deploy + port-forwa
 	@echo ""
 	@echo "  n8n login           $(OWNER_EMAIL) / $(OWNER_PASSWORD)"
 	@echo "  write token         $(WRITE_TOKEN)"
+	@echo "  read token          $(READ_TOKEN)"
 	@echo ""
 	@echo "  Both instances report every $(REPORT_INTERVAL_MINUTES) min to the cluster-internal URL"
 	@echo "  $(INGEST_URL)"
@@ -124,6 +128,7 @@ install-monitoring: ## Deploy the airgap-monitoring service
 	@kubectl create namespace $(MONITORING_NS) --dry-run=client -o yaml | kubectl apply -f -
 	@kubectl create secret generic airgap-monitoring-tokens -n $(MONITORING_NS) \
 		--from-literal=N8N_MONITORING_WRITE_TOKEN=$(WRITE_TOKEN) \
+		--from-literal=N8N_MONITORING_READ_TOKEN=$(READ_TOKEN) \
 		--dry-run=client -o yaml | kubectl apply -f -
 	@kubectl apply -f k8s/monitoring.yaml
 	@kubectl rollout restart deployment/airgap-monitoring -n $(MONITORING_NS) >/dev/null
