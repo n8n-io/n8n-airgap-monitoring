@@ -1,0 +1,14 @@
+.github/workflows/docker-build-and-push.yml
+  h_c63dce324dfc7b 53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "7d9e71b358720ac1cd888f2daaa468fdf61adbc8",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

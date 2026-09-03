@@ -1,0 +1,19 @@
+.github/workflows/docker-build-and-push.yml
+  s_1b7c72aeec7dc6::t_cd83a8d4302acd 54-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "25e1213b75e445f5105f0ef724c30d71a74d5186",
+  "prompts": {},
+  "sessions": {
+    "s_1b7c72aeec7dc6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "50b2d943-6509-4414-bc67-d9b14cd370f0",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
