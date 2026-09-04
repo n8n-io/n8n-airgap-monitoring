@@ -73,7 +73,7 @@ function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
   };
 }
 
-test("generateReport takes firstSeen from the earliest row and label from the latest", () => {
+test("generateReport takes firstSeen from the earliest row, and label and lastReportAt from the latest", () => {
   const report = fakeReportRepository([
     row({ batchId: "b1", label: "first", receivedAt: "2026-03-20T02:00:00.000Z" }),
     row({ batchId: "b2", label: "latest", receivedAt: "2026-03-25T02:00:00.000Z" }),
@@ -81,6 +81,18 @@ test("generateReport takes firstSeen from the earliest row and label from the la
 
   expect(report.data.instances[0].firstSeen).toBe("2026-03-20");
   expect(report.data.instances[0].label).toBe("latest");
+  expect(report.data.instances[0].lastReportAt).toBe("2026-03-25T02:00:00.000Z");
+});
+
+test("generateReport files a metric named __proto__ as data instead of crashing", () => {
+  const protoKey = "__proto__";
+  const report = fakeReportRepository([
+    row({ dataPoints: [{ kind: "cumulative", name: protoKey, value: 5 }] }),
+  ]).generateReport();
+
+  expect(report.data.instances[0].dataPoints[protoKey]).toEqual([
+    { kind: "cumulative", value: 5, batchId: "batch-1", receivedAt: "2026-03-25T02:00:00.000Z" },
+  ]);
 });
 
 test("generateReport groups points by name and tags each with its batchId and receivedAt, without folding", () => {

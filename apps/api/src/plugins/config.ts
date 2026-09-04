@@ -17,8 +17,6 @@ export default fp(
       throw new Error("N8N_MONITORING_WRITE_TOKEN must be set to a non-empty value");
     }
 
-    // A separate secret from the write token: a leaked read token can pull the
-    // usage report but cannot forge instance reports, and vice versa.
     const readToken = process.env.N8N_MONITORING_READ_TOKEN?.trim();
     if (!readToken) {
       throw new Error("N8N_MONITORING_READ_TOKEN must be set to a non-empty value");

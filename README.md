@@ -91,6 +91,7 @@ Its shape is:
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
         "label": "prod",
         "firstSeen": "2026-03-20",
+        "lastReportAt": "2026-03-26T02:00:00.000Z",
         "dataPoints": {
           "prodExecutions": [
             { "kind": "daily", "date": "2026-03-25", "value": 15234, "batchId": "a1b2c3d4", "receivedAt": "2026-03-26T02:00:00.000Z" }
@@ -106,9 +107,9 @@ Its shape is:
 ```
 
 `dataPoints` here is a map keyed by metric name — note this differs from the
-same field on the ingest payload, which is a flat array. Each key holds value 
-that instance reported for that metric, oldest-first, tagged with the `batchId` 
-and `receivedAt` of the report that carried it.
+same field on the ingest payload, which is a flat array. Each key holds every
+value that instance reported for that metric, oldest-first, tagged with the
+`batchId` and `receivedAt` of the report that carried it.
 
 ## Available Scripts
 

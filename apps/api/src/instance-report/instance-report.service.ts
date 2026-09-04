@@ -87,6 +87,8 @@ export interface InstanceReportEntry {
   label: string | null;
   /** UTC calendar day (YYYY-MM-DD) of the earliest event we stored for this instance. */
   firstSeen: string;
+  /** Timestamp the collector received the most recent report from this instance. */
+  lastReportAt: string;
   /**
    * Every value the instance ever reported, keyed by metric name. Nothing is folded or
    * deduplicated: this collector is a dumb pipe, so reconciliation (summing daily values,
@@ -137,13 +139,16 @@ export class InstanceReportService {
           label: row.label,
           // Slicing the ISO timestamp yields its UTC calendar day.
           firstSeen: row.receivedAt.slice(0, 10),
-          dataPoints: {},
+          lastReportAt: row.receivedAt,
+          dataPoints: Object.create(null) as Record<string, ReportedMetric[]>,
         };
         instances.set(row.instanceId, entry);
       }
 
-      // Last-received label wins; a report that omits it clears a previously-set one.
+      // Last-received label wins; a report that omits it clears a previously-set one. Rows are
+      // oldest-first per instance, so the last row's receivedAt is the most recent report.
       entry.label = row.label;
+      entry.lastReportAt = row.receivedAt;
 
       for (const point of row.dataPoints) {
         const reported: ReportedMetric =

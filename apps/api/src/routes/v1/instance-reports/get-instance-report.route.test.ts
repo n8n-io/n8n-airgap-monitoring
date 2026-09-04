@@ -121,6 +121,7 @@ test("reports each instance's id, first-seen day and full metric history", async
         {
           instanceId: "instance-1",
           firstSeen: "2026-03-25",
+          lastReportAt: "2026-03-26T02:00:00.000Z",
           label: "prod-renamed",
           dataPoints: {
             billableExecutionPerDay: [

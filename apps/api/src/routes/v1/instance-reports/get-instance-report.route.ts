@@ -16,12 +16,13 @@ const dataPointSchema = {
 
 const instanceReportSchema = {
   type: "object",
-  required: ["instanceId", "label", "firstSeen", "dataPoints"],
+  required: ["instanceId", "label", "firstSeen", "lastReportAt", "dataPoints"],
   additionalProperties: false,
   properties: {
     instanceId: { type: "string" },
     label: { type: ["string", "null"] },
     firstSeen: { type: "string" },
+    lastReportAt: { type: "string" },
     // Metric names are chosen by the reporting instance, so the keys are open; only
     // the shape of each name's value array is pinned down.
     dataPoints: {
@@ -50,9 +51,8 @@ const successResponseSchema = {
 
 /**
  * Downloads the full usage report as JSON, for a customer to hand to n8n. Guarded by the
- * read token, a different secret from the write token so a leaked reader cannot forge
- * reports. The body is a faithful projection of the event store — folding and billing math
- * happen on the receiving side, not here.
+ * read token. The body is a faithful projection of the event store — folding and billing
+ * math happen on the receiving side, not here.
  */
 const getInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> => {
   await fastify.register(bearerAuth, {
