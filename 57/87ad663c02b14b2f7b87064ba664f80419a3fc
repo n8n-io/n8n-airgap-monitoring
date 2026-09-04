@@ -1,0 +1,19 @@
+apps/api/src/instance-report/instance-report.service.ts
+  s_65531a6bdaa1f2::t_b6fb80ac35a6c8 141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "5787ad663c02b14b2f7b87064ba664f80419a3fc",
+  "prompts": {},
+  "sessions": {
+    "s_65531a6bdaa1f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fde0eca7-b1a1-407f-a854-41761d3686c0",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_65531a6bdaa1f2::t_65ba11cbcc1ff5 76,84-87,89,91-92,94-95
+  s_65531a6bdaa1f2::t_567fcc7fe604be 88,90,93
+README.md
+  s_65531a6bdaa1f2::t_4e0df897eaba4c 110
+apps/api/src/instance-report/instance-report.service.ts
+  s_65531a6bdaa1f2::t_b3c6a03b7e6621 142-143,148-149,151
+  s_65531a6bdaa1f2::t_71f5e7d1a87aab 90-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "217de2db92af7b73c2a83434c6349d95e60a649b",
+  "prompts": {},
+  "sessions": {
+    "s_65531a6bdaa1f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fde0eca7-b1a1-407f-a854-41761d3686c0",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}

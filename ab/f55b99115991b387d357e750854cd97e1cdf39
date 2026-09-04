@@ -1,0 +1,65 @@
+apps/api/src/routes/v1/instance-reports/index.ts
+  s_65531a6bdaa1f2::t_362726df0f594c 3,8
+README.md
+  s_65531a6bdaa1f2::t_32be8371fbd7c4 149-150
+  s_65531a6bdaa1f2::t_582c9566bdb62f 73-94,96-97,100-107,112
+apps/api/src/plugins/config.ts
+  s_65531a6bdaa1f2::t_132e44d8da2a8a 6,20-26,29
+scripts/local-k8s-demo/Makefile
+  s_65531a6bdaa1f2::t_df3ecd5b4798ac 73
+  s_65531a6bdaa1f2::t_3480b40cc63081 131
+  s_65531a6bdaa1f2::t_a95e15157a0bf5 16-18
+scripts/local-k8s-demo/k8s/monitoring.yaml
+  s_65531a6bdaa1f2::t_bee3254548342b 51-52
+apps/api/src/instance-report/instance-report.repository.test.ts
+  s_65531a6bdaa1f2::t_81bcb8a9bc8154 42,46-48,51-53,55-65
+  s_65531a6bdaa1f2::t_605761e1641b9b 23-41,43-45,49-50,54,66
+apps/api/src/routes/v1/instance-reports/get-instance-report.route.ts
+  s_65531a6bdaa1f2::t_af487266d2f1ad 1-85
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_65531a6bdaa1f2::t_3fe2fb11f2bff2 2
+  s_65531a6bdaa1f2::t_fd95cfa96711bd 1
+  s_65531a6bdaa1f2::t_ca79e35745e6ff 58-114,118,126
+  s_65531a6bdaa1f2::t_f4eb47abe66d5a 115-117,119-125
+apps/api/src/testing/build-app.ts
+  s_65531a6bdaa1f2::t_1807a55aa812a6 11
+docker-compose.yml
+  s_65531a6bdaa1f2::t_ee0d8a48bbe189 12
+apps/api/src/instance-report/instance-report.repository.ts
+  s_65531a6bdaa1f2::t_c284bfeafdf7fb 14-44
+  s_65531a6bdaa1f2::t_26e483b548399d 81,83-84
+  s_65531a6bdaa1f2::t_cd545646f6ea38 117
+  s_65531a6bdaa1f2::t_1db43875d7fead 114-116,118
+  s_65531a6bdaa1f2::t_76478e477afa45 73,82,85
+apps/api/src/instance-report/instance-report.service.ts
+  s_65531a6bdaa1f2::t_e8d206e2c7e2ef 149,152-156
+  s_65531a6bdaa1f2::t_15c1988d3dcf1c 57,60,82-107,119-148,150-151,157-165
+  s_65531a6bdaa1f2::t_f9604a4530354a 58-59,61-81
+apps/api/src/routes/v1/instance-reports/get-instance-report.route.test.ts
+  s_65531a6bdaa1f2::t_9beb3a9f171e58 141
+  s_65531a6bdaa1f2::t_8608e597f2c7cf 3-12,21-52,54-55,57-60,64,67,77-117,138-140,142-158,160-182,184-198,200-201
+  s_65531a6bdaa1f2::t_4f15b8546e2933 199
+  s_65531a6bdaa1f2::t_ae96f30136ca37 1-2
+  s_65531a6bdaa1f2::t_36f8100c2c78d0 13-20
+  s_65531a6bdaa1f2::t_1feafebd16a22d 183
+  s_65531a6bdaa1f2::t_75d57f2b13aa61 53
+  s_65531a6bdaa1f2::t_0c63cc439589c8 61-63,65-66,68-76
+  s_65531a6bdaa1f2::t_d4713704f8654e 118-137
+  s_65531a6bdaa1f2::t_ac95d391154129 159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "abf55b99115991b387d357e750854cd97e1cdf39",
+  "prompts": {},
+  "sessions": {
+    "s_65531a6bdaa1f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fde0eca7-b1a1-407f-a854-41761d3686c0",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}

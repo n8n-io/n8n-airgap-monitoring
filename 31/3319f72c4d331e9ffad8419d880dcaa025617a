@@ -1,0 +1,33 @@
+apps/api/package.json
+  s_49ace5f62bf37e::t_90307363206d46 12
+  s_49ace5f62bf37e::t_f93c0ad3d7adda 16
+package.json
+  s_49ace5f62bf37e::t_b15f95a145366f 11,14
+  s_49ace5f62bf37e::t_7a24c2adec520f 18
+.github/workflows/ci.yml
+  s_49ace5f62bf37e::t_35b59c7a4b46b1 42-43
+  s_49ace5f62bf37e::t_d83b9a7a0f01dc 1-17,20,25-26,44-55,61,63-67
+  s_49ace5f62bf37e::t_d57fa358b3fba7 56-60,62
+  s_49ace5f62bf37e::t_0d88b5be41570f 18-19,21-24,27-41
+turbo.json
+  s_49ace5f62bf37e::t_3f934216e658bf 13-15
+vitest.config.mts
+  s_49ace5f62bf37e::t_2d02068e6bed97 10-12
+  s_49ace5f62bf37e::t_10d537e9a600ac 6-9,13-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "313319f72c4d331e9ffad8419d880dcaa025617a",
+  "prompts": {},
+  "sessions": {
+    "s_49ace5f62bf37e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "308618e4-4da5-4c0e-bde7-9de0a31741e8",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
