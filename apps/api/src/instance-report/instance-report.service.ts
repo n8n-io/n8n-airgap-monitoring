@@ -1,4 +1,4 @@
-import type { InstanceReportRepository } from "./instance-report.repository";
+import type { InstanceReportRepository, InstanceReportRow } from "./instance-report.repository";
 
 interface BaseMetric {
   name: string;
@@ -80,6 +80,12 @@ interface ReportedCumulativeMetric extends ReportedMetricBase {
 /** Kept as a discriminated union so a consumer can tell a day-scoped value from a running total. */
 export type ReportedMetric = ReportedDailyMetric | ReportedCumulativeMetric;
 
+/** A {@link ReportedMetric} still carrying the name it will be filed under, before grouping. */
+interface NamedMetric {
+  name: string;
+  metric: ReportedMetric;
+}
+
 /** The report's view of one instance: identity, when we first heard from it, and its full metric history. */
 export interface InstanceReportEntry {
   instanceId: string;
@@ -120,46 +126,57 @@ export class InstanceReportService {
   }
 
   generateReport(): UsageReport {
-    const instances = new Map<string, InstanceReportEntry>();
-
-    // Rows arrive grouped per instance and oldest-first within each (repository order),
-    // so the first row seen for an instance is its earliest, and the last wins for label.
-    for (const row of this.repository.findAll()) {
-      let entry = instances.get(row.instanceId);
-      if (!entry) {
-        entry = {
-          instanceId: row.instanceId,
-          label: row.label,
-          // Slicing the ISO timestamp yields its UTC calendar day.
-          firstSeen: row.receivedAt.slice(0, 10),
-          lastReportAt: row.receivedAt,
-          dataPoints: Object.create(null) as Record<string, ReportedMetric[]>,
-        };
-        instances.set(row.instanceId, entry);
-      }
-
-      // Last-received label wins. Rows are oldest-first per instance, so
-      // the last row's receivedAt is the most recent report.
-      entry.label = row.label;
-      entry.lastReportAt = row.receivedAt;
-
-      for (const point of row.dataPoints) {
-        const reported: ReportedMetric =
-          point.kind === "daily"
-            ? { kind: "daily", date: point.date, value: point.value, batchId: row.batchId, receivedAt: row.receivedAt }
-            : { kind: "cumulative", value: point.value, batchId: row.batchId, receivedAt: row.receivedAt };
-
-        const series = entry.dataPoints[point.name] ?? [];
-        series.push(reported);
-        entry.dataPoints[point.name] = series;
-      }
-    }
+    const byInstance = Map.groupBy(this.repository.findAll(), (row) => row.instanceId);
 
     return {
       data: {
         generatedAt: new Date().toISOString(),
-        instances: [...instances.values()],
+        instances: [...byInstance.values()].map((rows) => this.toEntry(rows)),
       },
     };
+  }
+
+  /**
+   * Rows belonging to one instance, oldest-first (repository order) and never empty,
+   * so the first row is its earliest and the last one carries its latest state.
+   */
+  private toEntry(rows: InstanceReportRow[]): InstanceReportEntry {
+    const first = rows[0];
+    const last = rows[rows.length - 1];
+
+    return {
+      instanceId: first.instanceId,
+      // Last-received label wins.
+      label: last.label,
+      // Slicing the ISO timestamp yields its UTC calendar day.
+      firstSeen: first.receivedAt.slice(0, 10),
+      lastReportAt: last.receivedAt,
+      dataPoints: this.byName(rows.flatMap((row) => this.toNamedMetrics(row))),
+    };
+  }
+
+  /** Every point in one row, tagged with the metric name it is filed under. */
+  private toNamedMetrics(row: InstanceReportRow): NamedMetric[] {
+    // `name` is dropped from the metric: it becomes the key the point is filed under.
+    return row.dataPoints.map(({ name, ...point }) => ({
+      name,
+      metric: { ...point, batchId: row.batchId, receivedAt: row.receivedAt },
+    }));
+  }
+
+  /**
+   * Nothing is folded or deduplicated here, only filed under its name.
+   */
+  private byName(points: NamedMetric[]): Record<string, ReportedMetric[]> {
+    const grouped: Record<string, ReportedMetric[]> = Object.create(null);
+
+    for (const { name, metric } of points) {
+      if (grouped[name] === undefined) {
+        grouped[name] = [];
+      }
+      grouped[name].push(metric);
+    }
+
+    return grouped;
   }
 }
