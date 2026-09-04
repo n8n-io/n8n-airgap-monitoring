@@ -9,7 +9,7 @@ customer-hosted instance can aggregate usage numbers for many n8n instances.
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `N8N_MONITORING_WRITE_TOKEN` | yes | — | Bearer token that reporting n8n instances must present on `POST /api/v1/instance-reports`. The service refuses to start without it. |
-| `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/instance-reports`. The service refuses to start without it. |
+| `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/report`. The service refuses to start without it. |
 | `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 
 ## Reporting usage
@@ -76,7 +76,7 @@ A customer downloads a JSON report of everything the service has recorded and
 shares it with n8n:
 
 ```http
-GET /api/v1/instance-reports
+GET /api/v1/report
 Authorization: Bearer <N8N_MONITORING_READ_TOKEN>
 ```
 

@@ -50,11 +50,10 @@ const successResponseSchema = {
 };
 
 /**
- * Downloads the full usage report as JSON, for a customer to hand to n8n. Guarded by the
- * read token. The body is a faithful projection of the event store — folding and billing
- * math happen on the receiving side, not here.
+ * Downloads the full usage report as JSON. This is the billing export — its own resource,
+ * and is guarded by the read token. 
  */
-const getInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> => {
+const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
   await fastify.register(bearerAuth, {
     keys: new Set([fastify.config.readToken]),
   });
@@ -82,4 +81,4 @@ const getInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> => 
   );
 };
 
-export default getInstanceReport;
+export default getReport;

@@ -2,7 +2,7 @@ import { expect, test, vi } from "vitest";
 import type { Metric, UsageReport } from "../../../instance-report/instance-report.service";
 import { build } from "../../../testing/build-app";
 
-const URL = "/api/v1/instance-reports";
+const URL = "/api/v1/report";
 const READ = { authorization: "Bearer test-read-token" };
 
 type App = Awaited<ReturnType<typeof build>>;
