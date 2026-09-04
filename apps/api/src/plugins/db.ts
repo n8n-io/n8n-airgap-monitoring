@@ -17,6 +17,12 @@ const SCHEMA = `
 
   CREATE UNIQUE INDEX IF NOT EXISTS idx_instance_reports_batch
     ON instance_reports (instance_id, batch_id);
+
+  -- The report streams one instance at a time, so it runs a keyed lookup per
+  -- instance rather than one scan. Without this index each of those lookups
+  -- scans the whole table.
+  CREATE INDEX IF NOT EXISTS idx_instance_reports_instance_received
+    ON instance_reports (instance_id, received_at, id);
 `;
 
 /**

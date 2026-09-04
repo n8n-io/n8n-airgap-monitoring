@@ -104,13 +104,25 @@ export interface InstanceReportEntry {
   dataPoints: Record<string, ReportedMetric[]>;
 }
 
-/** The full downloadable usage report, wrapped so error and success share a top-level object. */
+/**
+ * The full downloadable usage report. Describes the wire format; nothing builds one
+ * in a single piece, because holding every instance in memory at once is what
+ * {@link InstanceReportService.reportStream} exists to avoid.
+ */
 export interface UsageReport {
   data: {
     /** When this report was generated, so a downloaded file is self-dating. */
     generatedAt: string;
     instances: InstanceReportEntry[];
   };
+}
+
+/** The report as a header plus a lazy sequence, so a caller can write it out as it is read. */
+export interface ReportStream {
+  /** When this report was generated, so a downloaded file is self-dating. */
+  generatedAt: string;
+  /** One entry per instance, produced on demand. Iterating it runs the queries. */
+  entries: Generator<InstanceReportEntry>;
 }
 
 export class InstanceReportService {
@@ -125,20 +137,36 @@ export class InstanceReportService {
     return { id };
   }
 
-  generateReport(): UsageReport {
-    const byInstance = Map.groupBy(this.repository.findAll(), (row) => row.instanceId);
-
+  /**
+   * The report, read one instance at a time.
+   *
+   * A fleet reports for years, so the finished document runs to hundreds of megabytes.
+   * Building it in one piece costs that much memory and blocks the event loop for as
+   * long as it takes, which stalls the instances trying to report meanwhile. Yielding
+   * per instance keeps only one instance's history alive at a time and lets the caller
+   * hand each entry to the socket before asking for the next.
+   */
+  reportStream(): ReportStream {
     return {
-      data: {
-        generatedAt: new Date().toISOString(),
-        instances: [...byInstance.values()].map((rows) => this.toEntry(rows)),
-      },
+      generatedAt: new Date().toISOString(),
+      entries: this.entries(),
     };
   }
 
+  private *entries(): Generator<InstanceReportEntry> {
+    // Instances are read one at a time rather than under a single snapshot: the table
+    // only grows, so a report arriving mid-download can add to the export but never
+    // change what has already been written, and every point names the batch and moment
+    // it arrived in anyway.
+    for (const instanceId of this.repository.findInstanceIds()) {
+      yield this.toEntry(this.repository.findByInstance(instanceId));
+    }
+  }
+
   /**
-   * Rows belonging to one instance, oldest-first (repository order) and never empty,
-   * so the first row is its earliest and the last one carries its latest state.
+   * Rows belonging to one instance, oldest-first (repository order), so the first row is
+   * its earliest and the last one carries its latest state. Never empty: an instance only
+   * appears in `findInstanceIds` because it has rows, and rows are never deleted.
    */
   private toEntry(rows: InstanceReportRow[]): InstanceReportEntry {
     const first = rows[0];

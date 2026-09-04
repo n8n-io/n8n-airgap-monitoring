@@ -88,6 +88,24 @@ test("returns it as a named, uncacheable JSON download", async () => {
   expect(res.headers["content-disposition"]).not.toContain(":");
 });
 
+// The report is written out as it is read, so its length is unknown when the headers go.
+test("streams the report rather than sending it as one measured body", async () => {
+  const app = await build();
+
+  insertRow(app, {
+    instanceId: "instance-1",
+    batchId: "b1",
+    dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 5 }],
+    receivedAt: "2026-03-25T02:00:00.000Z",
+  });
+
+  const res = await app.inject({ method: "GET", url: URL, headers: READ });
+
+  expect(res.headers["transfer-encoding"]).toBe("chunked");
+  expect(res.headers["content-length"]).toBeUndefined();
+  expect(res.json<UsageReport>().data.instances).toHaveLength(1);
+});
+
 /** Writes a raw `data` column, so a test can store a payload the write endpoint would reject. */
 function insertRawData(app: App, instanceId: string, data: string): void {
   app.db

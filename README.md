@@ -108,8 +108,23 @@ Its shape is:
 
 `dataPoints` here is a map keyed by metric name — note this differs from the
 same field on the ingest payload, which is a flat array. Each key holds every
-value that instance reported for that metric, oldest-first, tagged with the
-`batchId` and `receivedAt` of the report that carried it.
+value that instance reported for that metric, in the order the collector
+received them, tagged with the `batchId` and `receivedAt` of the report that
+carried it. That is arrival order, not `date` order: a report may carry several
+days at once when an instance catches up after failing to reach the collector.
+
+The response is streamed one instance at a time and sent with
+`Transfer-Encoding: chunked`, so it has no `Content-Length` and a download shows
+no percentage. A whole fleet's history runs to hundreds of megabytes; streaming
+keeps the collector's memory flat and lets it keep accepting reports while the
+download runs. Instances are read one at a time as the file is written, so a
+report arriving mid-download may or may not appear depending on when it lands;
+every point names the `batchId` and `receivedAt` it came with, so a receiver can
+always tell.
+
+One consequence: a read that fails partway cannot change a response already on
+the wire, so a failed download arrives truncated rather than as an error status.
+The file will not parse as JSON, which is the signal to retry.
 
 ## Available Scripts
 

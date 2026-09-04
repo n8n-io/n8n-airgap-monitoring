@@ -70,7 +70,8 @@ export class DuplicateBatchError extends Error {
  */
 export class InstanceReportRepository {
   readonly #insertEvent: Database.Statement;
-  readonly #findAll: Database.Statement<[], StoredRow>;
+  readonly #findInstanceIds: Database.Statement<[], { instance_id: string }>;
+  readonly #findByInstance: Database.Statement<[string], StoredRow>;
 
   constructor(db: Database.Database) {
     // Prepared once per process: the daily report burst reuses the same plan.
@@ -79,10 +80,17 @@ export class InstanceReportRepository {
        VALUES (?, ?, ?, ?, ?, ?)`,
     );
 
-    this.#findAll = db.prepare<[], StoredRow>(
+    this.#findInstanceIds = db.prepare<[], { instance_id: string }>(
+      `SELECT DISTINCT instance_id
+       FROM instance_reports
+       ORDER BY instance_id ASC`,
+    );
+
+    this.#findByInstance = db.prepare<[string], StoredRow>(
       `SELECT instance_id, batch_id, label, n8n_version, data, received_at
        FROM instance_reports
-       ORDER BY instance_id ASC, received_at ASC, id ASC`,
+       WHERE instance_id = ?
+       ORDER BY received_at ASC, id ASC`,
     );
   }
 
@@ -112,8 +120,13 @@ export class InstanceReportRepository {
     }
   }
 
-  /** Every event ever received, grouped per instance and oldest-first within each. */
-  findAll(): InstanceReportRow[] {
-    return this.#findAll.all().map(toInstanceReportRow);
+  /** Every instance that has ever reported, once each, in a stable order. */
+  findInstanceIds(): string[] {
+    return this.#findInstanceIds.all().map((row) => row.instance_id);
+  }
+
+  /** One instance's events, oldest-first. */
+  findByInstance(instanceId: string): InstanceReportRow[] {
+    return this.#findByInstance.all(instanceId).map(toInstanceReportRow);
   }
 }

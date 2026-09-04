@@ -1,6 +1,11 @@
 import { expect, test, vi } from "vitest";
 import type { InstanceReport, InstanceReportRepository, InstanceReportRow } from "./instance-report.repository";
-import { type CreateInstanceReport, InstanceReportService, type Metric } from "./instance-report.service";
+import {
+  type CreateInstanceReport,
+  InstanceReportService,
+  type Metric,
+  type UsageReport,
+} from "./instance-report.service";
 
 const report: CreateInstanceReport = {
   instanceId: "instance-1",
@@ -56,9 +61,24 @@ test("returns the id assigned by the repository", async () => {
   expect(service.recordReport(report)).toEqual({ id: 2 });
 });
 
-/** A repository stub whose findAll returns pre-built rows in the order given. */
+/**
+ * A repository stub serving pre-built rows through the per-instance read API, grouped
+ * the way the real ORDER BY would group them.
+ */
 function fakeReportRepository(rows: InstanceReportRow[]): InstanceReportService {
-  return new InstanceReportService({ findAll: () => rows } as unknown as InstanceReportRepository);
+  const byInstance = Map.groupBy(rows, (row) => row.instanceId);
+
+  return new InstanceReportService({
+    findInstanceIds: () => [...byInstance.keys()],
+    findByInstance: (instanceId: string) => byInstance.get(instanceId) ?? [],
+  } as unknown as InstanceReportRepository);
+}
+
+/** Collects the stream into the document it describes, so shape assertions read as one object. */
+function reportFrom(rows: InstanceReportRow[]): UsageReport {
+  const { generatedAt, entries } = fakeReportRepository(rows).reportStream();
+
+  return { data: { generatedAt, instances: [...entries] } };
 }
 
 function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
@@ -73,22 +93,20 @@ function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
   };
 }
 
-test("generateReport takes firstSeen from the earliest row, and label and lastReportAt from the latest", () => {
-  const report = fakeReportRepository([
+test("the report takes firstSeen from the earliest row, and label and lastReportAt from the latest", () => {
+  const report = reportFrom([
     row({ batchId: "b1", label: "first", receivedAt: "2026-03-20T02:00:00.000Z" }),
     row({ batchId: "b2", label: "latest", receivedAt: "2026-03-25T02:00:00.000Z" }),
-  ]).generateReport();
+  ]);
 
   expect(report.data.instances[0].firstSeen).toBe("2026-03-20");
   expect(report.data.instances[0].label).toBe("latest");
   expect(report.data.instances[0].lastReportAt).toBe("2026-03-25T02:00:00.000Z");
 });
 
-test("generateReport files a metric named __proto__ as data instead of crashing", () => {
+test("the report files a metric named __proto__ as data instead of crashing", () => {
   const protoKey = "__proto__";
-  const report = fakeReportRepository([
-    row({ dataPoints: [{ kind: "cumulative", name: protoKey, value: 5 }] }),
-  ]).generateReport();
+  const report = reportFrom([row({ dataPoints: [{ kind: "cumulative", name: protoKey, value: 5 }] })]);
 
   expect(report.data.instances[0].dataPoints[protoKey]).toEqual([
     { kind: "cumulative", value: 5, batchId: "batch-1", receivedAt: "2026-03-25T02:00:00.000Z" },
@@ -97,15 +115,15 @@ test("generateReport files a metric named __proto__ as data instead of crashing"
 
 // Nothing validates the response on its way out any more, so the union is pinned here:
 // a daily point carries the day it covers and a cumulative one carries none.
-test("generateReport gives a daily point its date and a cumulative point none", () => {
-  const report = fakeReportRepository([
+test("the report gives a daily point its date and a cumulative point none", () => {
+  const report = reportFrom([
     row({
       dataPoints: [
         { kind: "daily", name: "perDay", value: 1, date: "2026-03-24" },
         { kind: "cumulative", name: "total", value: 2 },
       ],
     }),
-  ]).generateReport();
+  ]);
 
   expect(report.data.instances[0].dataPoints).toEqual({
     perDay: [
@@ -118,20 +136,51 @@ test("generateReport gives a daily point its date and a cumulative point none", 
 // The stored `data` column is parsed JSON, so a row written by a different version —
 // or by hand — can hold fields this code has never heard of. They stay out of the
 // export: nothing validates the response on its way out to strip them.
-test("generateReport carries only the fields it knows, whatever the stored point holds", () => {
+test("the report carries only the fields it knows, whatever the stored point holds", () => {
   const stored = [
     { kind: "cumulative", name: "total", value: 5, internalNote: "leaked", date: "2026-03-24" },
   ] as unknown as Metric[];
 
-  const report = fakeReportRepository([row({ dataPoints: stored })]).generateReport();
+  const report = reportFrom([row({ dataPoints: stored })]);
 
   expect(report.data.instances[0].dataPoints.total).toEqual([
     { kind: "cumulative", value: 5, batchId: "batch-1", receivedAt: "2026-03-25T02:00:00.000Z" },
   ]);
 });
 
-test("generateReport groups points by name and tags each with its batchId and receivedAt, without folding", () => {
-  const report = fakeReportRepository([
+test("the report separates instances into their own entries", () => {
+  const report = reportFrom([
+    row({ instanceId: "instance-1", batchId: "b1" }),
+    row({ instanceId: "instance-2", batchId: "b2" }),
+  ]);
+
+  expect(report.data.instances.map((i) => i.instanceId)).toEqual(["instance-1", "instance-2"]);
+});
+
+// Reading lazily is the point: an instance must not be touched before the caller asks
+// for it, or the whole fleet is in memory again.
+test("no instance is read until its entry is pulled from the stream", () => {
+  const read: string[] = [];
+  const service = new InstanceReportService({
+    findInstanceIds: () => ["instance-1", "instance-2"],
+    findByInstance: (instanceId: string) => {
+      read.push(instanceId);
+      return [row({ instanceId })];
+    },
+  } as unknown as InstanceReportRepository);
+
+  const { entries } = service.reportStream();
+  expect(read).toEqual([]);
+
+  entries.next();
+  expect(read).toEqual(["instance-1"]);
+
+  entries.next();
+  expect(read).toEqual(["instance-1", "instance-2"]);
+});
+
+test("the report groups points by name and tags each with its batchId and receivedAt, without folding", () => {
+  const report = reportFrom([
     row({
       batchId: "b1",
       receivedAt: "2026-03-25T02:00:00.000Z",
@@ -145,7 +194,7 @@ test("generateReport groups points by name and tags each with its batchId and re
       receivedAt: "2026-03-26T02:00:00.000Z",
       dataPoints: [{ kind: "cumulative", name: "billableExecutionTotal", value: 900110 }],
     }),
-  ]).generateReport();
+  ]);
 
   expect(report.data.instances[0].dataPoints).toEqual({
     billableExecutionPerDay: [
@@ -159,12 +208,12 @@ test("generateReport groups points by name and tags each with its batchId and re
   });
 });
 
-test("generateReport stamps the generation time", () => {
+test("the report stamps the generation time", () => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date("2026-09-03T14:30:00.000Z"));
 
   try {
-    expect(fakeReportRepository([]).generateReport()).toEqual({
+    expect(reportFrom([])).toEqual({
       data: { generatedAt: "2026-09-03T14:30:00.000Z", instances: [] },
     });
   } finally {
