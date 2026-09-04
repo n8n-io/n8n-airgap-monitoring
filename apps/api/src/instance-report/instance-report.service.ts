@@ -119,13 +119,6 @@ export class InstanceReportService {
     return { id };
   }
 
-  /**
-   * Projects the entire event store into the downloadable report. A faithful, lossless
-   * pass over the log: it groups points by metric name but never folds, dedups or picks a
-   * "latest" value. The latter matters most for cumulative metrics — with two instances
-   * sharing an instanceId, "the latest number" is meaningless, and folding would also hide
-   * DB rollbacks. Disentangling that is the receiver's job, so we hand over everything.
-   */
   generateReport(): UsageReport {
     const instances = new Map<string, InstanceReportEntry>();
 
@@ -145,8 +138,8 @@ export class InstanceReportService {
         instances.set(row.instanceId, entry);
       }
 
-      // Last-received label wins; a report that omits it clears a previously-set one. Rows are
-      // oldest-first per instance, so the last row's receivedAt is the most recent report.
+      // Last-received label wins. Rows are oldest-first per instance, so
+      // the last row's receivedAt is the most recent report.
       entry.label = row.label;
       entry.lastReportAt = row.receivedAt;
 
