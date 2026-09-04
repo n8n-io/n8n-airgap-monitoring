@@ -1,0 +1,36 @@
+apps/api/package.json
+  s_49ace5f62bf37e::t_f93c0ad3d7adda 16
+  s_49ace5f62bf37e::t_90307363206d46 12
+.github/actions/setup/action.yml
+  s_49ace5f62bf37e::t_174219cde0682d 1-20
+vitest.config.mts
+  s_49ace5f62bf37e::t_1dc50083a79386 10-14
+  s_49ace5f62bf37e::t_10d537e9a600ac 6-9,15-20
+turbo.json
+  s_49ace5f62bf37e::t_3f934216e658bf 13-15
+.github/scripts/coverage-summary.mjs
+  s_49ace5f62bf37e::t_91a416af4e9373 1-32
+.github/workflows/ci.yml
+  s_49ace5f62bf37e::t_d83b9a7a0f01dc 1-82
+package.json
+  s_49ace5f62bf37e::t_b15f95a145366f 11,14
+  s_49ace5f62bf37e::t_7a24c2adec520f 18
+pnpm-lock.yaml
+  ai_agent 11-13,19,65,69-89,330-333,337-339,611-619,675-677,862-864,889-900,905-907,998-1004,1410-1424,1578-1579,1582-1586,1734-1747,1810-1815,2028-2029,2048-2060,2063-2064,2135-2144,2445,2469
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "54a21983cb04f9562c14dccb693ee43dd74fa844",
+  "prompts": {},
+  "sessions": {
+    "s_49ace5f62bf37e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "308618e4-4da5-4c0e-bde7-9de0a31741e8",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
