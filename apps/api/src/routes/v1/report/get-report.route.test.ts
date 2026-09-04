@@ -88,6 +88,53 @@ test("returns it as a named, uncacheable JSON download", async () => {
   expect(res.headers["content-disposition"]).not.toContain(":");
 });
 
+/** Writes a raw `data` column, so a test can store a payload the write endpoint would reject. */
+function insertRawData(app: App, instanceId: string, data: string): void {
+  app.db
+    .prepare(
+      `INSERT INTO instance_reports (instance_id, batch_id, label, n8n_version, data, received_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    )
+    .run(instanceId, "raw-batch", null, "1.99.0", data, "2026-03-25T02:00:00.000Z");
+}
+
+// Serializing against a response schema coerced this to the number 42. Ingest refuses to
+// coerce for the same reason (`coerceTypes: false` in app.ts): a wrong value must stay
+// visibly wrong rather than be quietly repaired into a plausible billing figure.
+test("exports a stored value as it was recorded, without coercing its type", async () => {
+  const app = await build();
+
+  insertRawData(app, "odd", '[{"kind":"cumulative","name":"total","value":"42"}]');
+
+  const res = await app.inject({ method: "GET", url: URL, headers: READ });
+
+  expect(res.json<UsageReport>().data.instances[0].dataPoints.total[0].value).toBe("42");
+});
+
+// A daily point with no date is rejected at ingest today, but reachable through a restore,
+// a hand-edited row, or a later change to the write schema. It is exported as best it can
+// be rather than failing the download, which under a streamed response would truncate the
+// file for every other instance too.
+test("exports a stored point that is missing a field rather than failing the download", async () => {
+  const app = await build();
+
+  insertRawData(app, "broken", '[{"kind":"daily","name":"perDay","value":1}]');
+  insertRow(app, {
+    instanceId: "healthy",
+    batchId: "b2",
+    dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 5 }],
+    receivedAt: "2026-03-25T02:00:00.000Z",
+  });
+
+  const res = await app.inject({ method: "GET", url: URL, headers: READ });
+
+  expect(res.statusCode).toBe(200);
+  const { instances } = res.json<UsageReport>().data;
+  expect(instances.map((i) => i.instanceId)).toEqual(["broken", "healthy"]);
+  expect(instances[0].dataPoints.perDay[0]).not.toHaveProperty("date");
+  expect(instances[1].dataPoints.activeWorkflows).toHaveLength(1);
+});
+
 test("reports each instance's id, first-seen day and full metric history", async () => {
   const app = await build();
 

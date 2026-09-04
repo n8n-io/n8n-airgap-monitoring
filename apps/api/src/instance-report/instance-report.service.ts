@@ -155,12 +155,22 @@ export class InstanceReportService {
     };
   }
 
-  /** Every point in one row, tagged with the metric name it is filed under. */
+  /**
+   * Every point in one row, tagged with the metric name it is filed under.
+   *
+   * Each field is named rather than spread from the stored point. The `data` column is
+   * parsed JSON, so its runtime contents are only as trustworthy as whatever wrote the
+   * row; spreading would carry anything it happens to hold into the export, which no
+   * longer validates its own output. Listing the fields keeps the response exactly
+   * {@link ReportedMetric}, and `name` is dropped because it becomes the key.
+   */
   private toNamedMetrics(row: InstanceReportRow): NamedMetric[] {
-    // `name` is dropped from the metric: it becomes the key the point is filed under.
-    return row.dataPoints.map(({ name, ...point }) => ({
-      name,
-      metric: { ...point, batchId: row.batchId, receivedAt: row.receivedAt },
+    return row.dataPoints.map((point) => ({
+      name: point.name,
+      metric:
+        point.kind === "daily"
+          ? { kind: "daily", date: point.date, value: point.value, batchId: row.batchId, receivedAt: row.receivedAt }
+          : { kind: "cumulative", value: point.value, batchId: row.batchId, receivedAt: row.receivedAt },
     }));
   }
 

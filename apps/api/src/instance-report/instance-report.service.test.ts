@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest";
 import type { InstanceReport, InstanceReportRepository, InstanceReportRow } from "./instance-report.repository";
-import { type CreateInstanceReport, InstanceReportService } from "./instance-report.service";
+import { type CreateInstanceReport, InstanceReportService, type Metric } from "./instance-report.service";
 
 const report: CreateInstanceReport = {
   instanceId: "instance-1",
@@ -91,6 +91,41 @@ test("generateReport files a metric named __proto__ as data instead of crashing"
   ]).generateReport();
 
   expect(report.data.instances[0].dataPoints[protoKey]).toEqual([
+    { kind: "cumulative", value: 5, batchId: "batch-1", receivedAt: "2026-03-25T02:00:00.000Z" },
+  ]);
+});
+
+// Nothing validates the response on its way out any more, so the union is pinned here:
+// a daily point carries the day it covers and a cumulative one carries none.
+test("generateReport gives a daily point its date and a cumulative point none", () => {
+  const report = fakeReportRepository([
+    row({
+      dataPoints: [
+        { kind: "daily", name: "perDay", value: 1, date: "2026-03-24" },
+        { kind: "cumulative", name: "total", value: 2 },
+      ],
+    }),
+  ]).generateReport();
+
+  expect(report.data.instances[0].dataPoints).toEqual({
+    perDay: [
+      { kind: "daily", date: "2026-03-24", value: 1, batchId: "batch-1", receivedAt: "2026-03-25T02:00:00.000Z" },
+    ],
+    total: [{ kind: "cumulative", value: 2, batchId: "batch-1", receivedAt: "2026-03-25T02:00:00.000Z" }],
+  });
+});
+
+// The stored `data` column is parsed JSON, so a row written by a different version —
+// or by hand — can hold fields this code has never heard of. They stay out of the
+// export: nothing validates the response on its way out to strip them.
+test("generateReport carries only the fields it knows, whatever the stored point holds", () => {
+  const stored = [
+    { kind: "cumulative", name: "total", value: 5, internalNote: "leaked", date: "2026-03-24" },
+  ] as unknown as Metric[];
+
+  const report = fakeReportRepository([row({ dataPoints: stored })]).generateReport();
+
+  expect(report.data.instances[0].dataPoints.total).toEqual([
     { kind: "cumulative", value: 5, batchId: "batch-1", receivedAt: "2026-03-25T02:00:00.000Z" },
   ]);
 });

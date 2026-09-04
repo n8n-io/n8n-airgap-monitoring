@@ -1,84 +1,35 @@
 import bearerAuth from "@fastify/bearer-auth";
 import type { FastifyPluginAsync } from "fastify";
 
-const dataPointSchema = {
-  type: "object",
-  required: ["kind", "value", "batchId", "receivedAt"],
-  additionalProperties: false,
-  properties: {
-    kind: { enum: ["daily", "cumulative"] },
-    value: { type: "number" },
-    batchId: { type: "string", minLength: 1 },
-    receivedAt: { type: "string" },
-    date: { type: "string" },
-  },
-};
-
-const instanceReportSchema = {
-  type: "object",
-  required: ["instanceId", "label", "firstSeen", "lastReportAt", "dataPoints"],
-  additionalProperties: false,
-  properties: {
-    instanceId: { type: "string" },
-    label: { type: ["string", "null"] },
-    firstSeen: { type: "string" },
-    lastReportAt: { type: "string" },
-    // Metric names are chosen by the reporting instance, so the keys are open; only
-    // the shape of each name's value array is pinned down.
-    dataPoints: {
-      type: "object",
-      additionalProperties: { type: "array", items: dataPointSchema },
-    },
-  },
-};
-
-const successResponseSchema = {
-  type: "object",
-  required: ["data"],
-  additionalProperties: false,
-  properties: {
-    data: {
-      type: "object",
-      required: ["generatedAt", "instances"],
-      additionalProperties: false,
-      properties: {
-        generatedAt: { type: "string" },
-        instances: { type: "array", items: instanceReportSchema },
-      },
-    },
-  },
-};
-
 /**
  * Downloads the full usage report as JSON. This is the billing export — its own resource,
  * and is guarded by the read token.
+ *
+ * Deliberately declares no response schema. Serializing against one rewrites the payload
+ * rather than merely checking it — fast-json-stringify coerces, so a value stored as the
+ * string "42" left here as the number 42. Ingest already refuses that trade (`coerceTypes:
+ * false`, see app.ts) because a silently corrected number is worse than a rejected report,
+ * and an export that quietly repairs its own billing figures on the way out undoes it. The
+ * shape is fixed by {@link UsageReport} and pinned by tests instead.
  */
 const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
   await fastify.register(bearerAuth, {
     keys: new Set([fastify.config.readToken]),
   });
 
-  fastify.get(
-    "/",
-    {
-      schema: {
-        response: { 200: successResponseSchema },
-      },
-    },
-    async (_request, reply) => {
-      const report = fastify.instanceReportService.generateReport();
+  fastify.get("/", async (_request, reply) => {
+    const report = fastify.instanceReportService.generateReport();
 
-      // Colons and dots are unsafe in filenames on some OSes, so flatten the timestamp.
-      const stamp = report.data.generatedAt.replace(/[:.]/g, "-");
+    // Colons and dots are unsafe in filenames on some OSes, so flatten the timestamp.
+    const stamp = report.data.generatedAt.replace(/[:.]/g, "-");
 
-      reply
-        .header("cache-control", "no-store")
-        .header("content-disposition", `attachment; filename="n8n-instance-report-${stamp}.json"`)
-        .type("application/json");
+    reply
+      .header("cache-control", "no-store")
+      .header("content-disposition", `attachment; filename="n8n-instance-report-${stamp}.json"`)
+      .type("application/json");
 
-      return report;
-    },
-  );
+    return report;
+  });
 };
 
 export default getReport;
