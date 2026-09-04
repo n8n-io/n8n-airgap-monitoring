@@ -16,7 +16,7 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "passThroughEnv": ["N8N_MONITORING_WRITE_TOKEN", "N8N_DB_PATH"]
+      "passThroughEnv": ["N8N_MONITORING_WRITE_TOKEN", "N8N_MONITORING_READ_TOKEN", "N8N_DB_PATH"]
     },
     "test": {
       "dependsOn": ["typecheck"],

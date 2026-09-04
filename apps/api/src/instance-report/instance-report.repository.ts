@@ -11,6 +11,37 @@ export interface InstanceReport {
   receivedAt: string;
 }
 
+/** One stored event, read back with its JSON `data` column already parsed. */
+export interface InstanceReportRow {
+  instanceId: string;
+  batchId: string;
+  label: string | null;
+  n8nVersion: string;
+  dataPoints: Metric[];
+  receivedAt: string;
+}
+
+/** The raw column shape a row comes back in, before the JSON column is parsed. */
+interface StoredRow {
+  instance_id: string;
+  batch_id: string;
+  label: string | null;
+  n8n_version: string;
+  data: string;
+  received_at: string;
+}
+
+function toInstanceReportRow(row: StoredRow): InstanceReportRow {
+  return {
+    instanceId: row.instance_id,
+    batchId: row.batch_id,
+    label: row.label,
+    n8nVersion: row.n8n_version,
+    dataPoints: JSON.parse(row.data) as Metric[],
+    receivedAt: row.received_at,
+  };
+}
+
 /**
  * `(instance_id, batch_id)` is the only unique index on the table, so this code
  * identifies the collision on its own.
@@ -39,12 +70,19 @@ export class DuplicateBatchError extends Error {
  */
 export class InstanceReportRepository {
   readonly #insertEvent: Database.Statement;
+  readonly #findAll: Database.Statement<[], StoredRow>;
 
   constructor(db: Database.Database) {
     // Prepared once per process: the daily report burst reuses the same plan.
     this.#insertEvent = db.prepare(
       `INSERT INTO instance_reports (instance_id, batch_id, label, n8n_version, data, received_at)
        VALUES (?, ?, ?, ?, ?, ?)`,
+    );
+
+    this.#findAll = db.prepare<[], StoredRow>(
+      `SELECT instance_id, batch_id, label, n8n_version, data, received_at
+       FROM instance_reports
+       ORDER BY instance_id ASC, received_at ASC, id ASC`,
     );
   }
 
@@ -72,5 +110,10 @@ export class InstanceReportRepository {
 
       throw error;
     }
+  }
+
+  /** Every event ever received, grouped per instance and oldest-first within each. */
+  findAll(): InstanceReportRow[] {
+    return this.#findAll.all().map(toInstanceReportRow);
   }
 }

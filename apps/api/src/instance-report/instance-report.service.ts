@@ -54,6 +54,59 @@ export interface CreateInstanceReport {
   dataPoints: Metric[];
 }
 
+/**
+ * A reported value as it appears in the report: like {@link Metric} but carrying the
+ * envelope's provenance and dropping `name` (that is the key it is filed under).
+ */
+interface ReportedMetricBase {
+  value: number;
+  /** batchId of the report that carried this point, so the receiver can join and dedup. */
+  batchId: string;
+  /** When the collector received the report this point arrived in. */
+  receivedAt: string;
+}
+
+/** A day-scoped value in the report — {@link DailyMetric} plus provenance. */
+interface ReportedDailyMetric extends ReportedMetricBase {
+  kind: "daily";
+  date: string;
+}
+
+/** A running total in the report — {@link CumulativeMetric} plus provenance. */
+interface ReportedCumulativeMetric extends ReportedMetricBase {
+  kind: "cumulative";
+}
+
+/** Kept as a discriminated union so a consumer can tell a day-scoped value from a running total. */
+export type ReportedMetric = ReportedDailyMetric | ReportedCumulativeMetric;
+
+/** The report's view of one instance: identity, when we first heard from it, and its full metric history. */
+export interface InstanceReportEntry {
+  instanceId: string;
+  /** Last-received display label, or null. Untrusted, customer-chosen free text. */
+  label: string | null;
+  /** Timestamp the collector received the earliest event we stored for this instance. */
+  firstSeen: string;
+  /** Timestamp the collector received the most recent report from this instance. */
+  lastReportAt: string;
+  /**
+   * Every value the instance ever reported, keyed by metric name. Nothing is folded or
+   * deduplicated: this collector is a dumb pipe, so reconciliation (summing daily values,
+   * detecting DB rollbacks or duplicated instances from conflicting values) is the
+   * receiver's job — see the ADRs. One name can carry both kinds and repeated points.
+   */
+  dataPoints: Record<string, ReportedMetric[]>;
+}
+
+/** The full downloadable usage report, wrapped so error and success share a top-level object. */
+export interface UsageReport {
+  data: {
+    /** When this report was generated, so a downloaded file is self-dating. */
+    generatedAt: string;
+    instances: InstanceReportEntry[];
+  };
+}
+
 export class InstanceReportService {
   constructor(private readonly repository: InstanceReportRepository) {}
 
@@ -64,5 +117,48 @@ export class InstanceReportService {
     });
 
     return { id };
+  }
+
+  generateReport(): UsageReport {
+    const instances = new Map<string, InstanceReportEntry>();
+
+    // Rows arrive grouped per instance and oldest-first within each (repository order),
+    // so the first row seen for an instance is its earliest, and the last wins for label.
+    for (const row of this.repository.findAll()) {
+      let entry = instances.get(row.instanceId);
+      if (!entry) {
+        entry = {
+          instanceId: row.instanceId,
+          label: row.label,
+          firstSeen: row.receivedAt,
+          lastReportAt: row.receivedAt,
+          dataPoints: Object.create(null) as Record<string, ReportedMetric[]>,
+        };
+        instances.set(row.instanceId, entry);
+      }
+
+      // Last-received label wins. Rows are oldest-first per instance, so
+      // the last row's receivedAt is the most recent report.
+      entry.label = row.label;
+      entry.lastReportAt = row.receivedAt;
+
+      for (const point of row.dataPoints) {
+        const reported: ReportedMetric =
+          point.kind === "daily"
+            ? { kind: "daily", date: point.date, value: point.value, batchId: row.batchId, receivedAt: row.receivedAt }
+            : { kind: "cumulative", value: point.value, batchId: row.batchId, receivedAt: row.receivedAt };
+
+        const series = entry.dataPoints[point.name] ?? [];
+        series.push(reported);
+        entry.dataPoints[point.name] = series;
+      }
+    }
+
+    return {
+      data: {
+        generatedAt: new Date().toISOString(),
+        instances: [...instances.values()],
+      },
+    };
   }
 }

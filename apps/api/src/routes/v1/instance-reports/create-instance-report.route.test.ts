@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { build } from "../../../testing/build-app";
 
 const URL = "/api/v1/instance-reports";
-const AUTHORIZED = { authorization: "Bearer test-token" };
+const AUTHORIZED = { authorization: "Bearer test-write-token" };
 
 const validReport = {
   instanceId: "instance-1",
