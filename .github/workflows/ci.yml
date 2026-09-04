@@ -64,4 +64,6 @@ jobs:
         with:
           token: ${{ env.CODECOV_TOKEN }}
           files: coverage/lcov.info
-          fail_ci_if_error: true
+          # A Codecov outage/rate-limit must not redden an otherwise-green run;
+          # the coverage upload is reporting, not a gate.
+          fail_ci_if_error: false
