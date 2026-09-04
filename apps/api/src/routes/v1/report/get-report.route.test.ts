@@ -139,7 +139,7 @@ test("reports each instance's id, first-seen day and full metric history", async
   });
 });
 
-test("keeps both values when a day is reported twice under different batchIds, instead of folding", async () => {
+test("keeps conflicting cumulative values from two batchIds on one instance, instead of folding to latest", async () => {
   const app = await build();
 
   insertRow(app, {

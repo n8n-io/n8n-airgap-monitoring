@@ -51,7 +51,7 @@ const successResponseSchema = {
 
 /**
  * Downloads the full usage report as JSON. This is the billing export — its own resource,
- * and is guarded by the read token. 
+ * and is guarded by the read token.
  */
 const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
   await fastify.register(bearerAuth, {
