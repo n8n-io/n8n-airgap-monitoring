@@ -120,7 +120,7 @@ test("reports each instance's id, first-seen day and full metric history", async
       instances: [
         {
           instanceId: "instance-1",
-          firstSeen: "2026-03-25",
+          firstSeen: "2026-03-25T02:00:00.000Z",
           lastReportAt: "2026-03-26T02:00:00.000Z",
           label: "prod-renamed",
           dataPoints: {

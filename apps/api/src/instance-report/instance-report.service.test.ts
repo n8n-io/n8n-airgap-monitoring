@@ -79,7 +79,7 @@ test("generateReport takes firstSeen from the earliest row, and label and lastRe
     row({ batchId: "b2", label: "latest", receivedAt: "2026-03-25T02:00:00.000Z" }),
   ]).generateReport();
 
-  expect(report.data.instances[0].firstSeen).toBe("2026-03-20");
+  expect(report.data.instances[0].firstSeen).toBe("2026-03-20T02:00:00.000Z");
   expect(report.data.instances[0].label).toBe("latest");
   expect(report.data.instances[0].lastReportAt).toBe("2026-03-25T02:00:00.000Z");
 });

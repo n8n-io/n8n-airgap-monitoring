@@ -85,7 +85,7 @@ export interface InstanceReportEntry {
   instanceId: string;
   /** Last-received display label, or null. Untrusted, customer-chosen free text. */
   label: string | null;
-  /** UTC calendar day (YYYY-MM-DD) of the earliest event we stored for this instance. */
+  /** Timestamp the collector received the earliest event we stored for this instance. */
   firstSeen: string;
   /** Timestamp the collector received the most recent report from this instance. */
   lastReportAt: string;
@@ -130,8 +130,7 @@ export class InstanceReportService {
         entry = {
           instanceId: row.instanceId,
           label: row.label,
-          // Slicing the ISO timestamp yields its UTC calendar day.
-          firstSeen: row.receivedAt.slice(0, 10),
+          firstSeen: row.receivedAt,
           lastReportAt: row.receivedAt,
           dataPoints: Object.create(null) as Record<string, ReportedMetric[]>,
         };

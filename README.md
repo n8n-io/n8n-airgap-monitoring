@@ -90,7 +90,7 @@ Its shape is:
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
         "label": "prod",
-        "firstSeen": "2026-03-20",
+        "firstSeen": "2026-03-20T02:00:00.000Z",
         "lastReportAt": "2026-03-26T02:00:00.000Z",
         "dataPoints": {
           "prodExecutions": [
