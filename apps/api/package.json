@@ -9,10 +9,11 @@
     "build": "tsc -p tsconfig.build.json",
     "format": "biome format --no-errors-on-unmatched --write src",
     "lint": "biome check --no-errors-on-unmatched --write --unsafe src",
+    "lint:check": "biome check --no-errors-on-unmatched src",
     "lint:staged": "biome check --no-errors-on-unmatched --write --unsafe --staged src",
     "watch": "tsc -w -p tsconfig.build.json",
     "dev": "pnpm run build && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"pnpm:watch\" \"pnpm:dev:start\"",
-  "dev:start": "fastify start --ignore-watch=\"data .ts$\" -w -l info -P -p 3456 dist/app.js"
+    "dev:start": "fastify start --ignore-watch=\"data .ts$\" -w -l info -P -p 3456 dist/app.js"
   },
   "dependencies": {
     "@fastify/ajv-compiler": "4.0.6",
