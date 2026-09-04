@@ -1,0 +1,41 @@
+apps/api/src/plugins/db.ts
+  s_3d130e472bd911::t_0b11672b6058b0 20-25
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_3d130e472bd911::t_0b11672b6058b0 3-8,64-67,69-81,96-97,100,107,109,118-119,126,139,144,151-183,197,211,216
+README.md
+  s_3d130e472bd911::t_0b11672b6058b0 111-127
+adr/2026-09-04-stream-the-usage-report.md
+  s_3d130e472bd911::t_5e33e568579158 50
+  s_3d130e472bd911::t_29bd7de7ad0bc6 33-34,36-37,39-41
+  s_3d130e472bd911::t_5d1240f9568558 27
+  s_3d130e472bd911::t_da9485c4894292 1-26,28-32,35,38,42-49,51-63
+apps/api/src/routes/v1/report/get-report.route.ts
+  s_3d130e472bd911::t_d310884be6605e 11-15
+  s_3d130e472bd911::t_0b11672b6058b0 1-2,5-10,16-33,44-45,48-57,62,65
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  s_3d130e472bd911::t_72c40e4fbd48e4 91-108
+adr/2026-08-26-sqlite-with-synchronous-writes.md
+  s_3d130e472bd911::t_0b11672b6058b0 66
+apps/api/src/instance-report/instance-report.service.ts
+  s_3d130e472bd911::t_0b11672b6058b0 107-111,120-127,140-149,151-152,156-165,167-169
+apps/api/src/instance-report/instance-report.repository.test.ts
+  s_3d130e472bd911::t_0b11672b6058b0 24,30,42,50-51,54,62-80
+apps/api/src/instance-report/instance-report.repository.ts
+  s_3d130e472bd911::t_0b11672b6058b0 73-74,83-89,92-93,123-130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "a1760d37f03053021f3bcbc40b891ce2b35794ab",
+  "prompts": {},
+  "sessions": {
+    "s_3d130e472bd911": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "11ea8c4f-ad43-4dbe-a1a5-b2c1bd622dd7",
+        "model": "claude-opus-5"
+      },
+      "human_author": null
+    }
+  }
+}
