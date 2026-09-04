@@ -1,0 +1,69 @@
+name: 'CI'
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Cancel superseded runs on the same branch/PR to save runner minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Lint, typecheck, build & test
+    runs-on: ubuntu-latest
+    env:
+      # Exposed as an env var so the Codecov step can be skipped by a simple
+      # `env.CODECOV_TOKEN != ''` check until the secret is configured.
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Reads the pnpm version from the root package.json "packageManager" field.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      # Node version comes from .nvmrc so CI and local dev stay in lockstep.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Checks run fail-fast in cheapest-first order. The `text` coverage
+      # reporter prints the coverage table straight into this job's log.
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run unit tests with coverage
+        run: pnpm test:coverage
+
+      # Runs only when everything above (including the tests) passed and once
+      # CODECOV_TOKEN is added to the repo secrets — until then it is skipped and
+      # CI stays green. `success()` is implicit here, but spelled out so the
+      # "skip on test failure" intent is unmistakable. Wired up the same way as
+      # the main n8n repo, ready to light up once the token is available.
+      - name: Upload coverage to Codecov
+        if: ${{ success() && env.CODECOV_TOKEN != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ env.CODECOV_TOKEN }}
+          files: coverage/lcov.info
+          # A Codecov outage/rate-limit must not redden an otherwise-green run;
+          # the coverage upload is reporting, not a gate.
+          fail_ci_if_error: false
