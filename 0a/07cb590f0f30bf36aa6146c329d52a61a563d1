@@ -1,0 +1,19 @@
+apps/api/src/instance-report/instance-report.repository.ts
+  s_013a5a9f312c73::t_ee831a2668ba7d 90-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "0a07cb590f0f30bf36aa6146c329d52a61a563d1",
+  "prompts": {},
+  "sessions": {
+    "s_013a5a9f312c73": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1720f4fd-9514-4920-8d45-192f8a635d0c",
+        "model": "unknown"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
