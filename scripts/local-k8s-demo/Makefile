@@ -21,7 +21,7 @@ OWNER_PASSWORD   := hello1234
 
 # Cluster DNS name of the ingest endpoint — the whole point of the demo is that
 # this traffic never leaves the cluster.
-INGEST_URL := http://airgap-monitoring.$(MONITORING_NS).svc.cluster.local:3000/api/v1/instance-reports
+INGEST_BASE_URL := http://airgap-monitoring.$(MONITORING_NS).svc.cluster.local:3000
 
 # Every minute instead of the 60-minute default, so a report shows up while
 # someone is still watching.
@@ -73,7 +73,7 @@ up: cluster images install ## Full setup: cluster + images + deploy + port-forwa
 	@echo "  read token          $(READ_TOKEN)"
 	@echo ""
 	@echo "  Both instances report every $(REPORT_INTERVAL_MINUTES) min to the cluster-internal URL"
-	@echo "  $(INGEST_URL)"
+	@echo "  $(INGEST_BASE_URL)"
 	@echo "  The first report is sent one interval after an instance boots."
 	@echo "  Run 'make reports' to see what has arrived so far."
 
@@ -154,7 +154,7 @@ install-n8n: ## Deploy both n8n instances
 		fi; \
 		sed -e "s|__NAMESPACE__|$$ns|g" \
 			-e "s|__IDENTIFIER__|$$identifier|g" \
-			-e "s|__INGEST_URL__|$(INGEST_URL)|g" \
+			-e "s|__INGEST_BASE_URL__|$(INGEST_BASE_URL)|g" \
 			-e "s|__WRITE_TOKEN__|$(WRITE_TOKEN)|g" \
 			-e "s|__REPORT_INTERVAL_MINUTES__|$(REPORT_INTERVAL_MINUTES)|g" \
 			k8s/n8n-instance.template.yaml | kubectl apply -f -; \
