@@ -1,0 +1,42 @@
+apps/api/package.json
+  s_d2b70699d9f2a7::t_eb2b39b33fe19b 30
+package.json
+  s_d2b70699d9f2a7::t_6dcb8c941d05be 6
+  s_d2b70699d9f2a7::t_d35e54cd6fac98 23-24
+Dockerfile
+  s_d2b70699d9f2a7::t_1ea1907bc6ce02 22
+  s_d2b70699d9f2a7::t_bcb4038f57ffff 26
+  s_d2b70699d9f2a7::t_c64b3f05c7f9cd 13
+  h_c63dce324dfc7b 12
+  s_d2b70699d9f2a7::t_4ee0083d3a90ff 4,11
+pnpm-workspace.yaml
+  s_d2b70699d9f2a7::t_f59caff053d4b7 7
+  s_d2b70699d9f2a7::t_88a6bc4f174d85 4-5
+  s_d2b70699d9f2a7::t_71dcb8c10924fb 8
+  s_d2b70699d9f2a7::t_00ab1c33d1dd77 6,9
+.nvmrc
+  s_d2b70699d9f2a7::t_5af1e6dd25793d 1
+pnpm-lock.yaml
+  s_d2b70699d9f2a7::t_93dcd8e7c87448 1-101,153-154,166,592-594,1390-1392,1766,1780-1784,1877-1884,2546-2549,2568-2580,2609-2636
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "80d04ab6c400647c4326de07dbfe426b5694be7e",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_d2b70699d9f2a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ab874567-a740-4fa2-a96a-da9893fdd03e",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
