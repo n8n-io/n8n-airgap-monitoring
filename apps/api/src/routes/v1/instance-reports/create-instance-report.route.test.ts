@@ -4,22 +4,6 @@ import { build } from "../../../testing/build-app";
 const URL = "/api/v1/instance-reports";
 const AUTHORIZED = { authorization: "Bearer test-write-token" };
 
-type App = Awaited<ReturnType<typeof build>>;
-
-/** Reads raw rows straight from the table, so the assertion sees what was stored, not what the ORM maps. */
-async function rows<T = Record<string, unknown>>(app: App, sql: string, params: unknown[] = []): Promise<T[]> {
-  return app.dataSource.query(sql, params) as Promise<T[]>;
-}
-
-async function count(app: App, where = "1 = 1", params: unknown[] = []): Promise<number> {
-  const [row] = await rows<{ count: number }>(
-    app,
-    `SELECT COUNT(*) AS count FROM instance_reports WHERE ${where}`,
-    params,
-  );
-  return row.count;
-}
-
 const validReport = {
   instanceId: "instance-1",
   batchId: "batch-1",
@@ -49,7 +33,11 @@ test("stores an accepted instance report", async () => {
   expect(res.statusCode).toBe(201);
 
   const { id } = res.json() as { id: number };
-  const [row] = await rows<Record<string, string>>(app, "SELECT * FROM instance_reports WHERE id = ?", [id]);
+  // Read the raw row, so the assertion sees what was stored, not what the ORM maps.
+  const [row] = (await app.dataSource.query("SELECT * FROM instance_reports WHERE id = ?", [id])) as Record<
+    string,
+    string
+  >[];
 
   expect(row.instanceId).toBe("instance-1");
   expect(row.batchId).toBe("batch-1");
@@ -72,7 +60,9 @@ test("stores the optional label when provided", async () => {
   expect(res.statusCode).toBe(201);
 
   const { id } = res.json() as { id: number };
-  const [row] = await rows<{ label: string }>(app, "SELECT label FROM instance_reports WHERE id = ?", [id]);
+  const [row] = (await app.dataSource.query("SELECT label FROM instance_reports WHERE id = ?", [id])) as {
+    label: string;
+  }[];
 
   expect(row.label).toBe("Kiwi prod");
 });
@@ -94,11 +84,9 @@ test("appends every report instead of overwriting the instance", async () => {
     expect(res.statusCode).toBe(201);
   }
 
-  const stored = await rows<{ data: string }>(
-    app,
-    "SELECT data FROM instance_reports WHERE instanceId = ? ORDER BY id",
-    ["instance-1"],
-  );
+  const stored = (await app.dataSource.query("SELECT data FROM instance_reports WHERE instanceId = ? ORDER BY id", [
+    "instance-1",
+  ])) as { data: string }[];
 
   expect(stored.map((row) => JSON.parse(row.data)[0].value)).toEqual([10, 25]);
 });
@@ -118,7 +106,7 @@ test("keeps envelopes that share a batchId across different instances", async ()
     expect(res.statusCode).toBe(201);
   }
 
-  expect(await count(app)).toBe(2);
+  expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 2 }]);
 });
 
 test("rejects a repeated batchId as a conflict", async () => {
@@ -138,7 +126,12 @@ test("rejects a repeated batchId as a conflict", async () => {
   // The client is told what it did, not how the store is built.
   expect(/SQLITE|UNIQUE/i.test(message)).toBe(false);
 
-  expect(await count(app, "instanceId = ? AND batchId = ?", ["instance-1", "batch-1"])).toBe(1);
+  expect(
+    await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports WHERE instanceId = ? AND batchId = ?", [
+      "instance-1",
+      "batch-1",
+    ]),
+  ).toEqual([{ count: 1 }]);
 });
 
 test("rejects a request without a bearer token", async () => {
@@ -206,7 +199,7 @@ test("rejects malformed instance reports", async () => {
     expect(res.statusCode, `expected 400 for ${description}`).toBe(400);
   }
 
-  expect(await count(app)).toBe(0);
+  expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
 });
 
 test("ignores unknown top level fields so newer instances stay compatible", async () => {

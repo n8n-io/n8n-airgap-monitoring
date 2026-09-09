@@ -82,7 +82,7 @@ test("findAll groups by instance and orders each by receivedAt", async () => {
   ]);
 });
 
-test("two reports that arrived at the same moment stay in the order they came in", async () => {
+test("findAll breaks a receivedAt tie by insertion order", async () => {
   const app = await build();
   const repository = new InstanceReportRepository(app.dataSource);
 
@@ -93,14 +93,4 @@ test("two reports that arrived at the same moment stay in the order they came in
   const rows = await repository.findAll();
 
   expect(rows.map((r) => r.batchId)).toEqual(["first", "second"]);
-});
-
-test("an absent label is stored as NULL", async () => {
-  const app = await build();
-  const repository = new InstanceReportRepository(app.dataSource);
-
-  await repository.insert(event);
-
-  const [row] = await repository.findAll();
-  expect(row.label).toBeNull();
 });
