@@ -1,0 +1,27 @@
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_13635c0e6c0d77::t_c18e4a27cc4e85 63-65
+  s_13635c0e6c0d77::t_529df9f3684836 109
+  s_13635c0e6c0d77::t_0d856602c99ba5 129,134
+  s_13635c0e6c0d77::t_178a755589b85a 130-133
+  s_13635c0e6c0d77::t_bfc8918ff80033 202
+  s_13635c0e6c0d77::t_358f19027cbab9 36-40
+  s_13635c0e6c0d77::t_21b0ba067cb2e2 87-89
+apps/api/src/instance-report/instance-report.repository.test.ts
+  s_13635c0e6c0d77::t_9cd8a62520408f 85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "919108ba4e26fc54e08140ddcf8858e17ac73adb",
+  "prompts": {},
+  "sessions": {
+    "s_13635c0e6c0d77": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "12a85889-eb7a-4163-b2a7-9edc576d2cad",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
