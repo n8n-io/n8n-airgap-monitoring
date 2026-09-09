@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import AjvCompiler from "@fastify/ajv-compiler";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import instanceReport from "./instance-report/instance-report.plugin";
