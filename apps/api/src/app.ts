@@ -1,3 +1,6 @@
+// TypeORM decorators record entity metadata through the Reflect API, so the
+// polyfill has to be loaded before any entity module is evaluated.
+import "reflect-metadata";
 import AjvCompiler from "@fastify/ajv-compiler";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import instanceReport from "./instance-report/instance-report.plugin";

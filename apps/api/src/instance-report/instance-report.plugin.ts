@@ -11,7 +11,7 @@ import { InstanceReportService } from "./instance-report.service";
  */
 export default fp(
   async (fastify: FastifyInstance) => {
-    const repository = new InstanceReportRepository(fastify.db);
+    const repository = new InstanceReportRepository(fastify.dataSource);
 
     fastify.decorate("instanceReportService", new InstanceReportService(repository));
   },

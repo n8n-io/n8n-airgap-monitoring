@@ -110,8 +110,8 @@ export interface UsageReport {
 export class InstanceReportService {
   constructor(private readonly repository: InstanceReportRepository) {}
 
-  recordReport(report: CreateInstanceReport): { id: number } {
-    const id = this.repository.insert({
+  async recordReport(report: CreateInstanceReport): Promise<{ id: number }> {
+    const id = await this.repository.insert({
       ...report,
       receivedAt: new Date().toISOString(),
     });
@@ -119,12 +119,12 @@ export class InstanceReportService {
     return { id };
   }
 
-  generateReport(): UsageReport {
+  async generateReport(): Promise<UsageReport> {
     const instances = new Map<string, InstanceReportEntry>();
 
     // Rows arrive grouped per instance and oldest-first within each (repository order),
     // so the first row seen for an instance is its earliest, and the last wins for label.
-    for (const row of this.repository.findAll()) {
+    for (const row of await this.repository.findAll()) {
       let entry = instances.get(row.instanceId);
       if (!entry) {
         entry = {

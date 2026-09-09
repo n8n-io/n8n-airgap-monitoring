@@ -8,7 +8,7 @@ const READ = { authorization: "Bearer test-read-token" };
 type App = Awaited<ReturnType<typeof build>>;
 
 /** Writes one stored event straight to the table, so a test controls received_at and order. */
-function insertRow(
+async function insertRow(
   app: App,
   row: {
     instanceId: string;
@@ -18,20 +18,19 @@ function insertRow(
     dataPoints: Metric[];
     receivedAt: string;
   },
-): void {
-  app.db
-    .prepare(
-      `INSERT INTO instance_reports (instance_id, batch_id, label, n8n_version, data, received_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-    )
-    .run(
+): Promise<void> {
+  await app.dataSource.query(
+    `INSERT INTO instance_reports (instance_id, batch_id, label, n8n_version, data, received_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [
       row.instanceId,
       row.batchId,
       row.label ?? null,
       row.n8nVersion ?? "1.99.0",
       JSON.stringify(row.dataPoints),
       row.receivedAt,
-    );
+    ],
+  );
 }
 
 test("rejects a request without a bearer token", async () => {
@@ -91,7 +90,7 @@ test("returns it as a named, uncacheable JSON download", async () => {
 test("reports each instance's id, first-seen day and full metric history", async () => {
   const app = await build();
 
-  insertRow(app, {
+  await insertRow(app, {
     instanceId: "instance-1",
     batchId: "b1",
     label: "prod",
@@ -101,7 +100,7 @@ test("reports each instance's id, first-seen day and full metric history", async
     ],
     receivedAt: "2026-03-25T02:00:00.000Z",
   });
-  insertRow(app, {
+  await insertRow(app, {
     instanceId: "instance-1",
     batchId: "b2",
     label: "prod-renamed",
@@ -142,13 +141,13 @@ test("reports each instance's id, first-seen day and full metric history", async
 test("keeps conflicting cumulative values from two batchIds on one instance, instead of folding to latest", async () => {
   const app = await build();
 
-  insertRow(app, {
+  await insertRow(app, {
     instanceId: "shared",
     batchId: "from-a",
     dataPoints: [{ kind: "cumulative", name: "billableExecutionTotal", value: 900000 }],
     receivedAt: "2026-03-25T02:00:00.000Z",
   });
-  insertRow(app, {
+  await insertRow(app, {
     instanceId: "shared",
     batchId: "from-b",
     dataPoints: [{ kind: "cumulative", name: "billableExecutionTotal", value: 300000 }],
@@ -171,7 +170,7 @@ test("separates instances into their own entries", async () => {
   const app = await build();
 
   for (const instanceId of ["instance-1", "instance-2"]) {
-    insertRow(app, {
+    await insertRow(app, {
       instanceId,
       batchId: `${instanceId}-b1`,
       dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 5 }],
@@ -188,7 +187,7 @@ test("separates instances into their own entries", async () => {
 test("defaults a missing label to null", async () => {
   const app = await build();
 
-  insertRow(app, {
+  await insertRow(app, {
     instanceId: "instance-1",
     batchId: "b1",
     dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 5 }],

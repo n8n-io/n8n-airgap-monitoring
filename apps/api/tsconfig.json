@@ -3,7 +3,12 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "sourceMap": true
+    "sourceMap": true,
+    // TypeORM entities and migrations are declared with legacy decorators, as in
+    // n8n. Column types are always given explicitly, so `emitDecoratorMetadata`
+    // is not needed and stays off: Vitest transpiles with esbuild, which cannot
+    // emit it, and a column that relied on it would work in production only.
+    "experimentalDecorators": true
   },
   "include": ["src/**/*.ts"]
 }
