@@ -4,9 +4,6 @@ import { expect, onTestFinished, test } from "vitest";
 import app from "../app";
 import { build } from "../testing/build-app";
 
-// The durability decisions in adr/2026-09-09-node-sqlite3-via-n8n-typeorm.md
-// are pragmas, which nothing else would catch if a driver or ORM upgrade
-// silently changed them.
 test("opens the database in WAL mode with synchronous left at FULL", async () => {
   const { dataSource } = await build();
 

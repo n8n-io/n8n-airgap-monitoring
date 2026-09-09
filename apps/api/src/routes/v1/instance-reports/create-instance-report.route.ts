@@ -81,7 +81,6 @@ const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> 
       try {
         reply.code(201);
 
-        // Awaited inside the try, so a rejection lands in the catch below.
         return await fastify.instanceReportService.recordReport(request.body);
       } catch (error) {
         // An envelope is immutable, so a repeat is rejected.

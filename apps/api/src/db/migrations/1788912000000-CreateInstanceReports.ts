@@ -1,12 +1,7 @@
 import type { MigrationInterface, QueryRunner } from "@n8n/typeorm";
 
 /**
- * Baseline: the schema of the first TypeORM-based release.
- *
- * Deliberately not IF NOT EXISTS. A database file written before this release
- * has the same table with different column names, and starting against it
- * must fail here, loudly, rather than pass and break on the first insert.
- * Such files are from the beta phase and are discarded, not migrated.
+ * Adds the first table for this service: instance_reports
  */
 export class CreateInstanceReports1788912000000 implements MigrationInterface {
   name = "CreateInstanceReports1788912000000";

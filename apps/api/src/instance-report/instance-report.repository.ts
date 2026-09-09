@@ -24,9 +24,7 @@ export interface InstanceReportRow {
 
 /**
  * `(instance_id, batch_id)` is the only unique index on the table, so this code
- * identifies the collision on its own. node-sqlite3 reports only the primary
- * result code, not the extended `SQLITE_CONSTRAINT_UNIQUE`, so the message is
- * what tells a unique violation apart from a NOT NULL one.
+ * identifies the collision on its own.
  */
 function isUniqueConstraintViolation(error: unknown): boolean {
   return (
