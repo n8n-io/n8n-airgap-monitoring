@@ -23,7 +23,7 @@ export interface InstanceReportRow {
 }
 
 /**
- * `(instance_id, batch_id)` is the only unique index on the table, so this code
+ * `(instanceId, batchId)` is the only unique index on the table, so this code
  * identifies the collision on its own.
  */
 function isUniqueConstraintViolation(error: unknown): boolean {

@@ -7,7 +7,7 @@ const READ = { authorization: "Bearer test-read-token" };
 
 type App = Awaited<ReturnType<typeof build>>;
 
-/** Writes one stored event straight to the table, so a test controls received_at and order. */
+/** Writes one stored event straight to the table, so a test controls receivedAt and order. */
 async function insertRow(
   app: App,
   row: {
