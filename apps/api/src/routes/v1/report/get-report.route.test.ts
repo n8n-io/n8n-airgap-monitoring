@@ -20,7 +20,7 @@ async function insertRow(
   },
 ): Promise<void> {
   await app.dataSource.query(
-    `INSERT INTO instance_reports (instance_id, batch_id, label, n8n_version, data, received_at)
+    `INSERT INTO instance_reports (instanceId, batchId, label, n8nVersion, data, receivedAt)
      VALUES (?, ?, ?, ?, ?, ?)`,
     [
       row.instanceId,

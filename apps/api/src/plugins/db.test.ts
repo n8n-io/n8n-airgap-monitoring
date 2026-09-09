@@ -23,12 +23,13 @@ test("runs migrations on startup and records them once", async () => {
   expect(applied).toEqual([{ name: "CreateInstanceReports1788912000000" }]);
 });
 
-// A deployed volume already holds the table, created by a release that ran the
-// schema SQL directly. Upgrading must adopt it, not fail on it or wipe it.
+// Every container restart is a second start against a populated file. The
+// baseline migration is not idempotent on purpose, so this proves the
+// bookkeeping keeps it from running twice.
 test("a second start against the same database file keeps its data and does not re-run migrations", async () => {
   const first = await build();
   await first.dataSource.query(
-    `INSERT INTO instance_reports (instance_id, batch_id, n8n_version, data, received_at)
+    `INSERT INTO instance_reports (instanceId, batchId, n8nVersion, data, receivedAt)
      VALUES ('instance-1', 'batch-1', '1.99.0', '[]', '2026-03-25T00:00:00.000Z')`,
   );
 
@@ -41,5 +42,5 @@ test("a second start against the same database file keeps its data and does not 
   });
 
   expect(await second.dataSource.query("SELECT COUNT(*) AS count FROM migrations")).toEqual([{ count: 1 }]);
-  expect(await second.dataSource.query("SELECT batch_id FROM instance_reports")).toEqual([{ batch_id: "batch-1" }]);
+  expect(await second.dataSource.query("SELECT batchId FROM instance_reports")).toEqual([{ batchId: "batch-1" }]);
 });

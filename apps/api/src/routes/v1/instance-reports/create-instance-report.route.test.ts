@@ -51,12 +51,12 @@ test("stores an accepted instance report", async () => {
   const { id } = res.json() as { id: number };
   const [row] = await rows<Record<string, string>>(app, "SELECT * FROM instance_reports WHERE id = ?", [id]);
 
-  expect(row.instance_id).toBe("instance-1");
-  expect(row.batch_id).toBe("batch-1");
+  expect(row.instanceId).toBe("instance-1");
+  expect(row.batchId).toBe("batch-1");
   expect(row.label).toBe(null);
-  expect(row.n8n_version).toBe("1.99.0");
+  expect(row.n8nVersion).toBe("1.99.0");
   expect(JSON.parse(row.data)).toEqual(validReport.dataPoints);
-  expect(Number.isNaN(Date.parse(row.received_at))).toBe(false);
+  expect(Number.isNaN(Date.parse(row.receivedAt))).toBe(false);
 });
 
 test("stores the optional label when provided", async () => {
@@ -96,7 +96,7 @@ test("appends every report instead of overwriting the instance", async () => {
 
   const stored = await rows<{ data: string }>(
     app,
-    "SELECT data FROM instance_reports WHERE instance_id = ? ORDER BY id",
+    "SELECT data FROM instance_reports WHERE instanceId = ? ORDER BY id",
     ["instance-1"],
   );
 
@@ -138,7 +138,7 @@ test("rejects a repeated batchId as a conflict", async () => {
   // The client is told what it did, not how the store is built.
   expect(/SQLITE|UNIQUE/i.test(message)).toBe(false);
 
-  expect(await count(app, "instance_id = ? AND batch_id = ?", ["instance-1", "batch-1"])).toBe(1);
+  expect(await count(app, "instanceId = ? AND batchId = ?", ["instance-1", "batch-1"])).toBe(1);
 });
 
 test("rejects a request without a bearer token", async () => {
