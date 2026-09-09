@@ -87,7 +87,11 @@ export class InstanceReportRepository {
   /** Every event ever received, grouped per instance and oldest-first within each. */
   async findAll(): Promise<InstanceReportRow[]> {
     return this.#reports.find({
-      order: { instanceId: "ASC", receivedAt: "ASC", id: "ASC" },
+      order: {
+        instanceId: "ASC", // group each instance's rows together
+        receivedAt: "ASC", // oldest-first within an instance (ISO strings sort chronologically)
+        id: "ASC", // deterministic tie-break when two reports share a receivedAt
+      },
     });
   }
 }
