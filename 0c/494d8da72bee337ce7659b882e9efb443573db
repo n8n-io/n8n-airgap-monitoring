@@ -1,0 +1,29 @@
+apps/api/src/instance-report/instance-report.entity.ts
+  s_60e6136c333abd::t_ee5ba117c29766 10,13,19,22-24,28
+apps/api/src/db/migrations/1788912000000-CreateInstanceReports.ts
+  s_60e6136c333abd::t_f677ea2abb73c1 4,6-9,16-23,28-29,34-35
+apps/api/src/plugins/db.test.ts
+  s_60e6136c333abd::t_b2b6d96f295f65 26-28,32,45
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_60e6136c333abd::t_d80f4e7710d88e 54-55,57,59,99,141
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  s_60e6136c333abd::t_ac813522ad72c4 23
+scripts/local-k8s-demo/Makefile
+  s_60e6136c333abd::t_1d8a62c6270ec5 227
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "0c494d8da72bee337ce7659b882e9efb443573db",
+  "prompts": {},
+  "sessions": {
+    "s_60e6136c333abd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c08eb322-38fb-44ec-9f86-02906ac72b5d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
