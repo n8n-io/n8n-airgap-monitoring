@@ -1,0 +1,30 @@
+adr/2026-09-09-node-sqlite3-via-n8n-typeorm.md
+  s_60e6136c333abd::t_58cfcd309ace7a 1-31,34-47
+  s_60e6136c333abd::t_32b739deb397b2 32-33
+adr/2026-08-18-fastify-over-express.md
+  s_60e6136c333abd::t_bc9ffbb405f40f 46
+  s_60e6136c333abd::t_78c687c8e4cefd 44
+adr/2026-08-26-sqlite-with-synchronous-writes.md
+  s_60e6136c333abd::t_110f8c43bdc6d8 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "addfc51b8842e7d6d744ebeca6021c6e81d91383",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_60e6136c333abd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c08eb322-38fb-44ec-9f86-02906ac72b5d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
