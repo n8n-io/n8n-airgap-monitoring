@@ -1,0 +1,20 @@
+apps/api/src/db/migrations/index.ts
+  h_c63dce324dfc7b 4-5
+apps/api/src/db/migrations/1788912000000-CreateInstanceReports.ts
+  h_c63dce324dfc7b 4
+apps/api/src/instance-report/instance-report.repository.ts
+  h_c63dce324dfc7b 27
+apps/api/src/plugins/db.ts
+  h_c63dce324dfc7b 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "08594fbfa9d13121178ac531d6eb67fc474bafec",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
