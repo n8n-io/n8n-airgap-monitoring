@@ -224,7 +224,7 @@ backfill: ## Post BACKFILL_DAYS of invented daily history to the collector
 # endpoint to curl. Replace this with a request once one exists.
 reports: ## Print the reports the monitoring service has received so far
 	@kubectl exec deploy/airgap-monitoring -n $(MONITORING_NS) -- node -e \
-		'const rows = require("better-sqlite3")(process.env.N8N_DB_PATH).prepare("SELECT id, instance_id, batch_id, label, n8n_version, data, received_at FROM instance_reports ORDER BY id").all(); console.log(JSON.stringify(rows.map(row => ({ ...row, data: JSON.parse(row.data) })), null, 2))' \
+		'new (require("sqlite3").Database)(process.env.N8N_DB_PATH).all("SELECT id, instance_id, batch_id, label, n8n_version, data, received_at FROM instance_reports ORDER BY id", (err, rows) => { if (err) throw err; console.log(JSON.stringify(rows.map(row => ({ ...row, data: JSON.parse(row.data) })), null, 2)) })' \
 		|| echo "Query failed — is the monitoring pod running? Check 'make status'."
 
 # ── Port-forwards ─────────────────────────────────────────────────────────────

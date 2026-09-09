@@ -49,7 +49,7 @@ The first one lands one interval after an instance boots — n8n does not send o
 
 `POST /api/v1/instance-reports` is currently the service's only route, so there is no
 read endpoint to curl. `make reports` therefore reads the SQLite file inside the
-monitoring pod (`kubectl exec` + `better-sqlite3`, both already in the image) and prints
+monitoring pod (`kubectl exec` + `sqlite3`, both already in the image) and prints
 the stored envelopes as JSON. Swap it for an HTTP request once a read endpoint exists.
 
 ## Where the numbers come from
