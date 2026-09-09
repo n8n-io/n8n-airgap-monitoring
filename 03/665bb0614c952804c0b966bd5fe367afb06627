@@ -1,0 +1,23 @@
+scripts/local-k8s-demo/Makefile
+  s_60e6136c333abd::t_6042744307f6ac 227
+scripts/local-k8s-demo/README.md
+  s_60e6136c333abd::t_048a00a43d90f6 52
+Dockerfile
+  s_60e6136c333abd::t_34df5dd9637278 20-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "03665bb0614c952804c0b966bd5fe367afb06627",
+  "prompts": {},
+  "sessions": {
+    "s_60e6136c333abd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c08eb322-38fb-44ec-9f86-02906ac72b5d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
