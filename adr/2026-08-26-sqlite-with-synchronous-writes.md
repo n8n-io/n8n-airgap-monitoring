@@ -6,7 +6,7 @@ Date: 2026-08-26
 
 ## Status
 
-Accepted
+Superseded by `adr/2026-09-09-node-sqlite3-via-n8n-typeorm.md` (ADR 8) on 2026-09-09. The store decisions here (SQLite, WAL, `synchronous = FULL`) still stand and are restated there; the driver is now the asynchronous `sqlite3` package, so the event-loop blocking this ADR accepts no longer occurs.
 
 ## Context
 
