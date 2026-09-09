@@ -44,8 +44,6 @@ makes reports meaningful.
 Each instance reports once a day, at a random UTC time chosen on first boot (never
 before 03:00 UTC), to
 `http://airgap-monitoring.monitoring.svc.cluster.local:3000/api/v1/instance-reports`.
-`make backfill` seeds invented history immediately so there is a daily series to look
-at without waiting for that real report to fire.
 
 ## Seeing what arrived
 
