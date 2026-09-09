@@ -23,10 +23,6 @@ OWNER_PASSWORD   := hello1234
 # this traffic never leaves the cluster.
 INGEST_BASE_URL := http://airgap-monitoring.$(MONITORING_NS).svc.cluster.local:3000
 
-# Every minute instead of the 60-minute default, so a report shows up while
-# someone is still watching.
-REPORT_INTERVAL_MINUTES := 1
-
 # One row per n8n instance, as namespace:host-port:reporting-identifier. Every
 # loop below reads this table, so adding an instance is a one-line change.
 # Recipes unpack a row with `ns=$${spec%%:*}` and friends.
@@ -72,9 +68,9 @@ up: cluster images install ## Full setup: cluster + images + deploy + port-forwa
 	@echo "  write token         $(WRITE_TOKEN)"
 	@echo "  read token          $(READ_TOKEN)"
 	@echo ""
-	@echo "  Both instances report every $(REPORT_INTERVAL_MINUTES) min to the cluster-internal URL"
+	@echo "  Both instances report once a day, at a random UTC time chosen on first boot,"
+	@echo "  to the cluster-internal URL"
 	@echo "  $(INGEST_BASE_URL)"
-	@echo "  The first report is sent one interval after an instance boots."
 	@echo "  Run 'make reports' to see what has arrived so far."
 
 .PHONY: down
@@ -156,7 +152,6 @@ install-n8n: ## Deploy both n8n instances
 			-e "s|__IDENTIFIER__|$$identifier|g" \
 			-e "s|__INGEST_BASE_URL__|$(INGEST_BASE_URL)|g" \
 			-e "s|__WRITE_TOKEN__|$(WRITE_TOKEN)|g" \
-			-e "s|__REPORT_INTERVAL_MINUTES__|$(REPORT_INTERVAL_MINUTES)|g" \
 			k8s/n8n-instance.template.yaml | kubectl apply -f -; \
 	done
 

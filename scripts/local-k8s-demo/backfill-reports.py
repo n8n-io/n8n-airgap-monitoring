@@ -44,7 +44,7 @@ def instance_id_from(encryption_key: str) -> str:
     """Reproduce n8n's own derivation (InstanceSettings.generateInstanceId).
 
     Lets the backfill address an instance before it has ever reported, instead
-    of waiting a reporting interval to learn its id.
+    of waiting for its first daily report to learn its id.
     """
     tail = encryption_key[round(len(encryption_key) / 2) :]
     return hashlib.sha256(tail.encode()).hexdigest()
