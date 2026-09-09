@@ -1,6 +1,12 @@
 packages:
   - "apps/*"
 
+# better-sqlite3 ships prebuilt binaries, so its build step is unnecessary.
+# esbuild's postinstall is required to put its platform binary in place.
+allowBuilds:
+  better-sqlite3: false
+  esbuild: true
+
 # Only resolve package versions published at least 3 days ago, so a compromised
 # or broken release has time to be pulled before it can enter the lockfile.
 minimumReleaseAge: 4320
