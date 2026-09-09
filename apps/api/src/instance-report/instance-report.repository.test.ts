@@ -50,6 +50,51 @@ test("findAll parses the stored data column back into metrics", async () => {
   ]);
 });
 
+test("findAll groups by instance and orders each by receivedAt", async () => {
+  const app = await build();
+  const repository = new InstanceReportRepository(app.dataSource);
+
+  await repository.insert({
+    ...event,
+    instanceId: "instance-2",
+    batchId: "later",
+    receivedAt: "2026-03-24T00:00:00.000Z",
+  });
+  await repository.insert({
+    ...event,
+    instanceId: "instance-1",
+    batchId: "solo",
+    receivedAt: "2026-03-25T00:00:00.000Z",
+  });
+  await repository.insert({
+    ...event,
+    instanceId: "instance-2",
+    batchId: "earlier",
+    receivedAt: "2026-03-23T00:00:00.000Z",
+  });
+
+  const rows = await repository.findAll();
+
+  expect(rows.map((r) => [r.instanceId, r.batchId])).toEqual([
+    ["instance-1", "solo"],
+    ["instance-2", "earlier"],
+    ["instance-2", "later"],
+  ]);
+});
+
+test("two reports that arrived at the same moment stay in the order they came in", async () => {
+  const app = await build();
+  const repository = new InstanceReportRepository(app.dataSource);
+
+  const sameInstant = "2026-03-25T00:00:00.000Z";
+  await repository.insert({ ...event, batchId: "first", receivedAt: sameInstant });
+  await repository.insert({ ...event, batchId: "second", receivedAt: sameInstant });
+
+  const rows = await repository.findAll();
+
+  expect(rows.map((r) => r.batchId)).toEqual(["first", "second"]);
+});
+
 test("an absent label is stored as NULL", async () => {
   const app = await build();
   const repository = new InstanceReportRepository(app.dataSource);
