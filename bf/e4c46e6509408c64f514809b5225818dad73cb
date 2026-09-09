@@ -1,0 +1,14 @@
+adr/2026-08-26-sqlite-with-synchronous-writes.md
+  h_c63dce324dfc7b 27-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "bfe4c46e6509408c64f514809b5225818dad73cb",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
