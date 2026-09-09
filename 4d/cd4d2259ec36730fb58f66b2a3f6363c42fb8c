@@ -1,0 +1,26 @@
+scripts/local-k8s-demo/Makefile
+  s_d8ee286606f868::t_c7cc9fbfaf8523 71-72
+scripts/local-k8s-demo/k8s/n8n-instance.template.yaml
+  s_d8ee286606f868::t_1daaffc4ec7aee 104-105
+scripts/local-k8s-demo/backfill-reports.py
+  s_d8ee286606f868::t_c6c289fd04afe3 47
+scripts/local-k8s-demo/README.md
+  s_d8ee286606f868::t_967e3863d722a1 44-45,47-48
+  s_d8ee286606f868::t_c7c7117442dd52 64,66-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "4dcd4d2259ec36730fb58f66b2a3f6363c42fb8c",
+  "prompts": {},
+  "sessions": {
+    "s_d8ee286606f868": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3ef64294-6847-484a-a432-bd98bd7aadfd",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
