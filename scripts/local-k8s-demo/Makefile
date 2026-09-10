@@ -21,11 +21,7 @@ OWNER_PASSWORD   := hello1234
 
 # Cluster DNS name of the ingest endpoint — the whole point of the demo is that
 # this traffic never leaves the cluster.
-INGEST_URL := http://airgap-monitoring.$(MONITORING_NS).svc.cluster.local:3000/api/v1/instance-reports
-
-# Every minute instead of the 60-minute default, so a report shows up while
-# someone is still watching.
-REPORT_INTERVAL_MINUTES := 1
+INGEST_BASE_URL := http://airgap-monitoring.$(MONITORING_NS).svc.cluster.local:3000
 
 # One row per n8n instance, as namespace:host-port:reporting-identifier. Every
 # loop below reads this table, so adding an instance is a one-line change.
@@ -72,9 +68,9 @@ up: cluster images install ## Full setup: cluster + images + deploy + port-forwa
 	@echo "  write token         $(WRITE_TOKEN)"
 	@echo "  read token          $(READ_TOKEN)"
 	@echo ""
-	@echo "  Both instances report every $(REPORT_INTERVAL_MINUTES) min to the cluster-internal URL"
-	@echo "  $(INGEST_URL)"
-	@echo "  The first report is sent one interval after an instance boots."
+	@echo "  Both instances report once a day, at a random UTC time chosen on first boot,"
+	@echo "  to the cluster-internal URL"
+	@echo "  $(INGEST_BASE_URL)"
 	@echo "  Run 'make reports' to see what has arrived so far."
 
 .PHONY: down
@@ -154,9 +150,8 @@ install-n8n: ## Deploy both n8n instances
 		fi; \
 		sed -e "s|__NAMESPACE__|$$ns|g" \
 			-e "s|__IDENTIFIER__|$$identifier|g" \
-			-e "s|__INGEST_URL__|$(INGEST_URL)|g" \
+			-e "s|__INGEST_BASE_URL__|$(INGEST_BASE_URL)|g" \
 			-e "s|__WRITE_TOKEN__|$(WRITE_TOKEN)|g" \
-			-e "s|__REPORT_INTERVAL_MINUTES__|$(REPORT_INTERVAL_MINUTES)|g" \
 			k8s/n8n-instance.template.yaml | kubectl apply -f -; \
 	done
 
@@ -224,7 +219,7 @@ backfill: ## Post BACKFILL_DAYS of invented daily history to the collector
 # endpoint to curl. Replace this with a request once one exists.
 reports: ## Print the reports the monitoring service has received so far
 	@kubectl exec deploy/airgap-monitoring -n $(MONITORING_NS) -- node -e \
-		'const rows = require("better-sqlite3")(process.env.N8N_DB_PATH).prepare("SELECT id, instance_id, batch_id, label, n8n_version, data, received_at FROM instance_reports ORDER BY id").all(); console.log(JSON.stringify(rows.map(row => ({ ...row, data: JSON.parse(row.data) })), null, 2))' \
+		'new (require("sqlite3").Database)(process.env.N8N_DB_PATH).all("SELECT id, instanceId, batchId, label, n8nVersion, data, receivedAt FROM instance_reports ORDER BY id", (err, rows) => { if (err) throw err; console.log(JSON.stringify(rows.map(row => ({ ...row, data: JSON.parse(row.data) })), null, 2)) })' \
 		|| echo "Query failed — is the monitoring pod running? Check 'make status'."
 
 # ── Port-forwards ─────────────────────────────────────────────────────────────

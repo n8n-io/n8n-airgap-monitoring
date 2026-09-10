@@ -90,22 +90,19 @@ spec:
             # Instance reporting. The webhook URL resolves through cluster DNS, so
             # the traffic never leaves the cluster, and the auth token has to match
             # the service's N8N_MONITORING_WRITE_TOKEN.
-            - name: N8N_INSTANCE_REPORTING_ENABLED
-              value: "true"
-            - name: N8N_INSTANCE_REPORTING_WEBHOOK_URL
-              value: "__INGEST_URL__"
+            - name: N8N_ENABLED_MODULES
+              value: 'instance-reporting'
+            - name: N8N_INSTANCE_REPORTING_BASE_URL
+              value: "__INGEST_BASE_URL__"
             - name: N8N_INSTANCE_REPORTING_AUTH_TOKEN
               value: "__WRITE_TOKEN__"
-            - name: N8N_INSTANCE_REPORTING_INTERVAL_MINUTES
-              value: "__REPORT_INTERVAL_MINUTES__"
             # Shows up as the report's `label`, so a consumer can name an instance
             # instead of only showing its generated instanceId.
-            - name: N8N_INSTANCE_REPORTING_IDENTIFIER
+            - name: N8N_INSTANCE_REPORTING_LABEL
               value: __IDENTIFIER__
             # The daily figure comes from insights, which only aggregates raw
-            # execution rows every 60 minutes by default — the reporter would keep
-            # sending stale numbers for most of a demo. One minute matches the
-            # reporting interval above.
+            # execution rows every 60 minutes by default — the daily figure would
+            # stay stale for most of a demo otherwise.
             - name: N8N_INSIGHTS_COMPACTION_INTERVAL_MINUTES
               value: "1"
           envFrom:

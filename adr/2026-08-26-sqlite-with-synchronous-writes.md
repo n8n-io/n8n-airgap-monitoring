@@ -6,7 +6,7 @@ Date: 2026-08-26
 
 ## Status
 
-Accepted
+Superseded by `adr/2026-09-09-node-sqlite3-via-n8n-typeorm.md` (ADR 8) on 2026-09-09. The store decisions here (SQLite, WAL, `synchronous = FULL`) still stand and are restated there; the driver is now the asynchronous `sqlite3` package, so the event-loop blocking this ADR accepts no longer occurs.
 
 ## Context
 
@@ -23,6 +23,8 @@ Point 3 is the gap. Every accepted report performs a blocking `INSERT` with a WA
 ## Decision
 
 **SQLite, via the synchronous `better-sqlite3` driver, in WAL mode, with `synchronous` left at `FULL`.**
+
+As Tomi described in this [slack message](https://n8nio.slack.com/archives/C069HS026UF/p1779365320137279?thread_ts=1779364878.021969&cid=C069HS026UF): The issue with `better-sqlite3` is that its synchronous. When I benchmarked it in our case it was drastically slower than the pooling the driver, since every query blocks everyone else. So if you have multiple executions being created concurrently it creates bottlenecks. Might be worth running the benchmark again to see if something has changed/missed
 
 *SQLite* keeps the deployment one container plus one volume. There is no separate database process for the customer to provision, secure, back up, or upgrade, and no second failure mode for an operator we cannot reach to diagnose. For an append-only store taking ~0.12 writes/second, a client/server database buys nothing and costs the customer an operational component.
 

@@ -34,7 +34,7 @@ function fakeRepository() {
 test("stamps the arrival time itself", async () => {
   const { inserted, repository } = fakeRepository();
 
-  new InstanceReportService(repository).recordReport(report);
+  await new InstanceReportService(repository).recordReport(report);
 
   expect(inserted.length).toBe(1);
   expect(Number.isNaN(Date.parse(inserted[0].receivedAt))).toBe(false);
@@ -43,7 +43,7 @@ test("stamps the arrival time itself", async () => {
 test("passes the reporting instance's batchId through untouched", async () => {
   const { inserted, repository } = fakeRepository();
 
-  new InstanceReportService(repository).recordReport(report);
+  await new InstanceReportService(repository).recordReport(report);
 
   expect(inserted[0].batchId).toBe("batch-1");
 });
@@ -52,8 +52,8 @@ test("returns the id assigned by the repository", async () => {
   const { repository } = fakeRepository();
   const service = new InstanceReportService(repository);
 
-  expect(service.recordReport(report)).toEqual({ id: 1 });
-  expect(service.recordReport(report)).toEqual({ id: 2 });
+  expect(await service.recordReport(report)).toEqual({ id: 1 });
+  expect(await service.recordReport(report)).toEqual({ id: 2 });
 });
 
 /** A repository stub whose findAll returns pre-built rows in the order given. */
@@ -73,8 +73,8 @@ function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
   };
 }
 
-test("generateReport takes firstSeen from the earliest row, and label and lastReportAt from the latest", () => {
-  const report = fakeReportRepository([
+test("generateReport takes firstSeen from the earliest row, and label and lastReportAt from the latest", async () => {
+  const report = await fakeReportRepository([
     row({ batchId: "b1", label: "first", receivedAt: "2026-03-20T02:00:00.000Z" }),
     row({ batchId: "b2", label: "latest", receivedAt: "2026-03-25T02:00:00.000Z" }),
   ]).generateReport();
@@ -84,9 +84,9 @@ test("generateReport takes firstSeen from the earliest row, and label and lastRe
   expect(report.data.instances[0].lastReportAt).toBe("2026-03-25T02:00:00.000Z");
 });
 
-test("generateReport files a metric named __proto__ as data instead of crashing", () => {
+test("generateReport files a metric named __proto__ as data instead of crashing", async () => {
   const protoKey = "__proto__";
-  const report = fakeReportRepository([
+  const report = await fakeReportRepository([
     row({ dataPoints: [{ kind: "cumulative", name: protoKey, value: 5 }] }),
   ]).generateReport();
 
@@ -95,8 +95,8 @@ test("generateReport files a metric named __proto__ as data instead of crashing"
   ]);
 });
 
-test("generateReport groups points by name and tags each with its batchId and receivedAt, without folding", () => {
-  const report = fakeReportRepository([
+test("generateReport groups points by name and tags each with its batchId and receivedAt, without folding", async () => {
+  const report = await fakeReportRepository([
     row({
       batchId: "b1",
       receivedAt: "2026-03-25T02:00:00.000Z",
@@ -124,12 +124,12 @@ test("generateReport groups points by name and tags each with its batchId and re
   });
 });
 
-test("generateReport stamps the generation time", () => {
+test("generateReport stamps the generation time", async () => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date("2026-09-03T14:30:00.000Z"));
 
   try {
-    expect(fakeReportRepository([]).generateReport()).toEqual({
+    expect(await fakeReportRepository([]).generateReport()).toEqual({
       data: { generatedAt: "2026-09-03T14:30:00.000Z", instances: [] },
     });
   } finally {

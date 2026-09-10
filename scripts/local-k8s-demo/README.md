@@ -41,15 +41,15 @@ The instance owner is provisioned from environment variables
 Reporting reads its numbers as the instance owner, so having one from first boot is what
 makes reports meaningful.
 
-Reports are sent every minute (`REPORT_INTERVAL_MINUTES` in the Makefile) to
+Each instance reports once a day, at a random UTC time chosen on first boot (never
+before 03:00 UTC), to
 `http://airgap-monitoring.monitoring.svc.cluster.local:3000/api/v1/instance-reports`.
-The first one lands one interval after an instance boots — n8n does not send on startup.
 
 ## Seeing what arrived
 
 `POST /api/v1/instance-reports` is currently the service's only route, so there is no
 read endpoint to curl. `make reports` therefore reads the SQLite file inside the
-monitoring pod (`kubectl exec` + `better-sqlite3`, both already in the image) and prints
+monitoring pod (`kubectl exec` + `sqlite3`, both already in the image) and prints
 the stored envelopes as JSON. Swap it for an HTTP request once a read endpoint exists.
 
 ## Where the numbers come from
@@ -59,11 +59,13 @@ the stored envelopes as JSON. Swap it for an HTTP request once a read endpoint e
 production executions on their own and the reports are not all zeroes. `make seed` runs
 the same step on demand and skips instances that already have the workflow.
 
-Two settings exist purely to compress the demo's timescale, both in the deployment
-template: reports go out every minute instead of every 60, and
+One setting exists purely to compress the demo's timescale, in the deployment template:
 `N8N_INSIGHTS_COMPACTION_INTERVAL_MINUTES=1` makes insights aggregate raw execution rows
-every minute rather than hourly. Without the second one the daily figure would lag behind
-by up to an hour.
+every minute rather than hourly, so the daily figure isn't stale for the first hour.
+
+The daily report itself can't be sped up the same way — each instance picks a random UTC
+time on first boot and only fires there, never before 03:00 UTC — so it may not show up
+during a short demo session.
 
 `make up` also posts `BACKFILL_DAYS` (default 3) of invented daily history to the
 collector, so there is a series to look at on a cluster that is minutes old. The volumes

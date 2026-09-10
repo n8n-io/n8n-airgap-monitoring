@@ -1,4 +1,5 @@
-import type Database from "better-sqlite3";
+import { type DataSource, QueryFailedError, type Repository } from "@n8n/typeorm";
+import { InstanceReportEntity } from "./instance-report.entity";
 import type { Metric } from "./instance-report.service";
 
 /** One row to append, with every value the caller has already decided on. */
@@ -21,33 +22,16 @@ export interface InstanceReportRow {
   receivedAt: string;
 }
 
-/** The raw column shape a row comes back in, before the JSON column is parsed. */
-interface StoredRow {
-  instance_id: string;
-  batch_id: string;
-  label: string | null;
-  n8n_version: string;
-  data: string;
-  received_at: string;
-}
-
-function toInstanceReportRow(row: StoredRow): InstanceReportRow {
-  return {
-    instanceId: row.instance_id,
-    batchId: row.batch_id,
-    label: row.label,
-    n8nVersion: row.n8n_version,
-    dataPoints: JSON.parse(row.data) as Metric[],
-    receivedAt: row.received_at,
-  };
-}
-
 /**
- * `(instance_id, batch_id)` is the only unique index on the table, so this code
+ * `(instanceId, batchId)` is the only unique index on the table, so this code
  * identifies the collision on its own.
  */
 function isUniqueConstraintViolation(error: unknown): boolean {
-  return error instanceof Error && (error as { code?: string }).code === "SQLITE_CONSTRAINT_UNIQUE";
+  return (
+    error instanceof QueryFailedError &&
+    (error.driverError as { code?: string } | undefined)?.code === "SQLITE_CONSTRAINT" &&
+    error.message.includes("UNIQUE constraint failed")
+  );
 }
 
 /**
@@ -69,41 +53,29 @@ export class DuplicateBatchError extends Error {
  * what to store, this only decides how it is written.
  */
 export class InstanceReportRepository {
-  readonly #insertEvent: Database.Statement;
-  readonly #findAll: Database.Statement<[], StoredRow>;
+  readonly #reports: Repository<InstanceReportEntity>;
 
-  constructor(db: Database.Database) {
-    // Prepared once per process: the daily report burst reuses the same plan.
-    this.#insertEvent = db.prepare(
-      `INSERT INTO instance_reports (instance_id, batch_id, label, n8n_version, data, received_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-    );
-
-    this.#findAll = db.prepare<[], StoredRow>(
-      `SELECT instance_id, batch_id, label, n8n_version, data, received_at
-       FROM instance_reports
-       ORDER BY instance_id ASC, received_at ASC, id ASC`,
-    );
+  constructor(dataSource: DataSource) {
+    this.#reports = dataSource.getRepository(InstanceReportEntity);
   }
 
   /** Appends one event and returns its id. Throws {@link DuplicateBatchError} for a repeated batchId. */
-  insert(event: InstanceReport): number {
+  async insert(event: InstanceReport): Promise<number> {
     try {
-      const { lastInsertRowid } = this.#insertEvent.run(
-        event.instanceId,
-        event.batchId,
-        // better-sqlite3 rejects undefined bindings, so an absent label is stored
-        // as SQL NULL.
-        event.label ?? null,
-        event.n8nVersion,
-        JSON.stringify(event.dataPoints),
-        event.receivedAt,
-      );
+      const { identifiers } = await this.#reports.insert({
+        instanceId: event.instanceId,
+        batchId: event.batchId,
+        // An absent label is stored as SQL NULL, not as the string "undefined".
+        label: event.label ?? null,
+        n8nVersion: event.n8nVersion,
+        dataPoints: event.dataPoints,
+        receivedAt: event.receivedAt,
+      });
 
-      return Number(lastInsertRowid);
+      return Number(identifiers[0].id);
     } catch (error) {
       // The only place that knows about driver error codes, so callers can act
-      // on the collision without depending on better-sqlite3.
+      // on the collision without depending on the database layer.
       if (isUniqueConstraintViolation(error)) {
         throw new DuplicateBatchError(event.instanceId, event.batchId);
       }
@@ -113,7 +85,13 @@ export class InstanceReportRepository {
   }
 
   /** Every event ever received, grouped per instance and oldest-first within each. */
-  findAll(): InstanceReportRow[] {
-    return this.#findAll.all().map(toInstanceReportRow);
+  async findAll(): Promise<InstanceReportRow[]> {
+    return this.#reports.find({
+      order: {
+        instanceId: "ASC", // group each instance's rows together
+        receivedAt: "ASC", // oldest-first within an instance (ISO strings sort chronologically)
+        id: "ASC", // deterministic tie-break when two reports share a receivedAt
+      },
+    });
   }
 }

@@ -66,7 +66,7 @@ const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
       },
     },
     async (_request, reply) => {
-      const report = fastify.instanceReportService.generateReport();
+      const report = await fastify.instanceReportService.generateReport();
 
       // Colons and dots are unsafe in filenames on some OSes, so flatten the timestamp.
       const stamp = report.data.generatedAt.replace(/[:.]/g, "-");

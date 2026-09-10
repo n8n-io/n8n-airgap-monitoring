@@ -1,48 +1,35 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import Database from "better-sqlite3";
+import { DataSource } from "@n8n/typeorm";
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
+import { migrations } from "../db/migrations";
+import { InstanceReportEntity } from "../instance-report/instance-report.entity";
 
-const SCHEMA = `
-  CREATE TABLE IF NOT EXISTS instance_reports (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    instance_id TEXT NOT NULL,
-    batch_id    TEXT NOT NULL,
-    label       TEXT,
-    n8n_version TEXT NOT NULL,
-    data        TEXT NOT NULL,
-    received_at TEXT NOT NULL
-  );
-
-  CREATE UNIQUE INDEX IF NOT EXISTS idx_instance_reports_batch
-    ON instance_reports (instance_id, batch_id);
-`;
-
-/**
- * Opens the append-only event store.
- *
- * SQLite keeps the deployment a single container plus one volume, which matters
- * when the operator is a customer running this in an environment we cannot
- * reach. Thousands of instances reporting once a day is a trivial write load.
- */
 export default fp(
   async (fastify: FastifyInstance) => {
     const { dbPath } = fastify.config;
 
     mkdirSync(dirname(dbPath), { recursive: true });
 
-    const db = new Database(dbPath);
+    const dataSource = new DataSource({
+      type: "sqlite",
+      database: dbPath,
+      // Readers do not block the writer, so a read endpoint stays responsive
+      // while the daily report burst is being written.
+      enableWAL: true,
+      entities: [InstanceReportEntity],
+      migrations,
+      migrationsRun: true,
+      migrationsTableName: "migrations",
+      synchronize: false,
+    });
 
-    // Readers do not block the writer, so a read endpoint stays responsive
-    // while the daily report burst is being written.
-    db.pragma("journal_mode = WAL");
+    await dataSource.initialize();
 
-    db.exec(SCHEMA);
-
-    fastify.decorate("db", db);
+    fastify.decorate("dataSource", dataSource);
     fastify.addHook("onClose", async () => {
-      db.close();
+      await dataSource.destroy();
     });
   },
   { name: "db", dependencies: ["config"] },
@@ -50,6 +37,6 @@ export default fp(
 
 declare module "fastify" {
   export interface FastifyInstance {
-    db: Database.Database;
+    dataSource: DataSource;
   }
 }

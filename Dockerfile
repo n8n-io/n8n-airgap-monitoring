@@ -17,8 +17,8 @@ COPY . .
 RUN pnpm turbo run build
 
 # Self-contained API: its dist plus a pruned production node_modules, including
-# fastify-cli and better-sqlite3, which ships its linux prebuilds in the package
-# itself, so no compiler toolchain is needed here. `--legacy` because the
+# fastify-cli and sqlite3, whose install script downloaded the linux prebuild
+# above, so no compiler toolchain is needed here. `--legacy` because the
 # workspace does not use injected dependencies, which pnpm's deploy assumes.
 RUN pnpm deploy --legacy --filter api --prod /out
 
