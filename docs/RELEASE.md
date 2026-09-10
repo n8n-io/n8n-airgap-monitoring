@@ -28,7 +28,7 @@ flowchart TD
 
 ## Tags
 
-| Tag         | Moves when                                       | Pin it?                     |
+| Tag         | Moves when                                       | Safe to reference in a deployment?                     |
 | ----------- | ------------------------------------------------ | --------------------------- |
 | `{sha}`     | never                                            | for reproducing a `main` build |
 | `alpha`     | every push to `main` that touches the image      | no                          |
