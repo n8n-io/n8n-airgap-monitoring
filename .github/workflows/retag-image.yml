@@ -22,9 +22,14 @@ on:
         required: true
         type: string
       tags:
-        description: Space-separated tags to move (e.g. "stable" or "latest stable")
+        description: Which moving tags to retarget
         required: true
-        type: string
+        default: stable
+        type: choice
+        options:
+          - stable
+          - latest
+          - latest stable
 
 permissions:
   contents: read
@@ -54,6 +59,27 @@ jobs:
           TAGS: ${{ inputs.tags }}
         run: |
           set -euo pipefail
+          set -f # split TAGS on whitespace without glob-expanding it
+
+          # `stable` and `latest` are the only tags this workflow may retarget.
+          # Release versions are immutable and `alpha` belongs to main, so an
+          # allowlist -- not a version-shaped denylist -- is what keeps a typo,
+          # a digest or an empty input from landing on a published tag. Checked
+          # before the source lookup, so nothing is touched when it fails.
+          read -r -a REQUESTED <<<"$TAGS"
+          if [[ ${#REQUESTED[@]} -eq 0 ]]; then
+            echo "::error::No tags requested. Pass \"stable\", \"latest\" or \"latest stable\". Nothing was changed."
+            exit 1
+          fi
+          for tag in "${REQUESTED[@]}"; do
+            case "$tag" in
+              stable | latest) ;;
+              *)
+                echo "::error::${tag} is not a retargetable tag. Only stable and latest can be moved; release versions are immutable. Nothing was changed."
+                exit 1
+                ;;
+            esac
+          done
 
           digest_of() {
             docker buildx imagetools inspect --format '{{json .Manifest}}' "$1" 2>/dev/null \
@@ -75,14 +101,7 @@ jobs:
           fi
           echo "${SOURCE_REF} is ${DIGEST}"
 
-          for tag in $TAGS; do
-            if [[ "$tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "::error::${tag} is a release version. Version tags are immutable; only moving tags like stable or latest can be retargeted. Nothing was changed."
-              exit 1
-            fi
-          done
-
-          for tag in $TAGS; do
+          for tag in "${REQUESTED[@]}"; do
             echo "${IMAGE}:${tag} was $(digest_of "${IMAGE}:${tag}" | grep . || echo absent)"
             # Copies the multi-arch index as-is, so the tag resolves to the same
             # digest as the source.

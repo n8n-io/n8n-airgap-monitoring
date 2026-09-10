@@ -10,6 +10,7 @@ on:
     paths:
       - 'apps/api/**'
       - 'Dockerfile'
+      - '.dockerignore'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -27,7 +28,7 @@ permissions:
   packages: write
 
 concurrency:
-  group: release-alpha-${{ github.ref }}
+  group: release-alpha-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
