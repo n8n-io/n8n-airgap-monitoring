@@ -1,53 +1,26 @@
+import { Readable } from "node:stream";
 import bearerAuth from "@fastify/bearer-auth";
 import type { FastifyPluginAsync } from "fastify";
+import type { InstanceReportEntry } from "../../../instance-report/instance-report.service";
 
-const dataPointSchema = {
-  type: "object",
-  required: ["kind", "value", "batchId", "receivedAt"],
-  additionalProperties: false,
-  properties: {
-    kind: { enum: ["daily", "cumulative"] },
-    value: { type: "number" },
-    batchId: { type: "string", minLength: 1 },
-    receivedAt: { type: "string" },
-    date: { type: "string" },
-  },
-};
+/**
+ * Renders the UsageReport envelope as a byte stream: the fixed head, each instance as its own
+ * `JSON.stringify` chunk, then the tail. Only one instance is serialised at a
+ * time, so the whole report never sits in memory.
+ *
+ * There is no response schema on this route, as we need to create stream and the data itself was validated during upload.
+ */
+async function* renderReport(generatedAt: string, entries: AsyncIterable<InstanceReportEntry>): AsyncGenerator<string> {
+  yield `{"data":{"generatedAt":${JSON.stringify(generatedAt)},"instances":[`;
 
-const instanceReportSchema = {
-  type: "object",
-  required: ["instanceId", "label", "firstSeen", "lastReportAt", "dataPoints"],
-  additionalProperties: false,
-  properties: {
-    instanceId: { type: "string" },
-    label: { type: ["string", "null"] },
-    firstSeen: { type: "string" },
-    lastReportAt: { type: "string" },
-    // Metric names are chosen by the reporting instance, so the keys are open; only
-    // the shape of each name's value array is pinned down.
-    dataPoints: {
-      type: "object",
-      additionalProperties: { type: "array", items: dataPointSchema },
-    },
-  },
-};
+  let first = true;
+  for await (const entry of entries) {
+    yield first ? JSON.stringify(entry) : `,${JSON.stringify(entry)}`;
+    first = false;
+  }
 
-const successResponseSchema = {
-  type: "object",
-  required: ["data"],
-  additionalProperties: false,
-  properties: {
-    data: {
-      type: "object",
-      required: ["generatedAt", "instances"],
-      additionalProperties: false,
-      properties: {
-        generatedAt: { type: "string" },
-        instances: { type: "array", items: instanceReportSchema },
-      },
-    },
-  },
-};
+  yield "]}}";
+}
 
 /**
  * Downloads the full usage report as JSON. This is the billing export — its own resource,
@@ -58,27 +31,22 @@ const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
     keys: new Set([fastify.config.readToken]),
   });
 
-  fastify.get(
-    "/",
-    {
-      schema: {
-        response: { 200: successResponseSchema },
-      },
-    },
-    async (_request, reply) => {
-      const report = await fastify.instanceReportService.generateReport();
+  fastify.get("/", async (_request, reply) => {
+    const generatedAt = new Date().toISOString();
+    // Colons and dots are unsafe in filenames on some OSes, so flatten the timestamp.
+    const stamp = generatedAt.replace(/[:.]/g, "-");
 
-      // Colons and dots are unsafe in filenames on some OSes, so flatten the timestamp.
-      const stamp = report.data.generatedAt.replace(/[:.]/g, "-");
+    reply
+      .header("cache-control", "no-store")
+      .header("content-disposition", `attachment; filename="n8n-instance-report-${stamp}.json"`)
+      .type("application/json");
 
-      reply
-        .header("cache-control", "no-store")
-        .header("content-disposition", `attachment; filename="n8n-instance-report-${stamp}.json"`)
-        .type("application/json");
-
-      return report;
-    },
-  );
+    // A DB error after the first chunk cannot un-send the 200 already on the
+    // wire; the stream just breaks and the client gets a truncated file. That is
+    // a trade-off for not buffering the whole report — a partial download is more honest
+    // than a valid-looking but silently short one.
+    return Readable.from(renderReport(generatedAt, fastify.instanceReportService.streamInstanceReports()));
+  });
 };
 
 export default getReport;
