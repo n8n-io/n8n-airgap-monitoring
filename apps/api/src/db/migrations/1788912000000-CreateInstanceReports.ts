@@ -9,7 +9,7 @@ export class CreateInstanceReports1788912000000 implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       CREATE TABLE instance_reports (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        id         INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         instanceId TEXT NOT NULL,
         batchId    TEXT NOT NULL,
         label      TEXT,
