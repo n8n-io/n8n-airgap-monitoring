@@ -1,0 +1,37 @@
+.github/workflows/release-alpha.yml
+  h_c63dce324dfc7b 13
+  s_324aeac0bd533d::t_5b1cf0a8e3697c 31
+.github/workflows/retag-image.yml
+  s_7f957968465d3e::t_2fd2d666b8152f 25,27-32
+  s_7f957968465d3e::t_b590e6e81e4cae 104
+  s_7f957968465d3e::t_883b28fdab942d 62-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5f8fe447a0ac2e593a1d5a072dd9b3b7f3e1a50a",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_324aeac0bd533d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "afa5d93a-ac74-415d-a8c6-17ce40f18c94",
+        "model": "unknown"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_7f957968465d3e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb35bf72-f831-42db-9b8e-19b96aba76ae",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
