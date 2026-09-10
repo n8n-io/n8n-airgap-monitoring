@@ -1,15 +1,16 @@
 # One image holding the API: an airgapped customer runs a single container and a
 # single volume for the SQLite file. There is no frontend in this service.
 
-FROM node:24-slim AS build
+FROM node:26-slim AS build
 
-# corepack honors the pnpm version pinned in the root package.json.
-RUN corepack enable
 WORKDIR /repo
 
 # Manifests first, so a source-only change reuses the cached install layer.
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/api/package.json apps/api/
+
+# Keep this in sync with "packageManager" field in the root package.json.
+RUN npm install -g pnpm@12.3.4
 RUN pnpm install --frozen-lockfile
 
 COPY . .
@@ -18,11 +19,11 @@ RUN pnpm turbo run build
 # Self-contained API: its dist plus a pruned production node_modules, including
 # fastify-cli and better-sqlite3, which ships its linux prebuilds in the package
 # itself, so no compiler toolchain is needed here. `--legacy` because the
-# workspace does not use injected dependencies, which pnpm 10's deploy assumes.
+# workspace does not use injected dependencies, which pnpm's deploy assumes.
 RUN pnpm deploy --legacy --filter api --prod /out
 
 
-FROM node:24-slim AS runtime
+FROM node:26-slim AS runtime
 
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
