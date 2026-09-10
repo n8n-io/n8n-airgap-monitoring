@@ -1,0 +1,23 @@
+.github/workflows/ci.yml
+  s_636a4375066799::t_34923cc5c2ca30 26,28-29,31,40
+scripts/set-release-version.sh
+  s_636a4375066799::t_ea9e7c9e7df373 1-15
+.github/actions/test/action.yml
+  s_636a4375066799::t_b442824ab8b20f 1-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3bb687f153d188b3c76651b4f52c0d5ba9741745",
+  "prompts": {},
+  "sessions": {
+    "s_636a4375066799": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0790618c-375b-42e2-a255-618b0048d383",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
