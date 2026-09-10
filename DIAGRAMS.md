@@ -34,7 +34,7 @@ sequenceDiagram
     Note over N8N,API: Example data - what an n8n instance sends today<br/>"dataPoints": [<br/>{<br/>"kind": "cumulative",<br/>"name": "billableExecutions",<br/>"value": 402931<br/>},<br/>{<br/>"kind": "daily",<br/>"name": "billableExecutions",<br/>"value": 15234,<br/>"date": "2026-03-25"<br/>}<br/>]<br/>The cumulative point is the lifetime total, the daily point covers the previous completed UTC day.
 
     API->>API: bearer-auth: token equals N8N_MONITORING_WRITE_TOKEN
-    API->>DB: INSERT INTO instance_reports<br/>(instanceId, batchId, label, n8nVersion, data, ReceivedAt)
+    API->>DB: INSERT INTO instance_reports<br/>(instanceId, batchId, label, n8nVersion, data, receivedAt)
     Note over DB: Append-only event store.<br/>dataPoints stored as a JSON blob.<br/>UNIQUE (instanceId, batchId).
     DB-->>API: lastInsertRowid
     API-->>N8N: 201 Created, body carries the stored event id
