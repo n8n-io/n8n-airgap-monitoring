@@ -1,0 +1,31 @@
+.github/workflows/release-publish.yml
+  s_636a4375066799::t_652711aef92a31 1-143
+.github/workflows/retag-image.yml
+  s_636a4375066799::t_234b165e381a3e 1-70
+.github/scripts/create-signed-commit-pr.mjs
+  s_636a4375066799::t_1ead305658d669 1-221
+.github/workflows/release-prep.yml
+  s_636a4375066799::t_144d4dfff6d210 1-162
+.github/scripts/package.json
+  s_636a4375066799::t_1ead305658d669 1-8
+docs/RELEASE.md
+  s_636a4375066799::t_95d76a578a9512 1-127
+.github/scripts/package-lock.json
+  s_636a4375066799::t_016792a7354677 1-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b6e3110d8837922fd908dc225add0eff7b39740f",
+  "prompts": {},
+  "sessions": {
+    "s_636a4375066799": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0790618c-375b-42e2-a255-618b0048d383",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

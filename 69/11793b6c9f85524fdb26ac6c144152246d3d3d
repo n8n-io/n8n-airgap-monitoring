@@ -1,0 +1,19 @@
+.github/workflows/release-alpha.yml
+  s_636a4375066799::t_e012475e1d54ac 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6911793b6c9f85524fdb26ac6c144152246d3d3d",
+  "prompts": {},
+  "sessions": {
+    "s_636a4375066799": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0790618c-375b-42e2-a255-618b0048d383",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

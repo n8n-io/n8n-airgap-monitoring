@@ -1,0 +1,37 @@
+.github/scripts/package-lock.json
+  s_636a4375066799::t_016792a7354677 1-25
+docs/RELEASE.md
+  s_636a4375066799::t_fdc0610f04cefe 37-41
+  s_636a4375066799::t_1ef9a5cc892481 112,114-119
+  s_636a4375066799::t_33a4696650a566 113
+  s_636a4375066799::t_95d76a578a9512 1-36,43-111,120-134
+  s_636a4375066799::t_db67f5b4558208 42
+.github/workflows/release-publish.yml
+  s_636a4375066799::t_652711aef92a31 1-143
+.github/scripts/package.json
+  s_636a4375066799::t_1ead305658d669 1-8
+.github/workflows/retag-image.yml
+  s_636a4375066799::t_8209ef20118e28 3,11-14,18-21,25,53,63-73,76-83,87-88
+  s_636a4375066799::t_234b165e381a3e 1-2,15-17,22-24,26-52,54-62,74-75,84-86,89-96
+  s_636a4375066799::t_fcb12f44d97d1e 4-10
+.github/scripts/create-signed-commit-pr.mjs
+  s_636a4375066799::t_1ead305658d669 1-221
+.github/workflows/release-prep.yml
+  s_636a4375066799::t_144d4dfff6d210 1-162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "78fb1fd5b0e20440d56ff986563f529e25c2194d",
+  "prompts": {},
+  "sessions": {
+    "s_636a4375066799": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0790618c-375b-42e2-a255-618b0048d383",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": null
+    }
+  }
+}
