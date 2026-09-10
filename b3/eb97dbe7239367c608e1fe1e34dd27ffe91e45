@@ -1,0 +1,14 @@
+DIAGRAMS.md
+  h_c63dce324dfc7b 37-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b3eb97dbe7239367c608e1fe1e34dd27ffe91e45",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
