@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Aggregate usage metrics for n8n instances in airgapped environments.",
   "private": true,
+  "license": "LicenseRef-n8n-enterprise",
   "packageManager": "pnpm@10.34.5",
   "scripts": {
     "build": "turbo run build",

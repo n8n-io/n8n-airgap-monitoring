@@ -179,3 +179,8 @@ this service in a [kind](https://kind.sigs.k8s.io/) cluster, with the instances
 reporting over cluster-internal DNS so no traffic leaves the cluster. See its
 [README](scripts/local-k8s-demo/README.md).
 
+## License
+
+This project is licensed under the [n8n Enterprise License](LICENSE_EE.md). See
+[LICENSE.md](LICENSE.md) for details.
+
