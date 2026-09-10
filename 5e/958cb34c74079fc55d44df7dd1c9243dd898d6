@@ -1,0 +1,19 @@
+apps/api/src/db/migrations/1788912000000-CreateInstanceReports.ts
+  s_df9e95a684c987::t_a89bddbcbf5cca 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5e958cb34c74079fc55d44df7dd1c9243dd898d6",
+  "prompts": {},
+  "sessions": {
+    "s_df9e95a684c987": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "89746db6-b8d0-4a1f-af1f-dc2f87a0c09a",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

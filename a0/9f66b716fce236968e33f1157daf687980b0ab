@@ -1,0 +1,23 @@
+apps/api/src/plugins/db.test.ts
+  s_df9e95a684c987::t_c2db4159d4b462 1
+  s_df9e95a684c987::t_0786108f4dc977 24,28-29,40,42
+  s_df9e95a684c987::t_490ffd417cced8 44-47,50,54,60,62-63
+  s_df9e95a684c987::t_dd8092a88236a3 25-27,30-39,41,43,48-49,51-53,55-59,61,64-67
+  s_df9e95a684c987::t_699749df66c56e 68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a09f66b716fce236968e33f1157daf687980b0ab",
+  "prompts": {},
+  "sessions": {
+    "s_df9e95a684c987": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "89746db6-b8d0-4a1f-af1f-dc2f87a0c09a",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
