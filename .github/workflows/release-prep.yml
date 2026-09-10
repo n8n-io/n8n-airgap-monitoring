@@ -1,0 +1,162 @@
+name: Release Prep
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type (ignored when version is set)"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      version:
+        description: "Exact version to release (x.y.z). Overrides bump."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Serialized, and deliberately not keyed by version: the resolved version is only
+# known mid-run, and two runs can reach the same one from different inputs. The
+# already-released check below is a read followed by a write, so it is only sound
+# while no other prep run is in flight.
+concurrency:
+  group: release-prep
+  cancel-in-progress: false
+
+jobs:
+  prep-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: main
+
+      # A bump computed from package.json collides whenever a past release left
+      # the version behind — an abandoned version stays reachable by bump forever.
+      # The override lets a human name the next version instead of
+      # reverse-engineering the input that yields it. set-release-version.sh
+      # rejects anything that is not x.y.z.
+      - name: Resolve version
+        id: bump
+        env:
+          BUMP: ${{ inputs.bump }}
+          OVERRIDE: ${{ inputs.version }}
+        run: |
+          CURRENT=$(jq -r .version package.json)
+          if [[ -n "$OVERRIDE" ]]; then
+            VERSION="$OVERRIDE"
+          else
+            IFS='.' read -r major minor patch <<< "$CURRENT"
+            case "$BUMP" in
+              major) major=$((major + 1)); minor=0; patch=0 ;;
+              minor) minor=$((minor + 1)); patch=0 ;;
+              patch) patch=$((patch + 1)) ;;
+            esac
+            VERSION="${major}.${minor}.${patch}"
+          fi
+          bash scripts/set-release-version.sh "$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing $CURRENT -> $VERSION"
+
+      # Catch a collision here rather than at the branch push, which reports it as
+      # an opaque non-fast-forward after the version has already been bumped.
+      - name: Fail if version was already released
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          for ref in "refs/tags/v${VERSION}" "refs/heads/release/${VERSION}"; do
+            # "No such ref" and "origin did not answer" both print nothing, so the
+            # exit status is the only thing that distinguishes free from unknown.
+            if ! matches=$(git ls-remote origin "$ref"); then
+              echo "::error::Could not reach origin to look up ${ref}. Refusing to continue without confirming v${VERSION} is unreleased; re-run once origin is reachable."
+              exit 1
+            fi
+            if [[ -n "$matches" ]]; then
+              echo "::error::${ref} already exists. v${VERSION} was already released, or a previous attempt left it behind. Pick a different version or delete the stale ref."
+              exit 1
+            fi
+          done
+
+      # An unused version number is not necessarily a releasable one. The version
+      # on main lags whenever a release is abandoned, and the override is
+      # hand-typed, so both paths can land below the newest release — where the
+      # image tag, and latest and stable with it, would silently move backwards.
+      # Releases only ever build from the tip of main, so a lower number cannot
+      # describe what it ships.
+      - name: Fail if version is not newer than the latest release
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          # Release branches count alongside tags. A version is claimed at prep and
+          # only tagged at the end of publishing, so a tag-only floor is blind to
+          # every release still in flight.
+          if ! refs=$(git ls-remote --refs origin 'refs/tags/v*' 'refs/heads/release/*'); then
+            echo "::error::Could not reach origin to list releases. Refusing to continue without confirming v${VERSION} is the newest; re-run once origin is reachable."
+            exit 1
+          fi
+          # Filtered with sed rather than grep, which exits 1 on no match and would
+          # abort the very first release under pipefail.
+          latest=$(sed -nE 's#.*/(v|release/)##; /^[0-9]+\.[0-9]+\.[0-9]+$/p' <<< "$refs" \
+            | sort -V | tail -1)
+          if [[ -z "$latest" ]]; then
+            echo "No prior releases; v${VERSION} is the first."
+            exit 0
+          fi
+          if [[ "$(printf '%s\n%s\n' "$VERSION" "$latest" | sort -V | head -1)" == "$VERSION" ]]; then
+            echo "::error::v${VERSION} is not newer than v${latest}, which is already released or still in flight. Publishing it would move latest and stable backwards onto an older image. Release above v${latest}, wait for v${latest} to finish publishing, or delete its abandoned release branch."
+            exit 1
+          fi
+          echo "v${VERSION} is newer than v${latest}"
+
+      # The release PR is opened with GITHUB_TOKEN, and GitHub does not run
+      # workflows for events that token causes, so CI will not run on the PR by
+      # itself. Validate here instead, before anything is pushed.
+      - name: Lint, typecheck, build & test
+        uses: ./.github/actions/test
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Build image (amd64, no push)
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha
+
+      - name: Create release branch
+        run: git push origin HEAD:refs/heads/release/${{ steps.bump.outputs.version }}
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          printf '%s\n' \
+            "Automated release PR for n8n-airgap-monitoring v${VERSION}." \
+            "" \
+            "**Image that will be published:**" \
+            "- \`ghcr.io/n8n-io/n8n-airgap-monitoring:${VERSION}\` (also tagged \`latest\` and \`stable\`)" \
+            "" \
+            "This PR was opened by a workflow, so CI does not run on it automatically." \
+            "The prep workflow already ran lint, typecheck, build, tests and a dry-run" \
+            "image build on this commit. Close and reopen the PR to trigger CI anyway." \
+            "" \
+            "Merging this PR will trigger the publish workflow." \
+            > /tmp/pr-body.md
+
+          npm ci --prefix .github/scripts
+          node .github/scripts/create-signed-commit-pr.mjs \
+            --base "release/${VERSION}" \
+            --branch "release-pr/${VERSION}" \
+            --title "release v${VERSION}" \
+            --body-file /tmp/pr-body.md \
+            --label "release" \
+            --message "release v${VERSION}" \
+            -- package.json
