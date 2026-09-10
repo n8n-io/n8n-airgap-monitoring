@@ -1,0 +1,35 @@
+LICENSE.md
+  s_c396075e75d50e::t_4a1e6326fa94d1 7-8
+  s_c396075e75d50e::t_0939bb92e930f3 4-6
+  s_c396075e75d50e::t_70128fd04f298f 9-10
+  h_c63dce324dfc7b 1-3
+package.json
+  h_c63dce324dfc7b 7
+LICENSE_EE.md
+  h_c63dce324dfc7b 1-27
+README.md
+  h_c63dce324dfc7b 182-186
+apps/api/package.json
+  h_c63dce324dfc7b 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3b8389d3caca4b1093dc90c97b473ed79224f779",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_c396075e75d50e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "de4c40a4-08e3-43ef-a5b3-79ed6b1030b5",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
