@@ -2,6 +2,7 @@
   "name": "api",
   "version": "0.0.1",
   "private": true,
+  "license": "LicenseRef-n8n-enterprise",
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
