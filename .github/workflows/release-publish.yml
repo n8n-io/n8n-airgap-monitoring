@@ -1,0 +1,143 @@
+name: Release Publish
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - 'release/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/n8n-airgap-monitoring
+
+jobs:
+  publish-image:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      # The merge commit rather than the base branch by name: merging the release
+      # PR is what puts the new version on that branch, so resolving the name
+      # could still read the pre-merge tip.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Read version
+        id: version
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          VERSION="${BASE_REF#release/}"
+          FILE_VERSION=$(jq -r .version package.json)
+          if [[ "$VERSION" != "$FILE_VERSION" ]]; then
+            echo "::error::Release branch ${BASE_REF} claims v${VERSION} but package.json reads ${FILE_VERSION}. Refusing to publish under either version."
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # release-metadata only tags at the very end, long after the image is public.
+      - name: Fail if version was already released
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if ! matches=$(git ls-remote origin "refs/tags/v${VERSION}"); then
+            echo "::error::Could not reach origin to look up v${VERSION}. Refusing to publish without confirming it is unreleased; re-run once origin is reachable."
+            exit 1
+          fi
+          if [[ -n "$matches" ]]; then
+            echo "::error::v${VERSION} already exists, so it was published before. Publishing it again would overwrite its image and move latest and stable onto it."
+            exit 1
+          fi
+
+      - name: Lint, typecheck, build & test
+        uses: ./.github/actions/test
+
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Build and push
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.version.outputs.version }}
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:stable
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Separate job so the image publish is what the bookkeeping below depends on,
+  # and a failure here leaves the already-public image traceable via a re-run.
+  release-metadata:
+    needs: publish-image
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.publish-image.outputs.version }}
+      IMAGE: ghcr.io/${{ github.repository_owner }}/n8n-airgap-monitoring
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Create git tag
+        run: |
+          # Not forced: a released tag must keep pointing at the commit its image
+          # was built from.
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes "## Docker Image
+
+          - \`${IMAGE}:${VERSION}\`
+
+          Also tagged \`latest\` and \`stable\`. Platforms: \`linux/amd64\`, \`linux/arm64\`.
+
+          Airgapped deployments should pin \`${VERSION}\` rather than a moving tag."
+
+      # The post-release PR is opened with GITHUB_TOKEN, so CI does not run on it
+      # by itself; the PR body says how to trigger it.
+      - name: Open version-bump PR against main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash scripts/set-release-version.sh "${VERSION}"
+          npm ci --prefix .github/scripts
+          node .github/scripts/create-signed-commit-pr.mjs \
+            --base main \
+            --branch "post-release/${VERSION}" \
+            --title "chore: Bump version to v${VERSION}" \
+            --body "Automated post-release PR to update the package.json version on main after publishing v${VERSION}. Close and reopen this PR to trigger CI." \
+            --label "release" \
+            --message "chore: Bump version to v${VERSION}" \
+            -- package.json

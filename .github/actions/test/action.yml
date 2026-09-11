@@ -1,0 +1,54 @@
+name: Lint, typecheck, build & test
+description: >
+  Install dependencies and run every check the repository has. Shared by CI and
+  the release workflows so an image is never published from a commit that would
+  not pass CI.
+
+inputs:
+  coverage:
+    required: false
+    default: 'false'
+    description: Run the tests with coverage (writes coverage/lcov.info)
+
+runs:
+  using: composite
+  steps:
+    # Reads the pnpm version from the root package.json "packageManager" field.
+    - name: Setup pnpm
+      uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+    # Node version comes from .nvmrc so CI and local dev stay in lockstep.
+    - name: Setup Node.js
+      uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    # Checks run fail-fast in cheapest-first order.
+    - name: Lint
+      shell: bash
+      run: pnpm lint
+
+    - name: Typecheck
+      shell: bash
+      run: pnpm typecheck
+
+    - name: Build
+      shell: bash
+      run: pnpm build
+
+    # The `text` coverage reporter prints the coverage table straight into the log.
+    - name: Run unit tests
+      shell: bash
+      env:
+        COVERAGE: ${{ inputs.coverage }}
+      run: |
+        if [[ "$COVERAGE" == "true" ]]; then
+          pnpm test:coverage
+        else
+          pnpm test
+        fi

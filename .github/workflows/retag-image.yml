@@ -1,0 +1,115 @@
+name: Retag Image
+
+# Points published tags at an image that is already in GHCR. It cannot build or
+# delete anything.
+#
+# Every release pushes `{version}`, `latest` and `stable` from one build, so the
+# three always agree at publish time and `latest` and `stable` start out as
+# synonyms. They differ in what they promise: `latest` is the newest release,
+# `stable` is the newest release we still recommend. When a release turns out
+# broken, this workflow moves `stable` (and `latest`, if the release should be
+# hidden entirely) back onto the previous version until a fix ships. Run it with
+# source = the known-good version, e.g. `1.0.0`, and tags = `stable`. Releasing
+# the fix moves both tags forward again, so the divergence is temporary by
+# construction.
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: >-
+          Version whose image the tags should point at (e.g. "1.0.0"). A digest
+          (sha256:...) is accepted too.
+        required: true
+        type: string
+      tags:
+        description: Which moving tags to retarget
+        required: true
+        default: stable
+        type: choice
+        options:
+          - stable
+          - latest
+          - latest stable
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: retag-image
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/n8n-airgap-monitoring
+
+jobs:
+  retag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Move tags
+        env:
+          SOURCE: ${{ inputs.source }}
+          TAGS: ${{ inputs.tags }}
+        run: |
+          set -euo pipefail
+          set -f # split TAGS on whitespace without glob-expanding it
+
+          # `stable` and `latest` are the only tags this workflow may retarget.
+          # Release versions are immutable and `alpha` belongs to main, so an
+          # allowlist -- not a version-shaped denylist -- is what keeps a typo,
+          # a digest or an empty input from landing on a published tag. Checked
+          # before the source lookup, so nothing is touched when it fails.
+          read -r -a REQUESTED <<<"$TAGS"
+          if [[ ${#REQUESTED[@]} -eq 0 ]]; then
+            echo "::error::No tags requested. Pass \"stable\", \"latest\" or \"latest stable\". Nothing was changed."
+            exit 1
+          fi
+          for tag in "${REQUESTED[@]}"; do
+            case "$tag" in
+              stable | latest) ;;
+              *)
+                echo "::error::${tag} is not a retargetable tag. Only stable and latest can be moved; release versions are immutable. Nothing was changed."
+                exit 1
+                ;;
+            esac
+          done
+
+          digest_of() {
+            docker buildx imagetools inspect --format '{{json .Manifest}}' "$1" 2>/dev/null \
+              | jq -r '.digest' || true
+          }
+
+          if [[ "$SOURCE" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            SOURCE_REF="${IMAGE}@${SOURCE}"
+          else
+            SOURCE_REF="${IMAGE}:${SOURCE}"
+          fi
+
+          # Resolve the source to a digest once, and fail before any tag moves if
+          # it does not exist, so a typo cannot leave the tags half-moved.
+          DIGEST=$(digest_of "$SOURCE_REF")
+          if [[ ! "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::${SOURCE_REF} does not exist. Nothing was changed."
+            exit 1
+          fi
+          echo "${SOURCE_REF} is ${DIGEST}"
+
+          for tag in "${REQUESTED[@]}"; do
+            echo "${IMAGE}:${tag} was $(digest_of "${IMAGE}:${tag}" | grep . || echo absent)"
+            # Copies the multi-arch index as-is, so the tag resolves to the same
+            # digest as the source.
+            docker buildx imagetools create --tag "${IMAGE}:${tag}" "${IMAGE}@${DIGEST}"
+            landed=$(digest_of "${IMAGE}:${tag}")
+            if [[ "$landed" != "$DIGEST" ]]; then
+              echo "::error::${IMAGE}:${tag} landed as ${landed}, expected ${DIGEST}"
+              exit 1
+            fi
+            echo "${IMAGE}:${tag} now ${landed}"
+          done

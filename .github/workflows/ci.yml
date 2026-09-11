@@ -23,35 +23,12 @@ jobs:
       # `env.CODECOV_TOKEN != ''` check until the secret is configured.
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      # Reads the pnpm version from the root package.json "packageManager" field.
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      # Node version comes from .nvmrc so CI and local dev stay in lockstep.
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Lint, typecheck, build & test
+        uses: ./.github/actions/test
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # Checks run fail-fast in cheapest-first order. The `text` coverage
-      # reporter prints the coverage table straight into this job's log.
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Build
-        run: pnpm build
-
-      - name: Run unit tests with coverage
-        run: pnpm test:coverage
+          coverage: 'true'
 
       # Runs only when everything above (including the tests) passed and once
       # CODECOV_TOKEN is added to the repo secrets — until then it is skipped and
@@ -60,7 +37,7 @@ jobs:
       # the main n8n repo, ready to light up once the token is available.
       - name: Upload coverage to Codecov
         if: ${{ success() && env.CODECOV_TOKEN != '' }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ env.CODECOV_TOKEN }}
           files: coverage/lcov.info

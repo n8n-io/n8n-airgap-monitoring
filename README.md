@@ -106,8 +106,7 @@ Its shape is:
 }
 ```
 
-`dataPoints` here is a map keyed by metric name — note this differs from the
-same field on the ingest payload, which is a flat array. Each key holds every
+`dataPoints` here is a map keyed by metric name. Each key holds every
 value that instance reported for that metric, oldest-first, tagged with the
 `batchId` and `receivedAt` of the report that carried it.
 
