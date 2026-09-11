@@ -1,4 +1,4 @@
-import type { InstanceReportRepository } from "./instance-report.repository";
+import type { InstanceReportRepository, InstanceReportRow } from "./instance-report.repository";
 
 interface BaseMetric {
   name: string;
@@ -80,6 +80,12 @@ interface ReportedCumulativeMetric extends ReportedMetricBase {
 /** Kept as a discriminated union so a consumer can tell a day-scoped value from a running total. */
 export type ReportedMetric = ReportedDailyMetric | ReportedCumulativeMetric;
 
+/** A {@link ReportedMetric} still carrying the name it will be filed under, before grouping. */
+interface NamedMetric {
+  name: string;
+  metric: ReportedMetric;
+}
+
 /** The report's view of one instance: identity, when we first heard from it, and its full metric history. */
 export interface InstanceReportEntry {
   instanceId: string;
@@ -119,46 +125,61 @@ export class InstanceReportService {
     return { id };
   }
 
-  async generateReport(): Promise<UsageReport> {
-    const instances = new Map<string, InstanceReportEntry>();
-
-    // Rows arrive grouped per instance and oldest-first within each (repository order),
-    // so the first row seen for an instance is its earliest, and the last wins for label.
-    for (const row of await this.repository.findAll()) {
-      let entry = instances.get(row.instanceId);
-      if (!entry) {
-        entry = {
-          instanceId: row.instanceId,
-          label: row.label,
-          firstSeen: row.receivedAt,
-          lastReportAt: row.receivedAt,
-          dataPoints: Object.create(null) as Record<string, ReportedMetric[]>,
-        };
-        instances.set(row.instanceId, entry);
-      }
-
-      // Last-received label wins. Rows are oldest-first per instance, so
-      // the last row's receivedAt is the most recent report.
-      entry.label = row.label;
-      entry.lastReportAt = row.receivedAt;
-
-      for (const point of row.dataPoints) {
-        const reported: ReportedMetric =
-          point.kind === "daily"
-            ? { kind: "daily", date: point.date, value: point.value, batchId: row.batchId, receivedAt: row.receivedAt }
-            : { kind: "cumulative", value: point.value, batchId: row.batchId, receivedAt: row.receivedAt };
-
-        const series = entry.dataPoints[point.name] ?? [];
-        series.push(reported);
-        entry.dataPoints[point.name] = series;
+  /**
+   * The report's instances, one at a time, ready to be streamed straight to the
+   * response. Only a single instance's history is materialised at any moment, so
+   * memory consumption does not depends on instance amounts.
+   *
+   * Rows come back grouped per instance and oldest-first (repository order), so
+   * the first row is the earliest and the last carries the latest state — see
+   * {@link toEntry}.
+   */
+  async *streamInstanceReports(): AsyncGenerator<InstanceReportEntry> {
+    for (const instanceId of await this.repository.findInstanceIds()) {
+      const rows = await this.repository.findByInstanceId(instanceId);
+      // findInstanceIds only returns ids that have rows, so this is never empty.
+      if (rows.length > 0) {
+        yield toEntry(rows);
       }
     }
-
-    return {
-      data: {
-        generatedAt: new Date().toISOString(),
-        instances: [...instances.values()],
-      },
-    };
   }
+}
+
+/**
+ * One instance's rows, oldest-first (repository order) and never empty, so the
+ * first row is its earliest and the last carries its latest state.
+ */
+function toEntry(rows: InstanceReportRow[]): InstanceReportEntry {
+  const first = rows[0];
+  const last = rows[rows.length - 1];
+
+  return {
+    instanceId: first.instanceId,
+    label: last.label, // last-received label wins
+    firstSeen: first.receivedAt,
+    lastReportAt: last.receivedAt,
+    dataPoints: byName(rows.flatMap(toNamedMetrics)),
+  };
+}
+
+/** Every point in one row, tagged with the metric name it is filed under. */
+function toNamedMetrics(row: InstanceReportRow): NamedMetric[] {
+  return row.dataPoints.map(({ name, ...point }) => ({
+    name,
+    metric: { ...point, batchId: row.batchId, receivedAt: row.receivedAt },
+  }));
+}
+
+/** Files each point under its name. Nothing is folded or deduplicated — dumb pipe. */
+function byName(points: NamedMetric[]): Record<string, ReportedMetric[]> {
+  const grouped: Record<string, ReportedMetric[]> = Object.create(null);
+
+  for (const { name, metric } of points) {
+    if (grouped[name] === undefined) {
+      grouped[name] = [];
+    }
+    grouped[name].push(metric);
+  }
+
+  return grouped;
 }

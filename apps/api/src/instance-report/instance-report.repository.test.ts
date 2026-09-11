@@ -32,13 +32,13 @@ test("lets other constraint violations escape untranslated", async () => {
   );
 });
 
-test("findAll parses the stored data column back into metrics", async () => {
+test("findByInstanceId parses the stored data column back into metrics", async () => {
   const app = await build();
   const repository = new InstanceReportRepository(app.dataSource);
 
   await repository.insert({ ...event, label: "prod" });
 
-  expect(await repository.findAll()).toEqual([
+  expect(await repository.findByInstanceId("instance-1")).toEqual([
     expect.objectContaining({
       instanceId: "instance-1",
       batchId: "batch-1",
@@ -50,7 +50,7 @@ test("findAll parses the stored data column back into metrics", async () => {
   ]);
 });
 
-test("findAll groups by instance and orders each by receivedAt", async () => {
+test("findByInstanceId returns only that instance's events, oldest-first", async () => {
   const app = await build();
   const repository = new InstanceReportRepository(app.dataSource);
 
@@ -73,16 +73,12 @@ test("findAll groups by instance and orders each by receivedAt", async () => {
     receivedAt: "2026-03-23T00:00:00.000Z",
   });
 
-  const rows = await repository.findAll();
+  const rows = await repository.findByInstanceId("instance-2");
 
-  expect(rows.map((r) => [r.instanceId, r.batchId])).toEqual([
-    ["instance-1", "solo"],
-    ["instance-2", "earlier"],
-    ["instance-2", "later"],
-  ]);
+  expect(rows.map((r) => r.batchId)).toEqual(["earlier", "later"]);
 });
 
-test("findAll breaks a receivedAt tie by insertion order", async () => {
+test("findByInstanceId breaks a receivedAt tie by insertion order", async () => {
   const app = await build();
   const repository = new InstanceReportRepository(app.dataSource);
 
@@ -90,7 +86,20 @@ test("findAll breaks a receivedAt tie by insertion order", async () => {
   await repository.insert({ ...event, batchId: "first", receivedAt: sameInstant });
   await repository.insert({ ...event, batchId: "second", receivedAt: sameInstant });
 
-  const rows = await repository.findAll();
+  const rows = await repository.findByInstanceId("instance-1");
 
   expect(rows.map((r) => r.batchId)).toEqual(["first", "second"]);
+});
+
+test("findInstanceIds returns each distinct instanceId once, ascending", async () => {
+  const app = await build();
+  const repository = new InstanceReportRepository(app.dataSource);
+
+  // Inserted out of order and with two rows for instance-b, to prove the query
+  // sorts and de-duplicates rather than echoing the table.
+  await repository.insert({ ...event, instanceId: "instance-b", batchId: "b1" });
+  await repository.insert({ ...event, instanceId: "instance-a", batchId: "a1" });
+  await repository.insert({ ...event, instanceId: "instance-b", batchId: "b2" });
+
+  expect(await repository.findInstanceIds()).toEqual(["instance-a", "instance-b"]);
 });

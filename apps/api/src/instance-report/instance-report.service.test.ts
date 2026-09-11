@@ -1,6 +1,6 @@
-import { expect, test, vi } from "vitest";
+import { expect, test } from "vitest";
 import type { InstanceReport, InstanceReportRepository, InstanceReportRow } from "./instance-report.repository";
-import { type CreateInstanceReport, InstanceReportService } from "./instance-report.service";
+import { type CreateInstanceReport, type InstanceReportEntry, InstanceReportService } from "./instance-report.service";
 
 const report: CreateInstanceReport = {
   instanceId: "instance-1",
@@ -56,9 +56,26 @@ test("returns the id assigned by the repository", async () => {
   expect(await service.recordReport(report)).toEqual({ id: 2 });
 });
 
-/** A repository stub whose findAll returns pre-built rows in the order given. */
-function fakeReportRepository(rows: InstanceReportRow[]): InstanceReportService {
-  return new InstanceReportService({ findAll: () => rows } as unknown as InstanceReportRepository);
+/**
+ * A repository stub whose per-instance reads serve pre-built rows. The streaming
+ * report groups by instanceId, so the fake derives the id list from the rows
+ * (order preserved) and filters per instance — mirroring the real repository.
+ */
+function fakeReportService(rows: InstanceReportRow[]): InstanceReportService {
+  const instanceIds = [...new Set(rows.map((r) => r.instanceId))];
+  return new InstanceReportService({
+    findInstanceIds: async () => instanceIds,
+    findByInstanceId: async (instanceId: string) => rows.filter((r) => r.instanceId === instanceId),
+  } as unknown as InstanceReportRepository);
+}
+
+/** Drains the streaming report into an array, the way the route does as it writes each chunk. */
+async function collectInstances(service: InstanceReportService): Promise<InstanceReportEntry[]> {
+  const instances: InstanceReportEntry[] = [];
+  for await (const entry of service.streamInstanceReports()) {
+    instances.push(entry);
+  }
+  return instances;
 }
 
 function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
@@ -73,46 +90,50 @@ function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
   };
 }
 
-test("generateReport takes firstSeen from the earliest row, and label and lastReportAt from the latest", async () => {
-  const report = await fakeReportRepository([
-    row({ batchId: "b1", label: "first", receivedAt: "2026-03-20T02:00:00.000Z" }),
-    row({ batchId: "b2", label: "latest", receivedAt: "2026-03-25T02:00:00.000Z" }),
-  ]).generateReport();
+test("streamInstanceReports takes firstSeen from the earliest row, and label and lastReportAt from the latest", async () => {
+  const [instance] = await collectInstances(
+    fakeReportService([
+      row({ batchId: "b1", label: "first", receivedAt: "2026-03-20T02:00:00.000Z" }),
+      row({ batchId: "b2", label: "latest", receivedAt: "2026-03-25T02:00:00.000Z" }),
+    ]),
+  );
 
-  expect(report.data.instances[0].firstSeen).toBe("2026-03-20T02:00:00.000Z");
-  expect(report.data.instances[0].label).toBe("latest");
-  expect(report.data.instances[0].lastReportAt).toBe("2026-03-25T02:00:00.000Z");
+  expect(instance.firstSeen).toBe("2026-03-20T02:00:00.000Z");
+  expect(instance.label).toBe("latest");
+  expect(instance.lastReportAt).toBe("2026-03-25T02:00:00.000Z");
 });
 
-test("generateReport files a metric named __proto__ as data instead of crashing", async () => {
+test("streamInstanceReports files a metric named __proto__ as data instead of crashing", async () => {
   const protoKey = "__proto__";
-  const report = await fakeReportRepository([
-    row({ dataPoints: [{ kind: "cumulative", name: protoKey, value: 5 }] }),
-  ]).generateReport();
+  const [instance] = await collectInstances(
+    fakeReportService([row({ dataPoints: [{ kind: "cumulative", name: protoKey, value: 5 }] })]),
+  );
 
-  expect(report.data.instances[0].dataPoints[protoKey]).toEqual([
+  expect(instance.dataPoints[protoKey]).toEqual([
     { kind: "cumulative", value: 5, batchId: "batch-1", receivedAt: "2026-03-25T02:00:00.000Z" },
   ]);
 });
 
-test("generateReport groups points by name and tags each with its batchId and receivedAt, without folding", async () => {
-  const report = await fakeReportRepository([
-    row({
-      batchId: "b1",
-      receivedAt: "2026-03-25T02:00:00.000Z",
-      dataPoints: [
-        { kind: "daily", name: "billableExecutionPerDay", value: 100, date: "2026-03-24" },
-        { kind: "cumulative", name: "billableExecutionTotal", value: 900000 },
-      ],
-    }),
-    row({
-      batchId: "b2",
-      receivedAt: "2026-03-26T02:00:00.000Z",
-      dataPoints: [{ kind: "cumulative", name: "billableExecutionTotal", value: 900110 }],
-    }),
-  ]).generateReport();
+test("streamInstanceReports groups points by name and tags each with its batchId and receivedAt, without folding", async () => {
+  const [instance] = await collectInstances(
+    fakeReportService([
+      row({
+        batchId: "b1",
+        receivedAt: "2026-03-25T02:00:00.000Z",
+        dataPoints: [
+          { kind: "daily", name: "billableExecutionPerDay", value: 100, date: "2026-03-24" },
+          { kind: "cumulative", name: "billableExecutionTotal", value: 900000 },
+        ],
+      }),
+      row({
+        batchId: "b2",
+        receivedAt: "2026-03-26T02:00:00.000Z",
+        dataPoints: [{ kind: "cumulative", name: "billableExecutionTotal", value: 900110 }],
+      }),
+    ]),
+  );
 
-  expect(report.data.instances[0].dataPoints).toEqual({
+  expect(instance.dataPoints).toEqual({
     billableExecutionPerDay: [
       { kind: "daily", date: "2026-03-24", value: 100, batchId: "b1", receivedAt: "2026-03-25T02:00:00.000Z" },
     ],
@@ -124,15 +145,15 @@ test("generateReport groups points by name and tags each with its batchId and re
   });
 });
 
-test("generateReport stamps the generation time", async () => {
-  vi.useFakeTimers({ toFake: ["Date"] });
-  vi.setSystemTime(new Date("2026-09-03T14:30:00.000Z"));
+test("streamInstanceReports yields one entry per instance and nothing for an empty store", async () => {
+  expect(await collectInstances(fakeReportService([]))).toEqual([]);
 
-  try {
-    expect(await fakeReportRepository([]).generateReport()).toEqual({
-      data: { generatedAt: "2026-09-03T14:30:00.000Z", instances: [] },
-    });
-  } finally {
-    vi.useRealTimers();
-  }
+  const instances = await collectInstances(
+    fakeReportService([
+      row({ instanceId: "instance-1", batchId: "a" }),
+      row({ instanceId: "instance-2", batchId: "b" }),
+    ]),
+  );
+
+  expect(instances.map((i) => i.instanceId)).toEqual(["instance-1", "instance-2"]);
 });

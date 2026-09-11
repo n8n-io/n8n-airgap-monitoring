@@ -199,3 +199,30 @@ test("defaults a missing label to null", async () => {
   const { instances } = res.json<UsageReport>().data;
   expect(instances[0].label).toBeNull();
 });
+
+test("streams a body that parses as valid JSON across multiple instances", async () => {
+  const app = await build();
+
+  // Several instances, each with more than one point, so the hand-assembled
+  // envelope (head + one JSON.stringify per instance + separating commas + tail)
+  // is exercised where a missing or extra comma would break parsing.
+  for (const instanceId of ["a", "b", "c"]) {
+    await insertRow(app, {
+      instanceId,
+      batchId: `${instanceId}-b1`,
+      dataPoints: [
+        { kind: "daily", name: "billableExecutionPerDay", value: 10, date: "2026-03-24" },
+        { kind: "cumulative", name: "billableExecutionTotal", value: 100 },
+      ],
+      receivedAt: "2026-03-25T02:00:00.000Z",
+    });
+  }
+
+  const res = await app.inject({ method: "GET", url: URL, headers: READ });
+
+  expect(res.statusCode).toBe(200);
+  // Parse the raw streamed bytes directly (not via res.json()), so this asserts
+  // the stream itself is well-formed JSON rather than trusting a helper to cope.
+  const parsed = JSON.parse(res.body) as UsageReport;
+  expect(parsed.data.instances.map((i) => i.instanceId)).toEqual(["a", "b", "c"]);
+});
