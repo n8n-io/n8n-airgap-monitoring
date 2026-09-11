@@ -31,7 +31,7 @@ const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
     keys: new Set([fastify.config.readToken]),
   });
 
-  fastify.get("/", async (_request, reply) => {
+  fastify.get("/", async (request, reply) => {
     const generatedAt = new Date().toISOString();
     // Colons and dots are unsafe in filenames on some OSes, so flatten the timestamp.
     const stamp = generatedAt.replace(/[:.]/g, "-");
@@ -41,11 +41,13 @@ const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
       .header("content-disposition", `attachment; filename="n8n-instance-report-${stamp}.json"`)
       .type("application/json");
 
-    // A DB error after the first chunk cannot un-send the 200 already on the
-    // wire; the stream just breaks and the client gets a truncated file. That is
-    // a trade-off for not buffering the whole report — a partial download is more honest
-    // than a valid-looking but silently short one.
-    return Readable.from(renderReport(generatedAt, fastify.instanceReportService.streamInstanceReports()));
+    const body = Readable.from(renderReport(generatedAt, fastify.instanceReportService.streamInstanceReports()));
+
+    body.on("error", (error) => {
+      request.log.error({ err: error }, "report stream failed after the response had started");
+    });
+
+    return body;
   });
 };
 

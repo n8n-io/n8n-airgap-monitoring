@@ -136,11 +136,7 @@ export class InstanceReportService {
    */
   async *streamInstanceReports(): AsyncGenerator<InstanceReportEntry> {
     for (const instanceId of await this.repository.findInstanceIds()) {
-      const rows = await this.repository.findByInstanceId(instanceId);
-      // findInstanceIds only returns ids that have rows, so this is never empty.
-      if (rows.length > 0) {
-        yield toEntry(rows);
-      }
+      yield toEntry(await this.repository.findByInstanceId(instanceId));
     }
   }
 }
