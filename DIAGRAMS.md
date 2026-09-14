@@ -77,4 +77,96 @@ implementation is in
 
 ## Download collected data via http endpoint
 
-To be added as part of https://linear.app/n8n/issue/API-203/add-endpoint-to-download-instance-report
+The service exposes a single read endpoint, `GET /api/v1/report`. A customer
+downloads the full usage report, every value every instance ever reported, as
+one JSON file and shares it with n8n. The endpoint is guarded by a second,
+separate secret (`N8N_MONITORING_READ_TOKEN`), so a reporting n8n instance that
+only holds the write token cannot read the fleet's data.
+
+The report is streamed, one instance at a time, instead of being built in memory
+(see [ADR 9](docs/adr/2026-09-11-stream-instance-report.md)). Peak memory tracks
+the largest single instance's history, not the number of instances. The price is
+N+1 queries and that a DB failure after the first chunk yields a truncated file
+rather than an error status, because the `200` is already on the wire.
+
+The diagram shows the happy path only. The endpoint also answers `401` for a
+missing or wrong token, including the write token.
+
+```mermaid
+---
+config:
+  sequence:
+    noteAlign: left
+---
+sequenceDiagram
+    autonumber
+    participant C as Customer<br/>curl / browser
+    participant API as airgap-monitoring<br/>GET /api/v1/report
+    participant SVC as InstanceReportService<br/>streamInstanceReports()
+    participant DB as SQLite<br/>instance_reports
+
+    C->>API: GET /api/v1/report<br/>Authorization: Bearer N8N_MONITORING_READ_TOKEN
+    API->>API: bearer-auth: token equals N8N_MONITORING_READ_TOKEN
+    API->>API: generatedAt = now (ISO 8601)<br/>stamp = generatedAt with ":" and "." replaced by "-"
+    API-->>C: 200 OK<br/>Content-Type: application/json<br/>Cache-Control: no-store<br/>Content-Disposition: attachment#59; filename="n8n-instance-report-{stamp}.json"
+    Note right of API: Headers go out first. The body is a Readable<br/>wrapping the renderReport async generator, so<br/>Fastify pipes chunks as they are produced.<br/>No response schema: the data was validated on<br/>upload and re-validating would undo the streaming.
+
+    API-->>C: chunk: {"data":{"generatedAt":"...","instances":[
+
+    API->>SVC: for await entry of streamInstanceReports()
+    SVC->>DB: SELECT DISTINCT instanceId<br/>ORDER BY instanceId ASC
+    Note over DB: Served by the leading column of the<br/>UNIQUE (instanceId, batchId) index.
+    DB-->>SVC: instanceId[]
+
+    loop one instance at a time
+        SVC->>DB: SELECT * WHERE instanceId = ?<br/>ORDER BY receivedAt ASC, id ASC
+        DB-->>SVC: rows, oldest-first, JSON data column parsed
+        SVC->>SVC: toEntry(rows)
+        Note right of SVC: instanceId - from any row<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>dataPoints - every point of every row, tagged with<br/>its row's batchId and receivedAt, then grouped by<br/>metric name. Nothing is summed or deduplicated:<br/>the collector is a dumb pipe, reconciliation is<br/>the receiver's job.
+        SVC-->>API: yield InstanceReportEntry
+        API-->>C: chunk: JSON.stringify(entry)<br/>prefixed with "," for every entry but the first
+    end
+
+    API-->>C: chunk: ]}}
+    Note over C: Client must treat a body that does not parse<br/>as a failed download. A mid-stream DB error is<br/>logged server-side and closes the connection.
+```
+
+### Example response
+
+One instance that reported twice and was relabelled in between:
+
+```http
+GET /api/v1/report HTTP/1.1
+Authorization: Bearer <read token>
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
+Content-Disposition: attachment; filename="n8n-instance-report-2026-03-28T08-00-00-000Z.json"
+```
+
+```json
+{
+  "data": {
+    "generatedAt": "2026-03-28T08:00:00.000Z",
+    "instances": [
+      {
+        "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
+        "label": "prod-renamed",
+        "firstSeen": "2026-03-26T02:00:00.000Z",
+        "lastReportAt": "2026-03-27T02:00:00.000Z",
+        "dataPoints": {
+          "billableExecutions": [
+            { "kind": "cumulative", "value": 402931, "batchId": "a1b2c3d4", "receivedAt": "2026-03-26T02:00:00.000Z" },
+            { "kind": "daily", "value": 15234, "date": "2026-03-25", "batchId": "a1b2c3d4", "receivedAt": "2026-03-26T02:00:00.000Z" },
+            { "kind": "cumulative", "value": 418165, "batchId": "e5f6a7b8", "receivedAt": "2026-03-27T02:00:00.000Z" },
+            { "kind": "daily", "value": 15234, "date": "2026-03-26", "batchId": "e5f6a7b8", "receivedAt": "2026-03-27T02:00:00.000Z" }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
