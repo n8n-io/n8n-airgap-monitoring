@@ -1,0 +1,27 @@
+DIAGRAMS.md
+  s_9a9dae600f285d::t_f80b0c4174bb0e 147,153,158-159,162-165
+  h_c63dce324dfc7b 172
+  s_9a9dae600f285d::t_af50109abab9e5 111
+  s_9a9dae600f285d::t_87f03a7d82b6b6 80-110,112-146,148-152,154-157,160-161,166-171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ae844b1e9001fdb60c0c46c00d2fff2a7429e468",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_9a9dae600f285d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e33842b7-0243-4fa7-b4a2-237da0973bd4",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
