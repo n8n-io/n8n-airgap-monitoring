@@ -4,9 +4,7 @@
 
 Date: 2026-08-18
 
-## Status
-
-Accepted
+Status: Active
 
 ## Context
 

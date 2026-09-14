@@ -4,11 +4,9 @@
 
 Date: 2026-09-09
 
-## Status
+Status: Active
 
-Accepted
-
-Supersedes `adr/2026-08-26-sqlite-with-synchronous-writes.md` (ADR 7). Everything that ADR decided about the *store* stands: SQLite, `journal_mode = WAL`, `synchronous = FULL`. What it decided about the *driver* is replaced here.
+Supersedes: `adr/2026-08-26-sqlite-with-synchronous-writes.md` (ADR 7). Everything that ADR decided about the *store* stands: SQLite, `journal_mode = WAL`, `synchronous = FULL`. What it decided about the *driver* is replaced here.
 
 ## Context
 
