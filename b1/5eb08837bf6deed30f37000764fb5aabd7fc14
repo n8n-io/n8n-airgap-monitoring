@@ -1,0 +1,37 @@
+docs/adr/2026-08-18-backwards-compatibility-via-n8n-version.md
+  s_398f9618a5a904::t_983cb9ee82b926 7
+docs/adr/2026-08-18-store-datapoints-as-json.md
+  s_398f9618a5a904::t_983cb9ee82b926 7
+docs/adr/2026-08-26-report-envelopes-are-immutable.md
+  s_398f9618a5a904::t_983cb9ee82b926 7
+docs/adr/2026-08-26-sqlite-with-synchronous-writes.md
+  s_398f9618a5a904::t_983cb9ee82b926 7
+  s_398f9618a5a904::t_59ae75cec7a600 9
+docs/adr/2026-08-18-daily-metric-combined-with-cumulative.md
+  s_398f9618a5a904::t_983cb9ee82b926 7
+docs/adr/2026-08-18-colocate-tests-with-implementation.md
+  s_398f9618a5a904::t_983cb9ee82b926 7
+docs/adr/2026-09-09-node-sqlite3-via-n8n-typeorm.md
+  s_398f9618a5a904::t_983cb9ee82b926 7
+  s_398f9618a5a904::t_6a1d948c298890 9
+docs/adr/2026-09-11-stream-instance-report.md
+  s_398f9618a5a904::t_983cb9ee82b926 7
+docs/adr/2026-08-18-fastify-over-express.md
+  s_398f9618a5a904::t_983cb9ee82b926 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b15eb08837bf6deed30f37000764fb5aabd7fc14",
+  "prompts": {},
+  "sessions": {
+    "s_398f9618a5a904": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "60639677-6842-4303-97a9-46bcc1f31dee",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
