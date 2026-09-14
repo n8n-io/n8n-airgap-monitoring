@@ -4,6 +4,10 @@ Central Monitoring for Airgapped Environments (CMFAE). Collects instance reports
 from self-hosted n8n instances that cannot reach n8n's own backend, so a single
 customer-hosted instance can aggregate usage numbers for many n8n instances.
 
+Sequence diagrams of both flows, reporting and downloading, are in
+[docs/DIAGRAMS.md](docs/DIAGRAMS.md). Design decisions are recorded as ADRs in
+[docs/adr/](docs/adr/).
+
 ## Configuration
 
 | Variable | Required | Default | Description |

@@ -84,7 +84,7 @@ separate secret (`N8N_MONITORING_READ_TOKEN`), so a reporting n8n instance that
 only holds the write token cannot read the fleet's data.
 
 The report is streamed, one instance at a time, instead of being built in memory
-(see [ADR 9](docs/adr/2026-09-11-stream-instance-report.md)). Peak memory tracks
+(see [ADR 9](adr/2026-09-11-stream-instance-report.md)). Peak memory tracks
 the largest single instance's history, not the number of instances. The price is
 N+1 queries and that a DB failure after the first chunk yields a truncated file
 rather than an error status, because the `200` is already on the wire.
