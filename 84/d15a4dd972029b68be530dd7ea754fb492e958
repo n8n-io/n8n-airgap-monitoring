@@ -1,0 +1,21 @@
+docs/DIAGRAMS.md
+  s_9a9dae600f285d::t_4e8c3198ca83ad 87
+README.md
+  s_9a9dae600f285d::t_97aede08717c78 7-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "84d15a4dd972029b68be530dd7ea754fb492e958",
+  "prompts": {},
+  "sessions": {
+    "s_9a9dae600f285d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e33842b7-0243-4fa7-b4a2-237da0973bd4",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
