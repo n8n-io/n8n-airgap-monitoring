@@ -1,7 +1,7 @@
 # n8n Airgap Monitoring
 
 A central monitoring service for a fleet of n8n instances in an airgapped environment.
-Many self-hosted n8n instance report usage metrics daily to one n8n-airgap-monitoring instance.
+Many self-hosted n8n instances report usage metrics daily to one n8n-airgap-monitoring instance.
 See the counterpart module in the n8n repository here: [n8n-io/n8n/instance-reporting](https://github.com/n8n-io/n8n/blob/master/packages/cli/src/modules/instance-reporting.ee/README.md)
 
 Sequence diagrams of both flows, reporting and downloading, are in

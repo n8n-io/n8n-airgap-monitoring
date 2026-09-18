@@ -29,7 +29,7 @@ controller, image registry) are plain values.
 1. Mirror the image, keeping the tag:
 
    ```sh
-   VERSION=0.1.1   # the chart's appVersion
+   VERSION=<latest-release>   # the chart's appVersion in Chart.yaml
    docker pull ghcr.io/n8n-io/n8n-airgap-monitoring:$VERSION
    docker tag  ghcr.io/n8n-io/n8n-airgap-monitoring:$VERSION registry.example.internal/n8n/n8n-airgap-monitoring:$VERSION
    docker push registry.example.internal/n8n/n8n-airgap-monitoring:$VERSION
@@ -123,7 +123,7 @@ restore, create a PVC from the snapshot and install with
 
 The service reads its tokens at start-up, so after changing the Secret restart
 the Deployment. Rotating the write token means every n8n instance must be
-updated too. n8n Istances still on the old token get `401` responses until then and retry
+updated too. n8n instances still on the old token get `401` responses until then and retry
 later, so nothing is lost.
 
 ## Values

@@ -28,8 +28,8 @@ Selector labels. Stable across chart versions: changing them would orphan the
 running pod from its Deployment.
 */}}
 {{- define "airgap-monitoring.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "airgap-monitoring.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/name: {{ include "airgap-monitoring.name" . | quote }}
+app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- end -}}
 
 {{/*
