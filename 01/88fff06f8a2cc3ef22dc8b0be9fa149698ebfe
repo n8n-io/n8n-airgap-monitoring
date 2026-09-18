@@ -1,0 +1,15 @@
+README.md
+  h_c63dce324dfc7b 11-12,121-122,127
+  h_c63dce324dfc7b 123-126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0188fff06f8a2cc3ef22dc8b0be9fa149698ebfe",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
