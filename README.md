@@ -18,8 +18,10 @@ Sequence diagrams of both flows, reporting and downloading, are in
 
 ## Reporting usage
 
-Each n8n instance sets `N8N_USAGE_METRICS_REPORTING_WEBHOOK_URL` to this
-service's `POST /api/v1/instance-reports` endpoint and sends one report per day:
+Each n8n instance sets `N8N_INSTANCE_REPORTING_BASE_URL` to this service's base
+URL (the instance appends `/api/v1/instance-reports` itself) and
+`N8N_INSTANCE_REPORTING_AUTH_TOKEN` to the write token, then sends one report
+per day:
 
 ```http
 POST /api/v1/instance-reports
@@ -28,14 +30,14 @@ Content-Type: application/json
 
 {
   "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
-  "batchId": "a1b2c3d4",
+  "batchId": "917fbe09-1fb0-4d5b-868d-d0536237638d",
   "label": "prod",
   "n8nVersion": "1.99.0",
   "dataPoints": [
-    { "kind": "cumulative", "name": "activeWorkflows", "value": 87 },
+    { "kind": "cumulative", "name": "billableExecutions", "value": 87 },
     {
       "kind": "daily",
-      "name": "prodExecutions",
+      "name": "billableExecutions",
       "value": 15234,
       "date": "2026-03-25"
     }
