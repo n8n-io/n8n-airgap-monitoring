@@ -179,9 +179,8 @@ generally has the wrong owner, so SQLite fails to create its WAL files.
 
 [`docs/charts/airgap-monitoring/`](docs/charts/airgap-monitoring/) is the
 recommended Helm chart for running the service in production: one pod, one
-persistent volume, hardened defaults, sized for 10,000 reporting instances. Its
-[README](docs/charts/airgap-monitoring/README.md) explains the sizing, backups,
-exposure and token rotation.
+persistent volume, hardened defaults, sized for 10,000 reporting instances. See
+[README](docs/charts/airgap-monitoring/README.md) for more detail.
 
 ## Local Kubernetes demo
 
