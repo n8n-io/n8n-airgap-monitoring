@@ -41,7 +41,12 @@ jobs:
           fi
           # The chart's appVersion is the image tag it deploys by default, so a
           # chart pointing at a different release must not ship with this one.
-          CHART_VERSION=$(sed -nE 's/^appVersion: "?([^"]*)"?$/\1/p' docs/charts/airgap-monitoring/Chart.yaml)
+CHART_VERSION=$(sed -nE 's/^appVersion:[[:space:]]*"?([^" ]*)"?[[:space:]]*$/\1/p' docs/charts/airgap-monitoring/Chart.yaml)
+          if [[ -z "$CHART_VERSION" ]]; then
+            echo "::error::Could not parse appVersion from docs/charts/airgap-monitoring/Chart.yaml in release branch ${BASE_REF}."
+            exit 1
+          fi
+          if [[ "$VERSION" != "$CHART_VERSION" ]]; then
           if [[ "$VERSION" != "$CHART_VERSION" ]]; then
             echo "::error::Release branch ${BASE_REF} claims v${VERSION} but the Helm chart's appVersion reads ${CHART_VERSION}. Refusing to publish."
             exit 1
