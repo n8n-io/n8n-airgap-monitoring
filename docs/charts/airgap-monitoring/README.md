@@ -68,7 +68,9 @@ controller, image registry) are plain values.
    ```
 
    Instances outside the cluster need an Ingress (`ingress.*`) and use its
-   hostname instead. Terminate TLS on it: the tokens travel as bearer headers.
+   hostname instead. Terminate TLS on it: the tokens travel as bearer headers,
+   so the chart refuses to render an Ingress without `ingress.tls` unless you
+   set `ingress.allowInsecureHttp=true` because TLS terminates further upstream.
 
 ## Sizing
 
@@ -141,5 +143,5 @@ The ones you will need. Everything else is documented in
 | `persistence.storageClassName` | cluster default | An SSD-backed class. |
 | `persistence.size` | `10Gi` | |
 | `persistence.existingClaim` | `""` | Reuse a PVC, for example one restored from a snapshot. |
-| `ingress.*` | disabled | Standard `className`, `annotations`, `hosts`, `tls`. |
+| `ingress.*` | disabled | Standard `className`, `annotations`, `hosts`, `tls`. `tls` is required when enabled unless `allowInsecureHttp=true`. |
 | `resources` | see [Compute](#compute) | |

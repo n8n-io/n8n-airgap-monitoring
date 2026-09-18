@@ -97,7 +97,10 @@ service:
 
 # ----- Ingress -----
 # Needed when the reporting n8n instances live outside this cluster. Terminate
-# TLS here: the tokens travel as bearer headers in clear text otherwise.
+# TLS here: the tokens travel as bearer headers in clear text otherwise, so
+# rendering fails when `enabled` is true and `tls` is empty. Set
+# `allowInsecureHttp: true` only if TLS terminates in front of the ingress
+# controller, for example on a cloud load balancer.
 ingress:
   enabled: false
   className: ""
@@ -110,6 +113,7 @@ ingress:
         # reachable from inside the cluster only.
         - path: /
           pathType: Prefix
+  allowInsecureHttp: false
   tls: []
   # - secretName: airgap-monitoring-tls
   #   hosts:

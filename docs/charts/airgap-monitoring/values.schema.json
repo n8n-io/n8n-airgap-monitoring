@@ -63,6 +63,7 @@
         "className": { "type": "string" },
         "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "hosts": { "type": "array" },
+        "allowInsecureHttp": { "type": "boolean" },
         "tls": { "type": "array" }
       }
     },
