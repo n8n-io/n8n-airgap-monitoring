@@ -14,7 +14,7 @@ guide on how to monitor that everything is healthy.
 
 ## What is it?
 
-n8n-airgap-monitoring is a small service service that runs in your cloud environment.
+n8n-airgap-monitoring is a small service that runs in your cloud environment.
 All your self-hosted n8n instances send it one usage report
 per day. The service stores those reports in a single SQLite database and lets
 you download usage reports as JSON files, which you can then share with
