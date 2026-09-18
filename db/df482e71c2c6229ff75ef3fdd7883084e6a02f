@@ -1,0 +1,19 @@
+.github/workflows/release-publish.yml
+  s_f1c1ed76b248d2::t_8027bfea246ed3 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dbdf482e71c2c6229ff75ef3fdd7883084e6a02f",
+  "prompts": {},
+  "sessions": {
+    "s_f1c1ed76b248d2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "13bfbc3a-54e1-46df-8311-e2c95dc0d274",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
