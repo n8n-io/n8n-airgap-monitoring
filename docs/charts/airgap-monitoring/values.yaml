@@ -1,0 +1,143 @@
+# Default values for the airgap-monitoring chart.
+#
+# The defaults are sized for one service receiving one report per day from
+# 10,000 n8n instances, with the usage report downloaded a few times a day.
+# See README.md next to this file for the reasoning behind each number.
+
+# ----- Image -----
+image:
+  # Airgapped clusters cannot pull from ghcr.io. Mirror the image into your own
+  # registry and point this at the mirror; the tag stays the same.
+  repository: ghcr.io/n8n-io/n8n-airgap-monitoring
+  # Leave empty to use the chart's appVersion, the release this chart was
+  # written against. Always pin an exact version in an airgapped deployment;
+  # never `latest` or `stable`, which move.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# Pull secrets for a private mirror registry.
+imagePullSecrets: []
+# - name: my-registry-credentials
+
+# ----- Names -----
+nameOverride: ""
+fullnameOverride: ""
+
+# Labels applied to every resource this chart creates, for example cost
+# allocation or ownership tags.
+commonLabels: {}
+
+# Annotations on the pod template, for example sidecar injection.
+podAnnotations: {}
+
+# ----- Authentication tokens -----
+# The service refuses to start without both tokens. Create a Secret with your
+# own tooling (External Secrets Operator, Sealed Secrets, kubectl ...) and
+# name it here; the chart never stores tokens itself.
+#   write token: presented by every n8n instance on POST /api/v1/instance-reports
+#                (set as N8N_INSTANCE_REPORTING_AUTH_TOKEN on the instances).
+#   read token:  required to download the fleet report from GET /api/v1/report.
+#                Hand it out separately; an instance holding only the write
+#                token must not be able to read the fleet's data.
+auth:
+  existingSecret: ""
+  # Keys inside that Secret holding each token.
+  writeTokenKey: N8N_MONITORING_WRITE_TOKEN
+  readTokenKey: N8N_MONITORING_READ_TOKEN
+
+# ----- Runtime -----
+# Cap the V8 heap below the container memory limit so garbage collection kicks
+# in before the kernel OOM-kills the pod. Keep it at roughly 75% of
+# resources.limits.memory; the remaining quarter covers native memory held by
+# the SQLite driver and Node itself.
+nodeOptions: "--max-old-space-size=384"
+
+# Extra environment variables for the container.
+extraEnv: []
+# - name: TZ
+#   value: UTC
+
+# ----- Resources -----
+# Idle nearly all day (~0.12 requests/second averaged over 10,000 instances).
+# The one CPU-bound moment is streaming the fleet report, which is why the CPU
+# limit is a full core: a limit only throttles, it does not reserve capacity.
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+# ----- Persistence -----
+# The SQLite database lives on a ReadWriteOnce volume. It is always created
+# (or reused via existingClaim); the service is pointless without it.
+persistence:
+  # Reuse a PersistentVolumeClaim you created yourself (for example one restored
+  # from a snapshot). Leave empty to let the chart create one.
+  existingClaim: ""
+  # Empty = the cluster's default StorageClass. Pick an SSD-backed class with
+  # low fsync latency: every accepted report is fsynced before the 201 is sent.
+  storageClassName: ""
+  # About 1.5 GiB per year at 10,000 instances; 10Gi covers several years and
+  # leaves room for the WAL and a VACUUM. Grow rather than start big: most CSI
+  # drivers expand volumes online.
+  size: 10Gi
+  annotations:
+    # Keep the volume when the release is uninstalled. The database is the only
+    # copy of the fleet's usage history, so it must never go with a `helm
+    # uninstall`. Delete the PVC by hand when you really mean it.
+    helm.sh/resource-policy: keep
+
+# ----- Service -----
+service:
+  type: ClusterIP
+  port: 3000
+  annotations: {}
+
+# ----- Ingress -----
+# Needed when the reporting n8n instances live outside this cluster. Terminate
+# TLS here: the tokens travel as bearer headers in clear text otherwise.
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  # cert-manager.io/cluster-issuer: internal-ca
+  hosts:
+    - host: airgap-monitoring.example.internal
+      paths:
+        # Expose only the ingest path if the report download should stay
+        # reachable from inside the cluster only.
+        - path: /
+          pathType: Prefix
+  tls: []
+  # - secretName: airgap-monitoring-tls
+  #   hosts:
+  #     - airgap-monitoring.example.internal
+
+# ----- Security -----
+# The image runs as the `node` user (uid 1000). fsGroup makes the mounted
+# volume writable for it so SQLite can create its database and WAL files.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+# The only writable paths are /data (the volume) and /tmp (an emptyDir for
+# SQLite's temporary files).
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# ----- Scheduling -----
+priorityClassName: ""
+nodeSelector: {}
+tolerations: []
+affinity: {}

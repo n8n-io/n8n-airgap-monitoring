@@ -1,8 +1,8 @@
 # n8n Airgap Monitoring
 
-Central Monitoring for Airgapped Environments (CMFAE). Collects instance reports
-from self-hosted n8n instances that cannot reach n8n's own backend, so a single
-customer-hosted instance can aggregate usage numbers for many n8n instances.
+A central monitoring service for a fleet of n8n instances in an airgapped environment.
+Many self-hosted n8n instance report usage metrics daily to one n8n-airgap-monitoring instance.
+See the counterpart module in the n8n repository here: [n8n-io/n8n/instance-reporting](https://github.com/n8n-io/n8n/blob/master/packages/cli/src/modules/instance-reporting.ee/README.md)
 
 Sequence diagrams of both flows, reporting and downloading, are in
 [docs/DIAGRAMS.md](docs/DIAGRAMS.md). Design decisions are recorded as ADRs in
@@ -174,6 +174,14 @@ container and its data volume.
 The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
+
+## Deploying on Kubernetes
+
+[`docs/charts/airgap-monitoring/`](docs/charts/airgap-monitoring/) is the
+recommended Helm chart for running the service in production: one pod, one
+persistent volume, hardened defaults, sized for 10,000 reporting instances. Its
+[README](docs/charts/airgap-monitoring/README.md) explains the sizing, backups,
+exposure and token rotation.
 
 ## Local Kubernetes demo
 

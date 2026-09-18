@@ -1,0 +1,21 @@
+airgap-monitoring {{ include "airgap-monitoring.imageTag" . }} deployed as release {{ .Release.Name }}.
+
+In-cluster URL for N8N_INSTANCE_REPORTING_BASE_URL on the reporting n8n instances:
+
+  http://{{ include "airgap-monitoring.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+  {{ if $.Values.ingress.tls }}https{{ else }}http{{ end }}://{{ .host }}
+{{- end }}
+{{- if not .Values.ingress.tls }}
+
+WARNING: ingress.tls is empty. Bearer tokens will cross the network in clear text.
+{{- end }}
+{{- end }}
+
+Download the fleet report with the read token:
+
+  kubectl port-forward svc/{{ include "airgap-monitoring.fullname" . }} -n {{ .Release.Namespace }} 3000:{{ .Values.service.port }}
+  curl -fsS -H "Authorization: Bearer $READ_TOKEN" -o report.json http://localhost:3000/api/v1/report
+
+Data lives on PVC {{ include "airgap-monitoring.claimName" . }}. `helm uninstall` keeps it.
