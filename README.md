@@ -8,6 +8,8 @@ Sequence diagrams of both flows, reporting and downloading, are in
 [docs/DIAGRAMS.md](docs/DIAGRAMS.md). Design decisions are recorded as ADRs in
 [docs/adr/](docs/adr/).
 
+See also the user guide at [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
+
 ## Configuration
 
 | Variable | Required | Default | Description |
@@ -116,6 +118,13 @@ Its shape is:
 value that instance reported for that metric, oldest-first, tagged with the
 `batchId` and `receivedAt` of the report that carried it.
 
+## Deployment
+
+[`docs/charts/airgap-monitoring/`](docs/charts/airgap-monitoring/) is the
+recommended Helm chart for running the service in production: one pod, one
+persistent volume, hardened defaults, sized for 10,000 reporting instances. See
+[README](docs/charts/airgap-monitoring/README.md) for more detail.
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -176,13 +185,6 @@ container and its data volume.
 The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
-
-## Deploying on Kubernetes
-
-[`docs/charts/airgap-monitoring/`](docs/charts/airgap-monitoring/) is the
-recommended Helm chart for running the service in production: one pod, one
-persistent volume, hardened defaults, sized for 10,000 reporting instances. See
-[README](docs/charts/airgap-monitoring/README.md) for more detail.
 
 ## Local Kubernetes demo
 
