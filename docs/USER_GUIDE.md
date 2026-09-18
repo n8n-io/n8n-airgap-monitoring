@@ -66,7 +66,9 @@ at the end covers what else to watch.
 
 ## 2. Configure your self-hosted n8n instances to report to n8n-airgap-monitoring
 
-Reporting is an opt-in n8n module. On **every** n8n instance that should report, set:
+In order to talk enable the `instance-reporting` module, your n8n instance needs to be on version `2.39.6` or higher.
+
+The airgapped instance reporting is an opt-in n8n module. On **every** n8n instance that should report, set:
 
 ```sh
 N8N_ENABLED_MODULES=instance-reporting
