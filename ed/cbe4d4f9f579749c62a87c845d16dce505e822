@@ -1,0 +1,34 @@
+docs/USER_GUIDE.md
+  s_0b07ecf1c082de::t_22eddecdfceb68 58,60-61,63-65
+  s_0b07ecf1c082de::t_ad41fa3d1b0847 40
+  s_0b07ecf1c082de::t_dc4804b7abc31d 50-52
+  s_0b07ecf1c082de::t_e3d36d30ead5ff 104-108
+  s_0b07ecf1c082de::t_1f6817d1831092 1-3,6-16,19,21-22,29-30,32-33,35-36,57,59,66,68-72,74,76-79,82-83,85-91,97-100,102-103,109-119,121-134,136-138,140-143,145,147,149-155,158-161,164-167,170-171,173-178,181-185
+  h_c63dce324dfc7b 4-5,17-18,20,23-28,37,54-55,62,67,73,75,80-81,84,92-96,101,120,135,139,146,148,156-157,168-169,172
+  s_0b07ecf1c082de::t_764616dffbbb4b 144
+  s_0b07ecf1c082de::t_644cbf13bec0ed 180
+  s_0b07ecf1c082de::t_08f885331e3cb7 31,34,38-39,41-49,53,56
+  s_0b07ecf1c082de::t_bbe6aec28843e3 162-163
+  s_0b07ecf1c082de::t_e993290181ee92 179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "edcbe4d4f9f579749c62a87c845d16dce505e822",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_0b07ecf1c082de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1255212b-022a-47e2-9b9b-b4a165891f0a",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
