@@ -16,6 +16,6 @@ WARNING: ingress.tls is empty. Bearer tokens will cross the network in clear tex
 Download the fleet report with the read token:
 
   kubectl port-forward svc/{{ include "airgap-monitoring.fullname" . }} -n {{ .Release.Namespace }} 3000:{{ .Values.service.port }}
-  curl -fsS -H "Authorization: Bearer $READ_TOKEN" -o report.json http://localhost:3000/api/v1/report
+  curl -fsS -H "Authorization: Bearer ${READ_TOKEN:?set READ_TOKEN to the report read token}" -o report.json http://localhost:3000/api/v1/report
 
 Data lives on PVC {{ include "airgap-monitoring.claimName" . }}. `helm uninstall` keeps it.
