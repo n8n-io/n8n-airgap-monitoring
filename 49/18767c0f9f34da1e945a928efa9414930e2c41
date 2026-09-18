@@ -1,0 +1,27 @@
+docs/charts/airgap-monitoring/templates/ingress.yaml
+  s_e78c6eb3ad0fbb::t_d7c5c1d17ed7da 2-4
+docs/charts/airgap-monitoring/values.schema.json
+  s_e78c6eb3ad0fbb::t_b3968ab55e941d 66
+docs/charts/airgap-monitoring/README.md
+  s_e78c6eb3ad0fbb::t_e603b17426f0a7 146
+  s_e78c6eb3ad0fbb::t_b7e623ab18a920 71-73
+docs/charts/airgap-monitoring/values.yaml
+  s_e78c6eb3ad0fbb::t_7330378f25cc8c 100-103
+  s_e78c6eb3ad0fbb::t_997e22dc7a26a2 116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4918767c0f9f34da1e945a928efa9414930e2c41",
+  "prompts": {},
+  "sessions": {
+    "s_e78c6eb3ad0fbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "58461923-2571-4355-867f-85dcd17815f4",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
