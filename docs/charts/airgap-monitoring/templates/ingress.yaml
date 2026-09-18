@@ -1,0 +1,41 @@
+{{- if .Values.ingress.enabled }}
+{{- if and (not .Values.ingress.tls) (not .Values.ingress.allowInsecureHttp) }}
+{{- fail "ingress.tls must be set when ingress.enabled=true: instance tokens travel as bearer headers and would cross the network in clear text. Set ingress.allowInsecureHttp=true only if TLS terminates in front of the ingress controller." }}
+{{- end }}
+{{- $fullName := include "airgap-monitoring.fullname" . }}
+{{- $svcPort := .Values.service.port }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "airgap-monitoring.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+          {{- end }}
+    {{- end }}
+{{- end }}

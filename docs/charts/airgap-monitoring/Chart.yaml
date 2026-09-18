@@ -1,0 +1,19 @@
+apiVersion: v2
+name: airgap-monitoring
+# Chart version. Bump on any change to templates, values or defaults.
+version: 0.1.0
+# The airgap-monitoring release this chart deploys by default (image tag).
+# Keep in step with the root package.json version when a release is cut.
+appVersion: "0.1.1"
+kubeVersion: ">=1.25.0-0"
+type: application
+description: >-
+  Helm chart for n8n Airgap Monitoring, the customer-hosted collector that
+  aggregates daily usage reports from self-hosted n8n instances that cannot
+  reach n8n's backend. One pod, one SQLite file on one persistent volume.
+home: https://github.com/n8n-io/n8n-airgap-monitoring
+sources:
+  - https://github.com/n8n-io/n8n-airgap-monitoring
+maintainers:
+  - name: n8n
+    url: https://github.com/n8n-io

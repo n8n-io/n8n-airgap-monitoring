@@ -1,0 +1,125 @@
+{{- $secret := required "auth.existingSecret is required: the name of a Secret holding both tokens. The service refuses to start without them." .Values.auth.existingSecret }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "airgap-monitoring.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "airgap-monitoring.labels" . | nindent 4 }}
+spec:
+  # Exactly one replica, and not configurable: SQLite on a ReadWriteOnce volume
+  # supports a single writer. Do not add an HPA or a second replica.
+  replicas: 1
+  revisionHistoryLimit: 3
+  # Recreate, not RollingUpdate: a second pod could not mount the RWO volume
+  # while the old one still holds it, so a rolling update would hang. The
+  # cost is a few seconds of downtime per upgrade, during which reporting
+  # instances retry.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "airgap-monitoring.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "airgap-monitoring.labels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      # The service never calls the Kubernetes API.
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      containers:
+        - name: airgap-monitoring
+          image: "{{ .Values.image.repository }}:{{ include "airgap-monitoring.imageTag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            # The image listens on 3000; the Service maps service.port onto it.
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: N8N_DB_PATH
+              value: /data/database.sqlite
+            - name: N8N_MONITORING_WRITE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secret }}
+                  key: {{ .Values.auth.writeTokenKey }}
+            - name: N8N_MONITORING_READ_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secret }}
+                  key: {{ .Values.auth.readTokenKey }}
+            {{- with .Values.nodeOptions }}
+            - name: NODE_OPTIONS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          # /healthz answers as soon as the HTTP server is up. Startup is
+          # generous because schema migrations run before the port opens and
+          # may take a while on a database holding years of reports.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            # SQLite writes temporary files for large sorts; with a read-only
+            # root filesystem it needs a writable /tmp.
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "airgap-monitoring.claimName" . }}
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,8 +1,8 @@
 # n8n Airgap Monitoring
 
-Central Monitoring for Airgapped Environments (CMFAE). Collects instance reports
-from self-hosted n8n instances that cannot reach n8n's own backend, so a single
-customer-hosted instance can aggregate usage numbers for many n8n instances.
+A central monitoring service for a fleet of n8n instances in an airgapped environment.
+Many self-hosted n8n instances report usage metrics daily to one n8n-airgap-monitoring instance.
+See the counterpart module in the n8n repository here: [n8n-io/n8n/instance-reporting](https://github.com/n8n-io/n8n/blob/master/packages/cli/src/modules/instance-reporting.ee/README.md)
 
 Sequence diagrams of both flows, reporting and downloading, are in
 [docs/DIAGRAMS.md](docs/DIAGRAMS.md). Design decisions are recorded as ADRs in
@@ -18,8 +18,10 @@ Sequence diagrams of both flows, reporting and downloading, are in
 
 ## Reporting usage
 
-Each n8n instance sets `N8N_USAGE_METRICS_REPORTING_WEBHOOK_URL` to this
-service's `POST /api/v1/instance-reports` endpoint and sends one report per day:
+Each n8n instance sets `N8N_INSTANCE_REPORTING_BASE_URL` to this service's base
+URL (the instance appends `/api/v1/instance-reports` itself) and
+`N8N_INSTANCE_REPORTING_AUTH_TOKEN` to the write token, then sends one report
+per day:
 
 ```http
 POST /api/v1/instance-reports
@@ -28,14 +30,14 @@ Content-Type: application/json
 
 {
   "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
-  "batchId": "a1b2c3d4",
+  "batchId": "917fbe09-1fb0-4d5b-868d-d0536237638d",
   "label": "prod",
   "n8nVersion": "1.99.0",
   "dataPoints": [
-    { "kind": "cumulative", "name": "activeWorkflows", "value": 87 },
+    { "kind": "cumulative", "name": "billableExecutions", "value": 87 },
     {
       "kind": "daily",
-      "name": "prodExecutions",
+      "name": "billableExecutions",
       "value": 15234,
       "date": "2026-03-25"
     }
@@ -174,6 +176,13 @@ container and its data volume.
 The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
+
+## Deploying on Kubernetes
+
+[`docs/charts/airgap-monitoring/`](docs/charts/airgap-monitoring/) is the
+recommended Helm chart for running the service in production: one pod, one
+persistent volume, hardened defaults, sized for 10,000 reporting instances. See
+[README](docs/charts/airgap-monitoring/README.md) for more detail.
 
 ## Local Kubernetes demo
 
