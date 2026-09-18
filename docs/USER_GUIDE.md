@@ -64,7 +64,7 @@ into the liveness and readiness probes. The section
 [Monitoring the health of n8n-airgap-monitoring](#monitoring-the-health-of-n8n-airgap-monitoring)
 at the end covers what else to watch.
 
-## 2. Configure on your self-hosted n8n instances to report to n8n-airgap-monitoring
+## 2. Configure your self-hosted n8n instances to report to n8n-airgap-monitoring
 
 Reporting is an opt-in n8n module. On **every** n8n instance that should report, set:
 
