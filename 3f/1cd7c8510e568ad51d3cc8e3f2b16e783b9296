@@ -1,0 +1,57 @@
+docs/charts/airgap-monitoring/README.md
+  h_c63dce324dfc7b 126
+  s_dba1254cf189c4::t_0450e7f1556953 32
+README.md
+  h_c63dce324dfc7b 4
+docs/charts/README.md
+  s_5f0f90ca8edc8f::t_3c11c0dd861689 8
+docs/charts/airgap-monitoring/templates/ingress.yaml
+  s_8754efabd4c18f::t_9131c4eaf49b00 17
+docs/charts/airgap-monitoring/templates/_helpers.tpl
+  s_25f02950351c55::t_1015261544b3ca 31-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3f1cd7c8510e568ad51d3cc8e3f2b16e783b9296",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_25f02950351c55": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84fb3cea-80f0-4fe7-9483-0dfeeeec2ad1",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_5f0f90ca8edc8f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d900bc96-c070-48f1-b5b9-6aaa0300b088",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_8754efabd4c18f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7351f0ce-2e27-4292-8dbc-62b61b43fb1c",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_dba1254cf189c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75f9b4f7-9bee-4849-a7b0-d292f26640b2",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
