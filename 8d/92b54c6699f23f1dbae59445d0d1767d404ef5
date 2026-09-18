@@ -1,0 +1,25 @@
+README.md
+  s_8cb0a11f68a774::t_cbc5d4118a0a08 21-24
+  h_c63dce324dfc7b 33,37,40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8d92b54c6699f23f1dbae59445d0d1767d404ef5",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_8cb0a11f68a774": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "290cb7e9-99a7-44b8-ada0-b2e993466695",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
