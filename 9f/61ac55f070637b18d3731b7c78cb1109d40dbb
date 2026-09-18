@@ -1,0 +1,22 @@
+scripts/local-k8s-demo/Makefile
+  s_8cb0a11f68a774::t_bdb5cb00f9ac81 122-126,133-141
+scripts/local-k8s-demo/README.md
+  s_8cb0a11f68a774::t_16b529c2a55325 13
+  s_8cb0a11f68a774::t_20abc02d93e67d 16-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9f61ac55f070637b18d3731b7c78cb1109d40dbb",
+  "prompts": {},
+  "sessions": {
+    "s_8cb0a11f68a774": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "290cb7e9-99a7-44b8-ada0-b2e993466695",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
