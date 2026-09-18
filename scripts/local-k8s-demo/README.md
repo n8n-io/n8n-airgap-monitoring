@@ -10,10 +10,12 @@ has arrived.
 
 ## Prerequisites
 
-- `docker`, `kind`, `kubectl`, `python3`
+- `docker`, `kind`, `kubectl`, `helm`, `python3`
 - The n8n image built locally as `n8nio/n8n:local` (from an n8n checkout, e.g.
   `pnpm build:docker`). The monitoring image is built by `make up` from this repo's root
-  `Dockerfile`.
+  `Dockerfile` and deployed with the customer-facing Helm chart in
+  [`docs/charts/airgap-monitoring`](../../docs/charts/airgap-monitoring), so the demo
+  exercises the same manifests customers get.
 
 ## Usage
 

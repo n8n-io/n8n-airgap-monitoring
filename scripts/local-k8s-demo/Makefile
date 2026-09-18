@@ -119,14 +119,26 @@ images: cluster ## Build the monitoring image and load both images into kind
 install: install-monitoring install-n8n ## Deploy the monitoring service and both n8n instances
 
 .PHONY: install-monitoring
-install-monitoring: ## Deploy the airgap-monitoring service
+# The same Helm chart customers use (docs/charts/airgap-monitoring), pointed at
+# the side-loaded image. The release name equals the chart name, so the
+# Deployment and Service are called plain `airgap-monitoring`, which the
+# port-forward, wait and reports targets rely on.
+install-monitoring: ## Deploy the airgap-monitoring service from the Helm chart
 	@echo "==> Installing airgap-monitoring"
 	@kubectl create namespace $(MONITORING_NS) --dry-run=client -o yaml | kubectl apply -f -
 	@kubectl create secret generic airgap-monitoring-tokens -n $(MONITORING_NS) \
 		--from-literal=N8N_MONITORING_WRITE_TOKEN=$(WRITE_TOKEN) \
 		--from-literal=N8N_MONITORING_READ_TOKEN=$(READ_TOKEN) \
 		--dry-run=client -o yaml | kubectl apply -f -
-	@kubectl apply -f k8s/monitoring.yaml
+	@helm upgrade --install airgap-monitoring $(REPO_ROOT)/docs/charts/airgap-monitoring \
+		-n $(MONITORING_NS) \
+		--set image.repository=$(firstword $(subst :, ,$(MONITORING_IMAGE))) \
+		--set image.tag=$(lastword $(subst :, ,$(MONITORING_IMAGE))) \
+		--set image.pullPolicy=Never \
+		--set auth.existingSecret=airgap-monitoring-tokens \
+		--set persistence.size=1Gi
+	@# The image tag never changes between rebuilds, so a restart is what picks
+	@# up a freshly loaded image.
 	@kubectl rollout restart deployment/airgap-monitoring -n $(MONITORING_NS) >/dev/null
 
 .PHONY: install-n8n
