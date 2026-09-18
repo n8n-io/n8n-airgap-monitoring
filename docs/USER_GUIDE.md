@@ -132,7 +132,7 @@ seen and every value it ever reported for each metric:
 }
 ```
 
-As of today the report always contains the complete history. In a future update we're adding a default threshold for the "time to look back" as well as a query paremeter to specify the time window to include in the report.
+As of today the report always contains the complete history. In a future update we're adding a default threshold for the "time to look back" as well as a query parameter to specify the time window to include in the report.
 
 ## Environment variable reference
 
