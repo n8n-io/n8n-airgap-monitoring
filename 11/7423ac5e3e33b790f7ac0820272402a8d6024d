@@ -1,0 +1,33 @@
+docs/RELEASE.md
+  s_8cb0a11f68a774::t_4f534d0f3ae9bb 6-7
+  h_c63dce324dfc7b 8
+  s_8cb0a11f68a774::t_ebe87dc48b4acc 79
+.github/workflows/release-publish.yml
+  s_8cb0a11f68a774::t_b275a246c65f16 147,150
+  s_8cb0a11f68a774::t_3cc0baefbf9347 42-48
+scripts/set-release-version.sh
+  s_8cb0a11f68a774::t_ffae9b66d72c21 3-4,17-26
+.github/workflows/release-prep.yml
+  s_8cb0a11f68a774::t_f6551e2a51a39a 162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "117423ac5e3e33b790f7ac0820272402a8d6024d",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_8cb0a11f68a774": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "290cb7e9-99a7-44b8-ada0-b2e993466695",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
