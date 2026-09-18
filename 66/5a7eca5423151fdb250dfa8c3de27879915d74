@@ -1,0 +1,66 @@
+docs/charts/airgap-monitoring/templates/_helpers.tpl
+  s_8cb0a11f68a774::t_5529df3b7c3ebc 36,39
+  s_8cb0a11f68a774::t_af638140ef9df0 1-35,37-38,40-60
+docs/charts/airgap-monitoring/templates/deployment.yaml
+  s_8cb0a11f68a774::t_683c6ccc7e97c3 2-21,23-25,28-29,31,33-63,65-68,70-77,81,87,93,99-125
+  s_8cb0a11f68a774::t_bc65e9709f0a54 22
+  s_8cb0a11f68a774::t_bb1cae0073acd3 1,26-27,30,32,64,69,78-80,82-86,88-92,94-98
+docs/charts/airgap-monitoring/values.schema.json
+  s_8cb0a11f68a774::t_a83118e0bc5911 1-4,7-9,12-15,17,19-24,27-29,32-33,35-37,40-44,46-48,51-54,56-58,61-64,68-73,76
+  s_8cb0a11f68a774::t_70f23db6639822 5-6,10-11,16,18,25-26,30-31,34,38-39,45,49-50,55,59-60,65-67,74-75
+docs/charts/airgap-monitoring/README.md
+  h_c63dce324dfc7b 32,126
+  s_8cb0a11f68a774::t_c2ada2ddb9167c 139
+  s_8cb0a11f68a774::t_3b33fca958f683 4-7,16,21,25,29,38-40,49,59,70-71,79,82,88-90,98-99,101-103,105-120,122-125,127-128,131-133,136-137,141,143,145
+  s_8cb0a11f68a774::t_8e26d75b5321ee 1-3,8-15,17-20,22-24,26-28,30-31,33-37,41-48,50-58,60-69,72-78,80-81,83-87,91-97,100,104,121,129-130,134-135,138,140,142,144
+docs/charts/airgap-monitoring/values.yaml
+  s_8cb0a11f68a774::t_54d0a58a562d2f 30
+  s_8cb0a11f68a774::t_3a1c4f3d4af362 1-25,28-29,31-33,37-54,56-72,75-143
+  s_8cb0a11f68a774::t_3980b326c903d4 26-27,34-36,55,73-74
+docs/charts/airgap-monitoring/.helmignore
+  s_8cb0a11f68a774::t_57860024569285 1-13
+docs/charts/airgap-monitoring/templates/ingress.yaml
+  s_8cb0a11f68a774::t_e76bf1b7f410ad 1-10,12-20,22-38
+  s_8cb0a11f68a774::t_4826f5cc8a5d42 11,21
+docs/charts/airgap-monitoring/templates/pvc.yaml
+  s_8cb0a11f68a774::t_ceeb6e352fc957 9,14,16
+  s_8cb0a11f68a774::t_52c730f5bbd047 1-8,10-13,15,17-23
+docs/charts/README.md
+  s_8cb0a11f68a774::t_93d98a5c99c9ea 8
+  s_8cb0a11f68a774::t_d4567b1b69b0b3 3
+  s_8cb0a11f68a774::t_a9115e43aef5eb 1-2,5-7
+  h_c63dce324dfc7b 4
+docs/charts/airgap-monitoring/templates/NOTES.txt
+  s_8cb0a11f68a774::t_17d335d05dccba 2,4,6-7,9-14,20
+  s_8cb0a11f68a774::t_4d5958e6eca3c1 1,3,5,8,15-19,21
+README.md
+  s_8cb0a11f68a774::t_f906d7ec6a2cd9 178-185
+  h_c63dce324dfc7b 3-5
+docs/charts/airgap-monitoring/templates/service.yaml
+  s_8cb0a11f68a774::t_cd7a259bd288bf 15
+  s_8cb0a11f68a774::t_a29e604c18ca33 8
+  s_8cb0a11f68a774::t_5b4b0cdfa5e10f 1-7,9-14,16-20
+docs/charts/airgap-monitoring/Chart.yaml
+  s_8cb0a11f68a774::t_cf8586377a11fb 1-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "665a7eca5423151fdb250dfa8c3de27879915d74",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_8cb0a11f68a774": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "290cb7e9-99a7-44b8-ada0-b2e993466695",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
