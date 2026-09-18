@@ -159,4 +159,4 @@ jobs:
             --body-file /tmp/pr-body.md \
             --label "release" \
             --message "release v${VERSION}" \
-            -- package.json
+            -- package.json docs/charts/airgap-monitoring/Chart.yaml

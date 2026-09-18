@@ -39,6 +39,13 @@ jobs:
             echo "::error::Release branch ${BASE_REF} claims v${VERSION} but package.json reads ${FILE_VERSION}. Refusing to publish under either version."
             exit 1
           fi
+          # The chart's appVersion is the image tag it deploys by default, so a
+          # chart pointing at a different release must not ship with this one.
+          CHART_VERSION=$(sed -nE 's/^appVersion: "?([^"]*)"?$/\1/p' docs/charts/airgap-monitoring/Chart.yaml)
+          if [[ "$VERSION" != "$CHART_VERSION" ]]; then
+            echo "::error::Release branch ${BASE_REF} claims v${VERSION} but the Helm chart's appVersion reads ${CHART_VERSION}. Refusing to publish."
+            exit 1
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       # release-metadata only tags at the very end, long after the image is public.
@@ -137,7 +144,7 @@ jobs:
             --base main \
             --branch "post-release/${VERSION}" \
             --title "chore: Bump version to v${VERSION}" \
-            --body "Automated post-release PR to update the package.json version on main after publishing v${VERSION}. Close and reopen this PR to trigger CI." \
+            --body "Automated post-release PR to update the package.json version and the Helm chart's appVersion on main after publishing v${VERSION}. Close and reopen this PR to trigger CI." \
             --label "release" \
             --message "chore: Bump version to v${VERSION}" \
-            -- package.json
+            -- package.json docs/charts/airgap-monitoring/Chart.yaml

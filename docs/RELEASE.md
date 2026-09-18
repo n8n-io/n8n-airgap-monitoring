@@ -3,7 +3,9 @@
 One image, `ghcr.io/n8n-io/n8n-airgap-monitoring`, published in two ways: an
 alpha on every push to `main`, and a versioned release through a release PR. The
 version lives in the root `package.json` and is the only version that matters;
-`apps/api/package.json` is not published anywhere.
+`apps/api/package.json` is not published anywhere. The Helm chart's
+`appVersion` in `docs/charts/airgap-monitoring/Chart.yaml` is written from the
+same value by `scripts/set-release-version.sh`.
 
 The process mirrors [n8n-sandbox-service](https://github.com/n8n-io/n8n-sandbox-service),
 minus the parts that only make sense for cloud deployments (Docker Hub, private
@@ -74,7 +76,7 @@ tag. Run the workflow manually to build a commit the filter skipped, or with
 
    It then runs lint, typecheck, build, tests and a dry-run image build, creates
    the release branch `release/{version}`, and opens a PR into it from
-   `release-pr/{version}` containing the one-line `package.json` bump.
+   `release-pr/{version}` containing the `package.json` and chart `appVersion` bumps.
 
    This orders the *starts* of releases, not their merges. Two releases can be in
    flight at once, and merging them out of order would move `latest` and `stable`
