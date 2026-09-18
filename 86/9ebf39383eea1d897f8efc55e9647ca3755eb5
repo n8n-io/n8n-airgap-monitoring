@@ -1,0 +1,14 @@
+docs/USER_GUIDE.md
+  h_c63dce324dfc7b 69-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "869ebf39383eea1d897f8efc55e9647ca3755eb5",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
