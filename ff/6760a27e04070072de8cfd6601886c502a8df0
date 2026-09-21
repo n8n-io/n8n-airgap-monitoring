@@ -1,0 +1,89 @@
+apps/api/src/testing/build-app.ts
+  s_b8582f488d1ad8::t_3ff42dac487906 9,12-14
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_b8582f488d1ad8::t_5284c01e1b0065 207-209
+  s_b8582f488d1ad8::t_c23b90124c5e19 3-7,10-13,31-33,40,60-81,88,108,112,133,144,166-180,186-206,210-212,215-217,223,266,281
+docs/charts/airgap-monitoring/templates/NOTES.txt
+  s_b8582f488d1ad8::t_7f49c65fa24b03 12
+apps/api/src/app.ts
+  s_b8582f488d1ad8::t_0db57ec34eda3e 33
+  s_b8582f488d1ad8::t_11fe1cf43f57cc 6
+turbo.json
+  s_b8582f488d1ad8::t_2159ed6b7161fa 22
+apps/api/src/testing/mock-license.ts
+  s_b8582f488d1ad8::t_abd3031746224e 136-138
+  s_b8582f488d1ad8::t_849e6125c49925 1-135,139-156
+docs/adr/2026-09-21-authenticate-with-license-certificate.md
+  s_b8582f488d1ad8::t_616fb21c342f1e 1-51
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.ts
+  s_b8582f488d1ad8::t_3114dee23d0c13 29-32,74-76,79
+docs/charts/airgap-monitoring/values.yaml
+  s_b8582f488d1ad8::t_a7be043607798b 101-103
+  s_b8582f488d1ad8::t_85a97a33f6d97b 33-43,46
+README.md
+  s_b8582f488d1ad8::t_ace4df76a48e5a 88-91
+  s_b8582f488d1ad8::t_2a5e02f7aff426 203-208
+  s_b8582f488d1ad8::t_def5155583a4ea 18,21-23,27-29,48-49,53-60
+  s_b8582f488d1ad8::t_5d743b30cdcc72 178-179,184
+  s_b8582f488d1ad8::t_5cdc9a0ba7ebb5 61
+docs/DIAGRAMS.md
+  s_b8582f488d1ad8::t_fc29e102b04d75 6-9,12-15
+  s_b8582f488d1ad8::t_a7e083e59a908b 86-88
+  s_b8582f488d1ad8::t_ef9ededad036d1 39-40
+  s_b8582f488d1ad8::t_32ad632fccf602 97
+  s_b8582f488d1ad8::t_cfefe5d92aa970 72-73
+  s_b8582f488d1ad8::t_0e9361055656e8 33,35
+apps/api/src/license/issuer-cert.ts
+  s_b8582f488d1ad8::t_327e03a58aad87 1-35
+apps/api/src/license/license-cert.ts
+  s_b8582f488d1ad8::t_495c995e7fd9c6 1-153
+apps/api/src/plugins/config.ts
+  s_b8582f488d1ad8::t_e22db899ed54ad 6-11,17-19,30
+docs/charts/airgap-monitoring/templates/deployment.yaml
+  s_b8582f488d1ad8::t_fd139a5ca6458f 1
+docs/charts/airgap-monitoring/README.md
+  s_b8582f488d1ad8::t_eb7e9c30a032d4 40-42
+  s_b8582f488d1ad8::t_0a9ffe8aa8c4cc 25-27
+  s_b8582f488d1ad8::t_d3a293b3a0a9e0 70-72,74-78
+  s_b8582f488d1ad8::t_ab606b5c5f40f3 131-133
+  s_b8582f488d1ad8::t_d855df463c70ca 145-146
+docker-compose.yml
+  s_b8582f488d1ad8::t_68822541f985e6 12-18
+Dockerfile
+  s_b8582f488d1ad8::t_bf97e6b534a137 33-35
+apps/api/src/plugins/license-auth.ts
+  s_b8582f488d1ad8::t_6578d29e9f4a9c 42-44,46
+  s_b8582f488d1ad8::t_fc7eaebe6fe665 1-41,45,47-81
+apps/api/package.json
+  s_b8582f488d1ad8::t_8dad8cd94babd2 33,35-36,39
+  s_b8582f488d1ad8::t_05b9d044173193 24,28
+apps/api/src/plugins/sensible.ts
+  s_b8582f488d1ad8::t_c80060b532ffeb 10-15
+docs/USER_GUIDE.md
+  s_b8582f488d1ad8::t_48a9098a758306 39-44,49-51
+  s_b8582f488d1ad8::t_2a195fa9a673f6 72,84-87
+  s_b8582f488d1ad8::t_6041fcbaa0a6c0 152,156-158,166
+  s_b8582f488d1ad8::t_3f96b41ce78d90 187
+apps/api/src/license/license-cert.test.ts
+  s_b8582f488d1ad8::t_abd3031746224e 47,58,62-65
+  s_b8582f488d1ad8::t_e945e0ddd1941e 1-8,10-46,48-57,59-61,66-96
+  s_b8582f488d1ad8::t_71c1967868a50b 9
+pnpm-lock.yaml
+  s_b8582f488d1ad8::t_c24f17db07278d 136-138,148-150,158-160,164-169,176-178,487-490,642-644,651-656,1009-1012,1600-1603,1609-1612,2396-2397,2489-2490,2495-2502,2849-2850,3467-3468,3486-3489
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ff6760a27e04070072de8cfd6601886c502a8df0",
+  "prompts": {},
+  "sessions": {
+    "s_b8582f488d1ad8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a5cdef5b-ced1-443a-8040-d6eb4eb0d93d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
