@@ -1,0 +1,19 @@
+docs/USER_GUIDE.md
+  s_619098c791e713::t_30d0ac9410458d 40-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e2d55590ce0bf8cd903a23798a1ce21b103ab6f1",
+  "prompts": {},
+  "sessions": {
+    "s_619098c791e713": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79823ab4-22ba-4e86-85e9-b5ddb0768758",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
