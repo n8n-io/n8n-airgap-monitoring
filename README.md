@@ -14,20 +14,22 @@ See also the user guide at [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `N8N_MONITORING_WRITE_TOKEN` | yes | — | Bearer token that reporting n8n instances must present on `POST /api/v1/instance-reports`. The service refuses to start without it. |
 | `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/report`. The service refuses to start without it. |
+| `N8N_MONITORING_ADDITIONAL_ISSUER_CERTS` | no | — | PEM bundle of license issuers trusted in addition to the n8n license CA. Only for a CA rotation announced by n8n, or a development CA locally. Every issuer here is named in a warning at start-up. |
 | `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
+
+There is no write token. A reporting n8n instance authenticates with its n8n
+license certificate, see [Reporting usage](#reporting-usage).
 
 ## Reporting usage
 
 Each n8n instance sets `N8N_INSTANCE_REPORTING_BASE_URL` to this service's base
-URL (the instance appends `/api/v1/instance-reports` itself) and
-`N8N_INSTANCE_REPORTING_AUTH_TOKEN` to the write token, then sends one report
-per day:
+URL (the instance appends `/api/v1/instance-reports` itself), then sends one
+report per day. The report carries the instance's license certificate in
+`licenseCert`, the same string the instance holds in `N8N_LICENSE_CERT`:
 
 ```http
 POST /api/v1/instance-reports
-Authorization: Bearer <N8N_MONITORING_WRITE_TOKEN>
 Content-Type: application/json
 
 {
@@ -43,9 +45,19 @@ Content-Type: application/json
       "value": 15234,
       "date": "2026-03-25"
     }
-  ]
+  ],
+  "licenseCert": "<base64 n8n license certificate>"
 }
 ```
+
+`licenseCert` is the credential. The service checks that the certificate chains
+to the n8n license CA and that its payload signature verifies, then drops it:
+nothing from the certificate is read, stored or exported, and expiry is not
+checked, so an instance whose license has run out still reports. Possession of
+a certificate n8n issued is the whole check. It travels in the body rather than
+a header because a real certificate is about 7 KB and sits too close to the
+8 KB per-header limit of common reverse proxies. See
+[adr/2026-09-21-authenticate-with-license-certificate.md](docs/adr/2026-09-21-authenticate-with-license-certificate.md).
 
 `label` is optional, human-readable, and purely cosmetic: `instanceId` remains
 the identity, so relabeling an instance never splits or merges its history. It
@@ -73,8 +85,10 @@ new metrics without a change here. Each entry is one of:
 Values may be counters, percentages or decimals, and may increase or decrease
 between reports.
 
-Responses are `201` with the stored event id, `400` for a malformed report,
-and `401` for a missing or wrong token. Every report is appended as its own
+Responses are `201` with the stored event id, `401` for a missing or invalid
+license certificate, and `400` for a malformed report. Authentication runs
+before validation, so an unauthenticated caller learns nothing about the
+schema. Every report is appended as its own
 event rather than overwriting the previous one, so usage history stays
 auditable; a reporting UI would read the newest event per instance.
 
@@ -161,13 +175,13 @@ Defaults baked into the image:
 | User | `node` (non-root, uid 1000) |
 | Health | `HEALTHCHECK` polling `/healthz` |
 
-`N8N_MONITORING_WRITE_TOKEN` and `N8N_MONITORING_READ_TOKEN` are deliberately
-**not** set. The service refuses to boot without either, so you must supply both.
+`N8N_MONITORING_READ_TOKEN` is deliberately **not** set. The service refuses to
+boot without it, so you must supply it.
 
 ### Running the image locally
 
 `docker compose up --build` builds the image and starts it on
-[http://localhost:3001](http://localhost:3001) with a throwaway token and a
+[http://localhost:3001](http://localhost:3001) with a throwaway read token and a
 named volume:
 
 ```sh
@@ -185,6 +199,12 @@ container and its data volume.
 The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
+
+Posting a report to it needs a license certificate the service trusts. With no
+`N8N_MONITORING_ADDITIONAL_ISSUER_CERTS` set, that is a real n8n-issued one.
+Tooling to mint development certificates under a committed dev CA is planned
+as a follow-up; until then tests are the place where mock certificates exist
+(`apps/api/src/testing/mock-license.ts`).
 
 ## Local Kubernetes demo
 

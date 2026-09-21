@@ -1,8 +1,16 @@
 import { expect, test } from "vitest";
 import { build } from "../../../testing/build-app";
+import {
+  generateMockLicense,
+  generateMockLicenseWithForgedIssuer,
+  generateMockLicenseWithTamperedPayload,
+} from "../../../testing/mock-license";
 
 const URL = "/api/v1/instance-reports";
-const AUTHORIZED = { authorization: "Bearer test-write-token" };
+
+// One certificate for the whole file: minting costs an RSA operation, and the
+// receiver does not care that every report carries the same one.
+const licenseCert = generateMockLicense();
 
 const validReport = {
   instanceId: "instance-1",
@@ -20,14 +28,16 @@ const validReport = {
   ],
 };
 
+/** The wire payload: the report plus the credential that authenticates it. */
+const authorized = (report: object = validReport) => ({ ...report, licenseCert });
+
 test("stores an accepted instance report", async () => {
   const app = await build();
 
   const res = await app.inject({
     method: "POST",
     url: URL,
-    headers: AUTHORIZED,
-    payload: validReport,
+    payload: authorized(),
   });
 
   expect(res.statusCode).toBe(201);
@@ -47,14 +57,35 @@ test("stores an accepted instance report", async () => {
   expect(Number.isNaN(Date.parse(row.receivedAt))).toBe(false);
 });
 
+// The certificate is the customer's license. It is a credential, not data,
+// and must not survive the request in any form.
+test("never stores the license certificate", async () => {
+  const app = await build();
+
+  const res = await app.inject({ method: "POST", url: URL, payload: authorized() });
+  expect(res.statusCode).toBe(201);
+
+  const [row] = (await app.dataSource.query("SELECT * FROM instance_reports")) as Record<string, unknown>[];
+  expect(JSON.stringify(row)).not.toContain(licenseCert);
+  expect(Object.keys(row)).not.toContain("licenseCert");
+
+  const report = await app.inject({
+    method: "GET",
+    url: "/api/v1/report",
+    headers: { authorization: "Bearer test-read-token" },
+  });
+  expect(report.statusCode).toBe(200);
+  expect(report.body).not.toContain(licenseCert);
+  expect(report.body).not.toContain("licenseCert");
+});
+
 test("stores the optional label when provided", async () => {
   const app = await build();
 
   const res = await app.inject({
     method: "POST",
     url: URL,
-    headers: AUTHORIZED,
-    payload: { ...validReport, label: "Kiwi prod" },
+    payload: authorized({ ...validReport, label: "Kiwi prod" }),
   });
 
   expect(res.statusCode).toBe(201);
@@ -74,12 +105,11 @@ test("appends every report instead of overwriting the instance", async () => {
     const res = await app.inject({
       method: "POST",
       url: URL,
-      headers: AUTHORIZED,
-      payload: {
+      payload: authorized({
         ...validReport,
         batchId: `batch-${value}`,
         dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value }],
-      },
+      }),
     });
     expect(res.statusCode).toBe(201);
   }
@@ -100,8 +130,7 @@ test("keeps envelopes that share a batchId across different instances", async ()
     const res = await app.inject({
       method: "POST",
       url: URL,
-      headers: AUTHORIZED,
-      payload: { ...validReport, instanceId },
+      payload: authorized({ ...validReport, instanceId }),
     });
     expect(res.statusCode).toBe(201);
   }
@@ -112,7 +141,7 @@ test("keeps envelopes that share a batchId across different instances", async ()
 test("rejects a repeated batchId as a conflict", async () => {
   const app = await build();
 
-  const post = () => app.inject({ method: "POST", url: URL, headers: AUTHORIZED, payload: validReport });
+  const post = () => app.inject({ method: "POST", url: URL, payload: authorized() });
 
   expect((await post()).statusCode).toBe(201);
 
@@ -134,22 +163,64 @@ test("rejects a repeated batchId as a conflict", async () => {
   ).toEqual([{ count: 1 }]);
 });
 
-test("rejects a request without a bearer token", async () => {
-  const app = await build();
-
-  const res = await app.inject({ method: "POST", url: URL, payload: validReport });
-
-  expect(res.statusCode).toBe(401);
-});
-
-test("rejects a request with the wrong bearer token", async () => {
+// Expiry is deliberately not checked: an instance whose license ran out is
+// still a licensed instance, and its usage is still wanted.
+test("accepts an expired license certificate", async () => {
   const app = await build();
 
   const res = await app.inject({
     method: "POST",
     url: URL,
-    headers: { authorization: "Bearer not-the-token" },
-    payload: validReport,
+    payload: { ...validReport, licenseCert: generateMockLicense({ expired: true }) },
+  });
+
+  expect(res.statusCode).toBe(201);
+});
+
+test("rejects a request without a license certificate", async () => {
+  const app = await build();
+
+  const res = await app.inject({ method: "POST", url: URL, payload: validReport });
+
+  expect(res.statusCode).toBe(401);
+  // Same error envelope as every other error the route produces.
+  expect(res.json()).toMatchObject({ statusCode: 401, error: "Unauthorized", message: expect.any(String) });
+  expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
+});
+
+test("rejects license certificates that do not verify", async () => {
+  const app = await build();
+
+  const rejected: Record<string, unknown> = {
+    "empty string": "",
+    "not a string": 42,
+    "not base64 JSON": "definitely-not-a-license-certificate-at-all-just-text",
+    "wrong issuer": generateMockLicenseWithForgedIssuer(),
+    "tampered payload": generateMockLicenseWithTamperedPayload(),
+  };
+
+  for (const [description, cert] of Object.entries(rejected)) {
+    const res = await app.inject({ method: "POST", url: URL, payload: { ...validReport, licenseCert: cert } });
+
+    expect(res.statusCode, `expected 401 for ${description}`).toBe(401);
+    // Nothing about the certificate reaches the client.
+    if (typeof cert === "string" && cert.length >= 20) {
+      expect(res.body, `response for ${description} leaks the certificate`).not.toContain(cert.slice(0, 20));
+    }
+  }
+
+  expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
+});
+
+// Authentication runs before validation, so an unauthenticated caller cannot
+// probe the schema.
+test("rejects a bad certificate before looking at the report", async () => {
+  const app = await build();
+
+  const res = await app.inject({
+    method: "POST",
+    url: URL,
+    payload: { instanceId: "", licenseCert: "not-a-certificate-and-not-even-close-to-long-enough-x" },
   });
 
   expect(res.statusCode).toBe(401);
@@ -192,8 +263,7 @@ test("rejects malformed instance reports", async () => {
     const res = await app.inject({
       method: "POST",
       url: URL,
-      headers: AUTHORIZED,
-      payload: payload as object,
+      payload: authorized(payload as object),
     });
 
     expect(res.statusCode, `expected 400 for ${description}`).toBe(400);
@@ -208,8 +278,7 @@ test("ignores unknown top level fields so newer instances stay compatible", asyn
   const res = await app.inject({
     method: "POST",
     url: URL,
-    headers: AUTHORIZED,
-    payload: { ...validReport, someFutureField: "ignored" },
+    payload: authorized({ ...validReport, someFutureField: "ignored" }),
   });
 
   expect(res.statusCode).toBe(201);

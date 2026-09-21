@@ -22,7 +22,9 @@ controller, image registry) are plain values.
 - The image `ghcr.io/n8n-io/n8n-airgap-monitoring:<version>` mirrored into a
   registry your cluster can reach. Pin the exact version; `latest` and
   `stable` move.
-- A Secret in the release namespace holding the two bearer tokens.
+- A Secret in the release namespace holding the read token.
+- Reporting n8n instances with an n8n license certificate (`N8N_LICENSE_CERT`).
+  It is their credential; there is no write token.
 
 ## Install
 
@@ -35,14 +37,13 @@ controller, image registry) are plain values.
    docker push registry.example.internal/n8n/n8n-airgap-monitoring:$VERSION
    ```
 
-2. Create the token Secret with your usual secrets tooling. Both tokens are
-   required and must differ: every n8n instance holds the write token, and it
-   must not also unlock the fleet report. Shown with `kubectl` for brevity:
+2. Create the read-token Secret with your usual secrets tooling. It unlocks
+   the fleet report and must never reach an n8n instance. Shown with `kubectl`
+   for brevity:
 
    ```sh
    kubectl create namespace airgap-monitoring
    kubectl -n airgap-monitoring create secret generic airgap-monitoring-tokens \
-     --from-literal=N8N_MONITORING_WRITE_TOKEN="$(openssl rand -hex 32)" \
      --from-literal=N8N_MONITORING_READ_TOKEN="$(openssl rand -hex 32)"
    ```
 
@@ -63,14 +64,18 @@ controller, image registry) are plain values.
    ```sh
    N8N_ENABLED_MODULES=instance-reporting
    N8N_INSTANCE_REPORTING_BASE_URL=http://airgap-monitoring.airgap-monitoring.svc.cluster.local:3000
-   N8N_INSTANCE_REPORTING_AUTH_TOKEN=<write token>
    N8N_INSTANCE_REPORTING_LABEL=<optional human-readable name>
    ```
 
+   The instance authenticates with its license certificate (`N8N_LICENSE_CERT`),
+   which a licensed airgapped instance already has. Nothing else is needed.
+
    Instances outside the cluster need an Ingress (`ingress.*`) and use its
-   hostname instead. Terminate TLS on it: the tokens travel as bearer headers,
-   so the chart refuses to render an Ingress without `ingress.tls` unless you
-   set `ingress.allowInsecureHttp=true` because TLS terminates further upstream.
+   hostname instead. Terminate TLS on it: each report carries the instance's
+   license certificate and the report download carries the read token, so the
+   chart refuses to render an Ingress without `ingress.tls` unless you set
+   `ingress.allowInsecureHttp=true` because TLS terminates further upstream.
+   Make sure the ingress controller does not log request bodies.
 
 ## Sizing
 
@@ -123,10 +128,9 @@ restore, create a PVC from the snapshot and install with
 
 ## Token rotation
 
-The service reads its tokens at start-up, so after changing the Secret restart
-the Deployment. Rotating the write token means every n8n instance must be
-updated too. n8n instances still on the old token get `401` responses until then and retry
-later, so nothing is lost.
+The service reads the read token at start-up, so after changing the Secret
+restart the Deployment. Reporting instances are unaffected: they authenticate
+with their license certificate, not with a token.
 
 ## Values
 
@@ -138,8 +142,8 @@ The ones you will need. Everything else is documented in
 | `image.repository` | `ghcr.io/n8n-io/n8n-airgap-monitoring` | Your mirror. |
 | `image.tag` | chart `appVersion` | Pin an exact release. |
 | `imagePullSecrets` | `[]` | For a private mirror. |
-| `auth.existingSecret` | `""` | **Required.** Secret holding both tokens. |
-| `auth.writeTokenKey` / `auth.readTokenKey` | `N8N_MONITORING_WRITE_TOKEN` / `N8N_MONITORING_READ_TOKEN` | Keys in that Secret. |
+| `auth.existingSecret` | `""` | **Required.** Secret holding the read token. |
+| `auth.readTokenKey` | `N8N_MONITORING_READ_TOKEN` | Key in that Secret. |
 | `persistence.storageClassName` | cluster default | An SSD-backed class. |
 | `persistence.size` | `10Gi` | |
 | `persistence.existingClaim` | `""` | Reuse a PVC, for example one restored from a snapshot. |

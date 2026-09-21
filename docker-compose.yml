@@ -8,8 +8,14 @@ services:
       # commonly taken by something else already (Grafana, for one).
       - "3001:3000"
     environment:
-      N8N_MONITORING_WRITE_TOKEN: dev-write-token
       N8N_MONITORING_READ_TOKEN: dev-read-token
+      # Reports authenticate with an n8n license certificate. To accept
+      # certificates minted by a development CA, put its PEM here; the service
+      # names every extra issuer in a start-up warning.
+      # N8N_MONITORING_ADDITIONAL_ISSUER_CERTS: |
+      #   -----BEGIN CERTIFICATE-----
+      #   ...
+      #   -----END CERTIFICATE-----
     volumes:
       # A named volume, not a bind mount: the container runs as `node` and a
       # bind-mounted host directory hits uid mismatches.

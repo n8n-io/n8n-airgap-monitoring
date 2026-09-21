@@ -1,0 +1,35 @@
+/**
+ * The n8n license CA. Every license certificate n8n issues carries a leaf
+ * certificate signed by this CA, and the leaf's key in turn signs the license
+ * payload. It is the same certificate the public `@n8n_io/license-sdk`
+ * embeds, so shipping it here reveals nothing. Valid until 2049.
+ */
+export const N8N_LICENSE_ISSUER_CERT_PEM = `-----BEGIN CERTIFICATE-----
+MIIFDDCCAvQCCQCWGBewlWbp0DANBgkqhkiG9w0BAQsFADBIMQswCQYDVQQGEwJE
+RTEPMA0GA1UECAwGQmVybGluMQ8wDQYDVQQHDAZCZXJsaW4xFzAVBgNVBAMMDmxp
+Y2Vuc2UubjhuLmlvMB4XDTIyMDYyNDA0MDkzM1oXDTQ5MTEwOTA0MDkzM1owSDEL
+MAkGA1UEBhMCREUxDzANBgNVBAgMBkJlcmxpbjEPMA0GA1UEBwwGQmVybGluMRcw
+FQYDVQQDDA5saWNlbnNlLm44bi5pbzCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCC
+AgoCggIBANK6Uj5CSyPaa2rf/bwH/AqzzINeWg4n94pECv4p8tsjy0+ZscodNn7Q
+IvYW/6IUpax8fZvHCSqu0L7fsgLkw0+HDLlsln+ryI/3h1ElVZm67BfqOvhSfPj+
+btxcP8EtS+6hbf74sqPEBFD0wikKhIPGdtBolp7rLXfTGs+5eMqSA5q4W1V+HUUU
+zgaCdchzlHGTdIICNpbRozGeFTIIx1MPzMie+4zIs6i680efx2KJVZWsa2WuCSED
++b0gSRTgoKQ3B7JjxJKfzHdOdM6JxhkCjrJIkJCrZL7wFypn+wMHsVFrsw/80WkS
+dwBj/RqCPzKcRwnxs0WNLhkyT/XCMS/1pNzPymdFADu2tEZjhFsa5ziIhdoQz8po
+Efheyg3mOZDWyu6oyHCLH9lUlsNjV9zZ6RICgvHZvHPmPqOLPomy4Qymq2osuH+S
+28rwEy0W3DCEfuS3dZHrSQfohGC9EAyyFAIPSGhTJSYJl0oNBZjpRM+jAm9ER7PM
+K70/7g6z8uIgKa8/SD/Pezd/aWzxH/tOokAF5X5o5TzSOwVzqOJzY06EZC7CJnhs
+sigAJTy1trZJBcZuWnKY5FqrK3QzjsQ9sWM0tRocfNOYmD21mubNo+RmMMo3kvYL
+JoBfap/cuP6kx3OiRzBJ4luTEa6nRIYy+EjcPaN3+9L5iEZ9/NABAgMBAAEwDQYJ
+KoZIhvcNAQELBQADggIBAIUpJ0Rh6C92cJqy6iehS8c77r1prj62gr6Acdy5QGh8
+ax30ANDbPtkezVIIBk+0JjLkMxr3mwqCRsPgMshPcxhZwEafmZrWPPGRVsOfukB3
+Gp10cIv1YmZ7AFY4i/izj5184+A+GjxrJBULQG1JfX4c7KW06Kaps85AaX/Tp0fl
+/hZ6oUe48aSSTuAW38hWZ5jCpBqfFyQ15ablJZt0fB8NkXEdFUcUEt/OHJfqF5fP
+Nt5PWC1AuBxzSbzjwabOy/M4r8m5CzCeXSIjqbcsAq52myMoxvNrjKRtucQ7CjqK
+LR6WdhMf+NLvyTI+evXMoXpDzlevkCpz17uDiDt9XrmvLSf3Ff8mdTRwzVmOmHfc
+Ruz5v7WBR4cpBR/sC+WxOw9heLMHgYhPyRUM4voo55EcJGusXr/iavblBAnI0GUw
+uMNs3MjEmfbaBV1K0GKG5UToF9UmUxxVmTcRUZrAQX+yBkRezDTpOQuRnB58BDQP
+A62lcgZlikzJw3lHue33qAudyUrUmjfHGll7GFQNeLO42jPMeM4NJiNIrBZ7j0uD
+4slHdDi/44PHcKchvde/5k7ZJMi6OC1Vu+bOnKvzhnWQIOkHFQ55m13oslV2ozZT
+/oqhn/8/LeV0ooZuYnBeRkRTveniUeho2OFe5xZvWSSfuBrbHt9+zBg+5MWPUTIJ
+-----END CERTIFICATE-----`;

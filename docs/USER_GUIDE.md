@@ -36,17 +36,19 @@ ghcr.io/n8n-io/n8n-airgap-monitoring:<version>
 
 In order to run, the service needs:
 
-- **Two secret tokens**, which you generate yourself and pass as environment
-  variables. Each is a plain string. Clients must send it verbatim in the
-  `Authorization: Bearer <token>` header of their requests.
-  - `N8N_MONITORING_WRITE_TOKEN`: every n8n instance presents it when reporting
-  - `N8N_MONITORING_READ_TOKEN`: needed to download the fleet report
+- **One secret token**, `N8N_MONITORING_READ_TOKEN`, which you generate
+  yourself and pass as an environment variable. It is a plain string, needed
+  to download the fleet report, sent verbatim in the
+  `Authorization: Bearer <token>` header. There is no write token: a reporting
+  n8n instance authenticates with its n8n license certificate, which it already
+  holds, so nothing has to be distributed to the instances.
 - **A persistent volume mounted at `/data`**, on SSD-backed storage. It holds
   the SQLite database, the only copy of your usage history, so include it in
   your backups.
 - **Port 3000** reachable from every n8n instance. If that path leaves a trusted
-  network, terminate TLS in front of the service, because the tokens travel as
-  bearer headers.
+  network, terminate TLS in front of the service: the read token travels as a
+  bearer header and each report carries the instance's license certificate.
+  Make sure any proxy in front of the service does not log request bodies.
 
 A single replica of this service is optimized to handle thousands of n8n
 instances reporting to it. The SQLite database only supports one writer, so do
@@ -67,19 +69,22 @@ at the end covers what else to watch.
 
 ## 2. Configure your self-hosted n8n instances to report to n8n-airgap-monitoring
 
-In order to enable the `instance-reporting` module, your n8n instance needs to be on version `2.39.6` or higher.
+In order to enable the `instance-reporting` module, your n8n instance needs to be on a version whose instance-reporting module sends the license certificate. Check the n8n release notes for the exact version.
 
 The airgapped instance reporting is an opt-in n8n module. On **every** n8n instance that should report, set:
 
 ```sh
 N8N_ENABLED_MODULES=instance-reporting
 N8N_INSTANCE_REPORTING_BASE_URL=https://airgap-monitoring.acme.com
-N8N_INSTANCE_REPORTING_AUTH_TOKEN=<write token>
 N8N_INSTANCE_REPORTING_LABEL=<optional label that will be included in reports>
 ```
 
 Notes:
 
+- The instance authenticates with its license certificate, the value of
+  `N8N_LICENSE_CERT`. It must be a certificate issued by n8n. An expired
+  certificate is still accepted. An instance without a license certificate
+  (community edition) does not report; n8n logs a warning instead.
 - `N8N_INSTANCE_REPORTING_BASE_URL` is the origin only. The n8n instance will append
   the path of the reporting endpoint itself.
 - If `N8N_ENABLED_MODULES` already lists other modules, add
@@ -143,13 +148,14 @@ As of today the report always contains the complete history. In a future update 
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `N8N_MONITORING_WRITE_TOKEN` | yes | none | Bearer token n8n instances present when reporting. The service refuses to start without it. |
 | `N8N_MONITORING_READ_TOKEN` | yes | none | Bearer token required to download the report. The service refuses to start without it. |
+| `N8N_MONITORING_ADDITIONAL_ISSUER_CERTS` | no | none | PEM bundle of license issuers trusted in addition to the n8n license CA. Leave unset unless n8n announces a CA rotation. Every issuer here is named in a warning at start-up. |
 | `N8N_DB_PATH` | no | `/data/database.sqlite` in the image | Location of the SQLite file. Must be on persistent storage. |
 
 
-Tokens are read at start-up. After rotating a token, restart the service and,
-for the write token, update every n8n instance.
+The token is read at start-up. After rotating it, restart the service.
+Reporting instances are not affected by a rotation: they authenticate with
+their license certificate, not with a token.
 
 ### On each n8n instance
 
@@ -157,7 +163,7 @@ for the write token, update every n8n instance.
 | --- | --- | --- | --- |
 | `N8N_ENABLED_MODULES` | yes | none | Must include `instance-reporting`. |
 | `N8N_INSTANCE_REPORTING_BASE_URL` | yes | empty | Origin of the n8n-airgap-monitoring instance, without a path. |
-| `N8N_INSTANCE_REPORTING_AUTH_TOKEN` | yes | empty | The write token to send data to the n8n-airgap-monitoring instance. |
+| `N8N_LICENSE_CERT` | yes | empty | The instance's n8n license certificate. It is sent with every report as the credential. Already set on a licensed airgapped instance. |
 | `N8N_INSTANCE_REPORTING_LABEL` | no | empty | Human-readable name shown in the report. |
 
 ## Monitoring the health of n8n-airgap-monitoring
@@ -178,7 +184,7 @@ for these status codes:
 | Status | Meaning |
 | --- | --- |
 | `201` | Report stored. |
-| `401` | Wrong or missing token. Check `N8N_INSTANCE_REPORTING_AUTH_TOKEN` on the instance. |
+| `401` | Missing or invalid license certificate. Check `N8N_LICENSE_CERT` on the instance: it must be a certificate issued by n8n. The service log carries a reason code (`PARSE_FAILED`, `INVALID_ISSUER`, `DECRYPTION_FAILED`, `SIGNATURE_INVALID`) and nothing else about the certificate. |
 | `400` | Malformed report. Should not happen with a supported n8n version. Report it to n8n. |
 | `409` | The exact same report (same instance id and `batchId`) was sent twice. n8n instances never do this on their own, so it points to a replayed request or a cloned instance database. Nothing is stored. |
 

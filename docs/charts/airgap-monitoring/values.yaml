@@ -30,19 +30,20 @@ commonLabels: {}
 # Annotations on the pod template, for example sidecar injection.
 podAnnotations: {}
 
-# ----- Authentication tokens -----
-# The service refuses to start without both tokens. Create a Secret with your
-# own tooling (External Secrets Operator, Sealed Secrets, kubectl ...) and
-# name it here; the chart never stores tokens itself.
-#   write token: presented by every n8n instance on POST /api/v1/instance-reports
-#                (set as N8N_INSTANCE_REPORTING_AUTH_TOKEN on the instances).
-#   read token:  required to download the fleet report from GET /api/v1/report.
-#                Hand it out separately; an instance holding only the write
-#                token must not be able to read the fleet's data.
+# ----- Authentication -----
+# Reporting n8n instances authenticate with their n8n license certificate,
+# which they already hold, so there is nothing to distribute to them and no
+# write token. The one secret is the read token, required to download the
+# fleet report from GET /api/v1/report; the service refuses to start without
+# it. Create a Secret with your own tooling (External Secrets Operator, Sealed
+# Secrets, kubectl ...) and name it here; the chart never stores the token.
+#
+# The chart deliberately exposes no way to trust additional license issuers.
+# Should n8n ever announce a CA rotation, pass N8N_MONITORING_ADDITIONAL_ISSUER_CERTS
+# through `extraEnv`.
 auth:
   existingSecret: ""
-  # Keys inside that Secret holding each token.
-  writeTokenKey: N8N_MONITORING_WRITE_TOKEN
+  # Key inside that Secret holding the read token.
   readTokenKey: N8N_MONITORING_READ_TOKEN
 
 # ----- Runtime -----
@@ -97,8 +98,9 @@ service:
 
 # ----- Ingress -----
 # Needed when the reporting n8n instances live outside this cluster. Terminate
-# TLS here: the tokens travel as bearer headers in clear text otherwise, so
-# rendering fails when `enabled` is true and `tls` is empty. Set
+# TLS here: the read token and the instances' license certificates travel in
+# clear text otherwise, so rendering fails when `enabled` is true and `tls` is
+# empty. Set
 # `allowInsecureHttp: true` only if TLS terminates in front of the ingress
 # controller, for example on a cloud load balancer.
 ingress:
