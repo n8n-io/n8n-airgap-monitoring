@@ -37,7 +37,8 @@ ghcr.io/n8n-io/n8n-airgap-monitoring:<version>
 In order to run, the service needs:
 
 - **Two secret tokens**, which you generate yourself and pass as environment
-  variables.
+  variables. Each is a plain string. Clients must send it verbatim in the
+  `Authorization: Bearer <token>` header of their requests.
   - `N8N_MONITORING_WRITE_TOKEN`: every n8n instance presents it when reporting
   - `N8N_MONITORING_READ_TOKEN`: needed to download the fleet report
 - **A persistent volume mounted at `/data`**, on SSD-backed storage. It holds
