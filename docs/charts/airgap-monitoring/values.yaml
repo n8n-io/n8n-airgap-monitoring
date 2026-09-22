@@ -31,19 +31,26 @@ commonLabels: {}
 podAnnotations: {}
 
 # ----- Authentication -----
-# Reporting n8n instances authenticate with their n8n license certificate,
-# which they already hold, so there is nothing to distribute to them and no
-# write token. The one secret is the read token, required to download the
-# fleet report from GET /api/v1/report; the service refuses to start without
-# it. Create a Secret with your own tooling (External Secrets Operator, Sealed
-# Secrets, kubectl ...) and name it here; the chart never stores the token.
+# Two secrets, both plain strings, in one Secret you create with your own
+# tooling (External Secrets Operator, Sealed Secrets, kubectl ...) and name
+# here; the chart never stores them.
 #
-# Reporting instances are trusted by their n8n license certificate. The service
-# trusts the embedded n8n license CA only; a CA rotation ships as a new image.
+#   read token:  required. Unlocks the fleet report on GET /api/v1/report; the
+#                service refuses to start without it. Never hand it to an n8n
+#                instance.
+#   write token: optional. Reporting n8n instances authenticate with their n8n
+#                license certificate, which they already hold. If you set a
+#                write token, an instance may instead present it as a bearer
+#                token (N8N_INSTANCE_REPORTING_AUTH_TOKEN on the instance).
+#                Leave the key out of the Secret to accept certificates only.
+#
+# The service trusts the embedded n8n license CA only; a CA rotation ships as a
+# new image.
 auth:
   existingSecret: ""
-  # Key inside that Secret holding the read token.
+  # Keys inside that Secret. The write-token key may be absent.
   readTokenKey: N8N_MONITORING_READ_TOKEN
+  writeTokenKey: N8N_MONITORING_WRITE_TOKEN
 
 # ----- Runtime -----
 # Cap the V8 heap below the container memory limit so garbage collection kicks

@@ -4,10 +4,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "sourceMap": true,
-    "experimentalDecorators": true,
-    // The dev CLIs under src/testing run straight from source with Node's type
-    // stripping, which resolves relative imports only with a real extension.
-    "rewriteRelativeImportExtensions": true
+    "experimentalDecorators": true
   },
   "include": ["src/**/*.ts"]
 }

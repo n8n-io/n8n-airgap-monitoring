@@ -9,10 +9,12 @@ import app from "../app";
 import { TEST_ISSUER_CERT_PEM } from "./mock-license";
 
 process.env.N8N_MONITORING_READ_TOKEN = "test-read-token";
-// Reports authenticate with a license certificate. Trust the test CA once here,
-// so every test mints certificates through mock-license.ts and nothing else.
-// The auth plugin honours this variable only under NODE_ENV=test, which the
+// Reports authenticate with either credential. The write token is set so the
+// bearer path is testable; the test CA is trusted once here, so every test
+// mints certificates through mock-license.ts and nothing else. The auth
+// plugin honours TEST_LICENSE_ISSUER_CERT only under NODE_ENV=test, which the
 // Vitest config pins.
+process.env.N8N_MONITORING_WRITE_TOKEN = "test-write-token";
 process.env.TEST_LICENSE_ISSUER_CERT = TEST_ISSUER_CERT_PEM;
 
 // Automatically build and tear down our instance

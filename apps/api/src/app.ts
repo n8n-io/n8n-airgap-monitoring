@@ -3,7 +3,7 @@ import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import instanceReport from "./instance-report/instance-report.plugin";
 import config from "./plugins/config";
 import db from "./plugins/db";
-import licenseAuth from "./plugins/license-auth";
+import reportAuth from "./plugins/report-auth";
 import sensible from "./plugins/sensible";
 import { healthRoutes } from "./routes/health";
 import v1Routes from "./routes/v1";
@@ -30,7 +30,7 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, _opts): Promise<void
   void fastify.register(config);
   void fastify.register(db);
   void fastify.register(sensible);
-  void fastify.register(licenseAuth);
+  void fastify.register(reportAuth);
 
   // Feature modules wire themselves up and are registered explicitly, so a
   // module keeps its plugin next to the service and repository it composes.

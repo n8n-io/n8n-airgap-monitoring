@@ -45,3 +45,38 @@ test("uses the embedded n8n CA when TEST_LICENSE_ISSUER_CERT is unset", async ()
   const res = await app.inject({ method: "POST", url: URL, payload: report });
   expect(res.statusCode).toBe(401);
 });
+
+// The write token is optional. Without it the service boots, and a bearer
+// header is simply not a credential: the request falls through to the
+// certificate check, so the behaviour is exactly the certificate-only one.
+test("boots without a write token and then ignores bearer headers", async () => {
+  vi.stubEnv("N8N_MONITORING_WRITE_TOKEN", undefined);
+  const app = await build();
+  expect(app.config.writeToken).toBeUndefined();
+
+  const { licenseCert: _omitted, ...bare } = report;
+  const headers = { authorization: "Bearer test-write-token" };
+
+  const withoutCert = await app.inject({ method: "POST", url: URL, headers, payload: bare });
+  expect(withoutCert.statusCode).toBe(401);
+  expect(withoutCert.json()).toMatchObject({ message: "Missing license certificate" });
+
+  const withCert = await app.inject({ method: "POST", url: URL, headers, payload: report });
+  expect(withCert.statusCode).toBe(201);
+});
+
+// An empty value is the same as unset, so a templated `WRITE_TOKEN=` line in a
+// deployment does not turn the empty string into a valid credential.
+test("treats an empty write token as unset", async () => {
+  vi.stubEnv("N8N_MONITORING_WRITE_TOKEN", "   ");
+  const app = await build();
+  expect(app.config.writeToken).toBeUndefined();
+
+  const res = await app.inject({
+    method: "POST",
+    url: URL,
+    headers: { authorization: "Bearer " },
+    payload: { instanceId: "x" },
+  });
+  expect(res.statusCode).toBe(401);
+});

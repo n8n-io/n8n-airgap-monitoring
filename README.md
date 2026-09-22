@@ -15,10 +15,12 @@ See also the user guide at [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/report`. The service refuses to start without it. |
+| `N8N_MONITORING_WRITE_TOKEN` | no | — | Bearer token that reporting n8n instances may present on `POST /api/v1/instance-reports` instead of their license certificate. Unset means certificates only. |
 | `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 
-There is no write token. A reporting n8n instance authenticates with its n8n
-license certificate, see [Reporting usage](#reporting-usage).
+A reporting n8n instance authenticates with its n8n license certificate, or
+with the write token when you set one. See [Reporting usage](#reporting-usage)
+and [docs/AUTHORIZATION.md](docs/AUTHORIZATION.md).
 
 ## Reporting usage
 
@@ -58,6 +60,13 @@ a header because a real certificate is about 7 KB and sits too close to the
 8 KB per-header limit of common reverse proxies. See
 [adr/2026-09-21-authenticate-with-license-certificate.md](docs/adr/2026-09-21-authenticate-with-license-certificate.md).
 
+Alternatively, if `N8N_MONITORING_WRITE_TOKEN` is set on the service, an
+instance may send that token as `Authorization: Bearer <token>` instead of
+`licenseCert` (set `N8N_INSTANCE_REPORTING_AUTH_TOKEN` on the instance). A
+bearer header, when present and a token is configured, decides the request on
+its own. Both credentials are described in
+[docs/AUTHORIZATION.md](docs/AUTHORIZATION.md#create-instance-report-route).
+
 `label` is optional, human-readable, and purely cosmetic: `instanceId` remains
 the identity, so relabeling an instance never splits or merges its history. It
 is customer-chosen free text and should be treated as untrusted display data by any consumer.
@@ -85,7 +94,7 @@ Values may be counters, percentages or decimals, and may increase or decrease
 between reports.
 
 Responses are `201` with the stored event id, `401` for a missing or invalid
-license certificate, and `400` for a malformed report. Authentication runs
+credential, and `400` for a malformed report. Authentication runs
 before validation, so an unauthenticated caller learns nothing about the
 schema. Every report is appended as its own
 event rather than overwriting the previous one, so usage history stays
@@ -158,9 +167,9 @@ For production mode
 
 Run the test cases.
 
-### `pnpm --filter api mock-license` and `pnpm --filter api mock-report`
+### `pnpm --filter api mock-report`
 
-Development helpers for posting reports without an n8n instance. See
+Prints a schema-valid report body for posting without an n8n instance. See
 [Local development](#local-development).
 
 ## Docker
@@ -180,13 +189,14 @@ Defaults baked into the image:
 | Health | `HEALTHCHECK` polling `/healthz` |
 
 `N8N_MONITORING_READ_TOKEN` is deliberately **not** set. The service refuses to
-boot without it, so you must supply it.
+boot without it, so you must supply it. `N8N_MONITORING_WRITE_TOKEN` is
+optional, see [Configuration](#configuration).
 
 ### Running the image locally
 
 `docker compose up --build` builds the image and starts it on
-[http://localhost:3001](http://localhost:3001) with a throwaway read token and a
-named volume:
+[http://localhost:3001](http://localhost:3001) with throwaway read and write
+tokens and a named volume:
 
 ```sh
 docker compose up --build          # or: docker-compose up --build
@@ -204,37 +214,32 @@ The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
 
-Posting a report to it needs a real n8n-issued license certificate: the
-service trusts the n8n license CA and nothing else. See
-[Local development](#local-development) for how to post without one.
+Posting a report to it needs one of the two credentials: the compose file's
+write token as a bearer header, or a real n8n-issued license certificate in the
+body. See [Local development](#local-development).
 
 ### Local development
 
-A reporting instance authenticates with its n8n license certificate, so there
-are two ways to exercise the receiver locally:
+A reporting instance authenticates with the write token or with its n8n
+license certificate, so there are two ways to exercise the receiver locally:
 
-- **With an n8n instance.** Point a licensed local n8n at the receiver via
-  `N8N_INSTANCE_REPORTING_BASE_URL`. Nothing else is needed; the instance
-  brings its own certificate, and the receiver runs exactly as in production.
-- **Without one.** Generate a throwaway CA, run the receiver in test mode so it
-  trusts that CA, and post bodies from `mock-report`:
+- **Without an n8n instance.** Post bodies from `mock-report` with the write
+  token. Against compose:
 
   ```sh
-  pnpm --filter api mock-license ca --out .dev-ca
-  NODE_ENV=test N8N_MONITORING_READ_TOKEN=dev-read-token TEST_LICENSE_ISSUER_CERT="$(cat .dev-ca/ca.cert.pem)" pnpm dev
-  pnpm --filter api --silent mock-report --ca .dev-ca --label demo --days 3 | \
-    curl -sS -X POST localhost:3456/api/v1/instance-reports -H 'content-type: application/json' -d @-
+  pnpm --filter api --silent mock-report --label demo --days 3 | \
+    curl -sS -X POST localhost:3001/api/v1/instance-reports \
+      -H 'authorization: Bearer dev-write-token' -H 'content-type: application/json' -d @-
   ```
 
-  `mock-report` also accepts a real certificate in `N8N_LICENSE_CERT` instead
-  of `--ca`, which works against a production-mode receiver.
-
-The `TEST_LICENSE_ISSUER_CERT` override replaces the n8n CA and is honoured
-only under `NODE_ENV=test`; the production image bakes `NODE_ENV=production`,
-so a mock certificate never reaches a deployed receiver. This is the mechanism
-ai-assistant-service uses for its tests. No CA is committed: `.dev-ca` is
-whatever you generated, and the [Kubernetes demo](#local-kubernetes-demo)
-generates its own per machine.
+  Against `pnpm dev`, start it with `N8N_MONITORING_READ_TOKEN` and
+  `N8N_MONITORING_WRITE_TOKEN` set and post to port 3456 the same way. The
+  [Kubernetes demo](#local-kubernetes-demo) and its backfill script use the
+  write token too.
+- **With a licensed n8n instance.** Point it at the receiver via
+  `N8N_INSTANCE_REPORTING_BASE_URL` and set nothing else; the instance brings
+  its certificate. `mock-report` embeds a certificate from `N8N_LICENSE_CERT`
+  when that variable is set, for posting by hand without a token.
 
 ## Local Kubernetes demo
 

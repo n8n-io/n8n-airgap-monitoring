@@ -88,18 +88,15 @@ spec:
               value: "$2b$10$LbD6Xck7zXofxajs5JKaNeQV37h9B8HhMfTNnuYR5l6hIS.T8VVwS"
 
             # Instance reporting. The webhook URL resolves through cluster DNS, so
-            # the traffic never leaves the cluster. The instance authenticates
-            # with its license certificate, which here is minted by the Makefile
-            # from the demo's throwaway CA (.dev-ca); the monitoring service runs
-            # in test mode so it trusts that CA. n8n itself cannot validate the
-            # certificate and logs one license error at boot, which does not stop
-            # reporting: the module is enabled by env, not by license.
+            # the traffic never leaves the cluster. The demo instances have no
+            # license certificate, so they authenticate with the write token,
+            # which has to match the service's N8N_MONITORING_WRITE_TOKEN.
             - name: N8N_ENABLED_MODULES
               value: 'instance-reporting'
             - name: N8N_INSTANCE_REPORTING_BASE_URL
               value: "__INGEST_BASE_URL__"
-            - name: N8N_LICENSE_CERT
-              value: "__LICENSE_CERT__"
+            - name: N8N_INSTANCE_REPORTING_AUTH_TOKEN
+              value: "__WRITE_TOKEN__"
             # Shows up as the report's `label`, so a consumer can name an instance
             # instead of only showing its generated instanceId.
             - name: N8N_INSTANCE_REPORTING_LABEL

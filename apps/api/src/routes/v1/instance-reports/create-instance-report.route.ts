@@ -26,10 +26,10 @@ const metricSchema = {
   else: { properties: { date: false } },
 };
 
-// The request also carries `licenseCert`, which is not listed here on purpose:
-// the licenseAuth preValidation hook requires it, verifies it and removes it
-// from the body before this schema runs, so it is a credential and never part
-// of the envelope that gets stored.
+// The request may also carry `licenseCert`, which is not listed here on
+// purpose: the reportAuth preValidation hook verifies it and removes it from
+// the body before this schema runs, so it is a credential and never part of
+// the envelope that gets stored.
 const instanceReportSchema = {
   type: "object",
   required: ["instanceId", "batchId", "n8nVersion", "dataPoints"],
@@ -71,9 +71,9 @@ const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> 
   fastify.post<{ Body: CreateInstanceReport }>(
     "/",
     {
-      // Possession of an n8n-issued license certificate is the whole
-      // authentication of a reporting instance.
-      preValidation: fastify.verifyLicenseCert,
+      // Either the write token as a bearer header or an n8n-issued license
+      // certificate in the body; see plugins/report-auth.ts.
+      preValidation: fastify.authenticateReport,
       schema: {
         body: instanceReportSchema,
         response: { 201: successResponseSchema, 401: errorResponseSchema, 409: errorResponseSchema },

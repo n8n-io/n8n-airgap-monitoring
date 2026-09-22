@@ -26,7 +26,8 @@
       "required": ["existingSecret"],
       "properties": {
         "existingSecret": { "type": "string" },
-        "readTokenKey": { "type": "string", "minLength": 1 }
+        "readTokenKey": { "type": "string", "minLength": 1 },
+        "writeTokenKey": { "type": "string", "minLength": 1 }
       }
     },
     "nodeOptions": { "type": "string" },

@@ -3,14 +3,17 @@ import fp from "fastify-plugin";
 
 export interface Config {
   readToken: string;
+  /**
+   * Optional shared secret that reporting instances may present as a bearer
+   * token instead of their license certificate. Undefined when unset, in which
+   * case only license certificates are accepted; see plugins/report-auth.ts.
+   */
+  writeToken: string | undefined;
   dbPath: string;
 }
 
 /**
  * Reads deployment configuration from the environment.
- *
- * There is no write token: reporting n8n instances authenticate with their
- * license certificate, see plugins/license-auth.ts.
  */
 export default fp(
   async (fastify: FastifyInstance) => {
@@ -21,6 +24,7 @@ export default fp(
 
     const config: Config = {
       readToken,
+      writeToken: process.env.N8N_MONITORING_WRITE_TOKEN?.trim() || undefined,
       dbPath: process.env.N8N_DB_PATH?.trim() || "./data/database.sqlite",
     };
 

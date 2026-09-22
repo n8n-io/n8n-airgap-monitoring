@@ -63,6 +63,14 @@ spec:
                 secretKeyRef:
                   name: {{ $secret }}
                   key: {{ .Values.auth.readTokenKey }}
+            # Optional: without this key in the Secret, reporting instances
+            # authenticate with their license certificate only.
+            - name: N8N_MONITORING_WRITE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secret }}
+                  key: {{ .Values.auth.writeTokenKey }}
+                  optional: true
             {{- with .Values.nodeOptions }}
             - name: NODE_OPTIONS
               value: {{ . | quote }}

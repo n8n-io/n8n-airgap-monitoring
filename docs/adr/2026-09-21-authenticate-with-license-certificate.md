@@ -18,6 +18,8 @@ This service runs inside the customer's network, operated by the customer who al
 
 A reporting instance authenticates by sending its license certificate as the `licenseCert` field of the report body. The service verifies, in a `preValidation` hook, that the leaf chains to the n8n license CA and that the payload signature verifies. Possession of a certificate n8n issued is the whole check.
 
+The shared write token stays available as an optional second authorization strategy. As has been the case until now: when the operator sets `N8N_MONITORING_WRITE_TOKEN` on their airgapped instance, a report POST request may carry it in its `Authorization: Bearer` header. Without a configured token, the certificate is checked for authorization. This keeps the service deployable for instances that have no certificate or where firewall rules to restrict access to the POST endpoint to n8n instances only are not desired. The `N8N_MONITORING_WRITE_TOKEN` env var being set does not narrow what the service accepts: the certificate path is always open.
+
 Deliberately not checked: expiry, termination, clock skew, entitlements, features, tenant, device fingerprint. An expired instance is still a licensed instance and its usage is still wanted. No identity is read from the certificate, nothing is stored, and nothing is exported. The hook deletes `licenseCert` from the body before the route schema and the service see it, and a test asserts that neither the stored row nor the export contains it. On rejection the service logs a reason code and nothing else about the certificate.
 
 The certificate travels in the body, not an `Authorization` header, because a measured real certificate is 7,334 bytes and grows with every feature flag. That sits within 10 percent of the 8 KB per-header default of nginx, the Kubernetes nginx ingress and Apache, and the failure would be an opaque `400` from the customer's proxy that neither side logs. Bodies have no comparable limit.
@@ -30,7 +32,8 @@ The read token stays as it is: its holder is the customer's operator, not a lice
 
 ## Alternatives Considered
 
-- **Keep the shared write token.** Rejected: it is the distribution chore this replaces, and it binds nothing to the caller.
+- **Keep the shared write token as the only mechanism.** Rejected: it is the distribution chore this replaces, and it binds nothing to the caller. Kept as an optional alternative instead, because a required token would force operators who rely on the certificate to invent one they never use.
+- **Let a configured write token switch the certificate path off**, so an operator can close the "any licensee" exposure. Not done here: it changes the meaning of the variable and the network requirement stays the documented answer. Open as a follow-up if the exposure concern turns out to be the driver.
 - **Exchange the certificate for a short-lived JWT**, as `ai-assistant-service` does for its chat endpoints. Rejected: a second endpoint plus a signing secret for a client that calls once a day, and the certificate must be sent to obtain the JWT anyway. `ai-assistant-service` itself validates the raw certificate per request on its newer endpoints.
 - **Certificate in the `Authorization: Bearer` header.** Rejected for the header-size reason above. A custom scheme or a dedicated header shares the size problem, and a dedicated header is more likely than `Authorization` to be logged by middleware.
 - **An operator-configurable PEM bundle of additional issuers**, named in a start-up warning and hidden from the Helm chart, for a CA rotation and for development CAs. Rejected: no production persona would use it. The embedded CA is valid until 2049, and a rotation would ship as a new image anyway, so it was a trust-widening switch in every customer's image for a scenario with no user. Development is served by the test-mode override instead.
@@ -41,13 +44,13 @@ The read token stays as it is: its holder is the customer's operator, not a lice
 
 ## Consequences
 
-- No write token anywhere: config, Helm chart, compose file, docs. `N8N_INSTANCE_REPORTING_AUTH_TOKEN` disappears on the n8n side.
-- Unlicensed (community) instances can no longer report. n8n logs a warning and does not schedule.
+- The write token becomes optional everywhere: config, Helm chart, compose file, docs. The service starts without it. `N8N_INSTANCE_REPORTING_AUTH_TOKEN` stays optional on the n8n side.
+- Unlicensed (community) instances can report only with a write token. Without one, n8n logs a warning and does not schedule.
 - Any n8n licensee's certificate unlocks any customer's receiver. Acceptable because the receiver is only reachable inside the customer's network; stated in the docs.
 - The credential is the customer's license, which they already hold and which travels to `ai-assistant.n8n.io` on every licensed instance today. TLS stays the recommendation it was; proxies in front of the service must not log request bodies.
 - A rejected request answers `401` before schema validation would answer `400`, so an unauthenticated caller learns nothing about the schema. The `401` uses the same error envelope as `409`.
 - `licenseCert` is a transport-only field. It is stripped before storage and is not part of the envelope defined in `adr/2026-08-26-report-envelopes-are-immutable.md`.
-- Breaking change, accepted while the service is new: a receiver on this version rejects instances that send a token and no certificate, and an older receiver rejects instances that send a certificate and no token. The receiver and the n8n instances must be upgraded together.
-- Local development with a licensed local n8n needs nothing: the instance brings its certificate and the receiver runs as in production. Posting without an instance uses the `mock-license` and `mock-report` CLIs (`apps/api/src/testing/cli/`) against a receiver in test mode, with a CA generated per machine and never committed. The k8s demo runs its receiver that way, so its Helm release differs from a customer's by two `extraEnv` values.
+- No breaking change for operators who keep a write token: an older instance that sends only the token is still accepted. An older receiver rejects instances that send a certificate and no token, so a fleet moving to certificates upgrades the receiver first.
+- Local development and the k8s demo use the write token, as before this ADR. A licensed local n8n can use its certificate against the same receiver. Mock certificates exist only inside the test process; the `license-auth.e2e.test.ts` suite keeps the certificate path exercised over a real socket in CI.
 - `NODE_ENV` becomes load-bearing. Vitest pins it to `test`, the Dockerfile to `production`, and the issuer override is the only behaviour that reads it.
 - New runtime dependencies `node-rsa` and `crypto-js`, the same two the license SDK and server use. Replacing them with `node:crypto` alone is possible but untested.

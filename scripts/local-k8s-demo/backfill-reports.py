@@ -22,11 +22,10 @@ from here and one from n8n.
 Python's standard library only, matching seed-workflow.py.
 
 Usage: backfill-reports.py N8N_URL MONITORING_URL LABEL DAYS
-Env:   N8N_EMAIL, N8N_PASSWORD, N8N_ENCRYPTION_KEY, N8N_LICENSE_CERT
+Env:   N8N_EMAIL, N8N_PASSWORD, N8N_ENCRYPTION_KEY, N8N_MONITORING_WRITE_TOKEN
 
-N8N_LICENSE_CERT is the certificate that authenticates the reports, the same
-string an n8n instance sends. The Makefile mints one from the demo CA, so no
-real license is involved.
+The reports authenticate with the write token as a bearer header, the same
+credential the demo's n8n instances use.
 """
 
 from __future__ import annotations
@@ -83,7 +82,7 @@ def main() -> int:
         email = os.environ["N8N_EMAIL"]
         password = os.environ["N8N_PASSWORD"]
         encryption_key = os.environ["N8N_ENCRYPTION_KEY"]
-        license_cert = os.environ["N8N_LICENSE_CERT"]
+        write_token = os.environ["N8N_MONITORING_WRITE_TOKEN"]
     except KeyError as missing:
         print(f"missing environment variable: {missing}", file=sys.stderr)
         return 2
@@ -126,16 +125,16 @@ def main() -> int:
             "dataPoints": [
                 {"kind": "daily", "name": METRIC, "value": volume, "date": day.isoformat()}
             ],
-            # The credential travels in the body, as n8n sends it; the collector
-            # strips it before storing the envelope.
-            "licenseCert": license_cert,
         }
 
         request = urllib.request.Request(
             f"{monitoring_url}/api/v1/instance-reports",
             data=json.dumps(payload).encode(),
             method="POST",
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {write_token}",
+            },
         )
 
         try:

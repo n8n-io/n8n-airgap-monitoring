@@ -22,9 +22,10 @@ controller, image registry) are plain values.
 - The image `ghcr.io/n8n-io/n8n-airgap-monitoring:<version>` mirrored into a
   registry your cluster can reach. Pin the exact version; `latest` and
   `stable` move.
-- A Secret in the release namespace holding the read token.
-- Reporting n8n instances with an n8n license certificate (`N8N_LICENSE_CERT`).
-  It is their credential; there is no write token.
+- A Secret in the release namespace holding the read token, and optionally a
+  write token.
+- Reporting n8n instances with a credential the service accepts: their n8n
+  license certificate (`N8N_LICENSE_CERT`), or the write token if you set one.
 - A network in which only your own n8n instances can reach the service's
   data ingestion endpoint. See [Network exposure](#network-exposure).
 
@@ -39,14 +40,17 @@ controller, image registry) are plain values.
    docker push registry.example.internal/n8n/n8n-airgap-monitoring:$VERSION
    ```
 
-2. Create the read-token Secret with your usual secrets tooling. It unlocks
-   the fleet report and must never reach an n8n instance. Shown with `kubectl`
-   for brevity:
+2. Create the token Secret with your usual secrets tooling. The read token is
+   required: it unlocks the fleet report and must never reach an n8n instance.
+   The write token is optional: add it if your instances should authenticate
+   with a shared secret instead of their license certificate, and make it a
+   different value. Shown with `kubectl` for brevity:
 
    ```sh
    kubectl create namespace airgap-monitoring
    kubectl -n airgap-monitoring create secret generic airgap-monitoring-tokens \
-     --from-literal=N8N_MONITORING_READ_TOKEN="$(openssl rand -hex 32)"
+     --from-literal=N8N_MONITORING_READ_TOKEN="$(openssl rand -hex 32)" \
+     --from-literal=N8N_MONITORING_WRITE_TOKEN="$(openssl rand -hex 32)"   # optional
    ```
 
 3. Install from a checkout of this repository:
@@ -70,7 +74,10 @@ controller, image registry) are plain values.
    ```
 
    The instance authenticates with its license certificate (`N8N_LICENSE_CERT`),
-   which a licensed airgapped instance already has. Nothing else is needed.
+   which a licensed airgapped instance already has, and nothing else is needed.
+   If you created a write token, an instance may instead set
+   `N8N_INSTANCE_REPORTING_AUTH_TOKEN=<write token>`. Both credentials are
+   described in [AUTHORIZATION.md](../../AUTHORIZATION.md#create-instance-report-route).
 
    Instances outside the cluster need an Ingress (`ingress.*`) and use its
    hostname instead. Read [Network exposure](#network-exposure) before enabling
@@ -160,9 +167,10 @@ restore, create a PVC from the snapshot and install with
 
 ## Token rotation
 
-The service reads the read token at start-up, so after changing the Secret
-restart the Deployment. Reporting instances are unaffected: they authenticate
-with their license certificate, not with a token.
+The service reads its tokens at start-up, so after changing the Secret restart
+the Deployment. Instances that authenticate with their license certificate are
+unaffected. Instances that use the write token need the new value too; until
+they have it they get `401` responses and retry later, so nothing is lost.
 
 ## Values
 
@@ -174,8 +182,8 @@ The ones you will need. Everything else is documented in
 | `image.repository` | `ghcr.io/n8n-io/n8n-airgap-monitoring` | Your mirror. |
 | `image.tag` | chart `appVersion` | Pin an exact release. |
 | `imagePullSecrets` | `[]` | For a private mirror. |
-| `auth.existingSecret` | `""` | **Required.** Secret holding the read token. |
-| `auth.readTokenKey` | `N8N_MONITORING_READ_TOKEN` | Key in that Secret. |
+| `auth.existingSecret` | `""` | **Required.** Secret holding the read token and, optionally, the write token. |
+| `auth.readTokenKey` / `auth.writeTokenKey` | `N8N_MONITORING_READ_TOKEN` / `N8N_MONITORING_WRITE_TOKEN` | Keys in that Secret. The write-token key may be absent. |
 | `persistence.storageClassName` | cluster default | An SSD-backed class. |
 | `persistence.size` | `10Gi` | |
 | `persistence.existingClaim` | `""` | Reuse a PVC, for example one restored from a snapshot. |

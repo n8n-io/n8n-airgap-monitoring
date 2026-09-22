@@ -26,7 +26,34 @@ reports cannot read the fleet's data. How to download the report and share it
 is covered in the
 [user guide](USER_GUIDE.md#3-download-usage-reports-from-n8n-airgap-monitoring).
 
-## License-cert based auth on POST /api/v1/instance-reports
+## Create instance report route
+
+`POST /api/v1/instance-reports` accepts two credentials. A request needs one
+of them:
+
+- the instance's n8n license certificate, in the request body, or
+- the write token, `N8N_MONITORING_WRITE_TOKEN`, as a bearer header.
+
+The certificate is always accepted. The write token is accepted only when the
+operator has set the variable on the service; it is optional, and the service
+starts without it.
+
+The check runs as a Fastify `preValidation` hook on the route. The body has
+been parsed as JSON at that point, but the route schema has not seen it yet,
+so a bad credential is answered with `401` before a malformed report would be
+answered with `400`, and an unauthenticated caller learns nothing about the
+schema. Which credential is checked:
+
+1. If the request carries an `Authorization: Bearer` header and a write token
+   is configured, the token decides. A wrong token is `401` even if the body
+   also carries a valid certificate.
+2. Otherwise, the certificate in the body is checked.
+
+Whichever credential authenticated the request, `licenseCert` is deleted from
+the body before the route schema and the service that persists the report see
+it.
+
+### License certificate in request body
 
 A reporting n8n instance proves that it is a licensed instance by sending its
 n8n license certificate with every report. Possession of a certificate that the
@@ -37,7 +64,7 @@ rationale is in
 request flow and the full body layout are in
 [DIAGRAMS.md](DIAGRAMS.md#n8n-instance-reports-data-to-airgap-monitoring-service).
 
-### What the n8n instance sends
+#### What the n8n instance sends
 
 The certificate travels in the JSON request body as the top-level field
 `licenseCert`, not in a header. A real certificate is about 7 KB and grows
@@ -59,13 +86,7 @@ example payload are documented in
 `licenseCert` is the instance's `N8N_LICENSE_CERT`, see the
 [user guide](USER_GUIDE.md#2-configure-your-self-hosted-n8n-instances-to-report-to-n8n-airgap-monitoring).
 
-### What the service checks
-
-The check runs as a Fastify `preValidation` hook on the route. The body has
-been parsed as JSON at that point, but the route schema has not seen it yet,
-so a bad certificate is answered with `401` before a malformed report would be
-answered with `400`, and an unauthenticated caller learns nothing about the
-schema.
+#### What the service checks
 
 The steps run in this order. The first failing step ends the request.
 
@@ -107,7 +128,7 @@ A body that is not valid JSON never reaches the hook because Fastify's
 content-type parser rejects it first. That path is not part of this check and
 its status code is not documented here.
 
-### What "authorized" means
+#### What "authorized" means
 
 Authorization here means only that the caller holds a license certificate n8n
 issued. It binds the request to no identity and no tenant:
@@ -119,16 +140,48 @@ issued. It binds the request to no identity and no tenant:
   caller. They are not compared with anything in the certificate.
 - Any n8n licensee's certificate is accepted, not only certificates of the
   customer operating this service. This is accepted because the service is
-  only reachable inside the customer's network.
+  only reachable inside the customer's network. Configuring a write token does
+  not change this: it adds a credential, it does not switch the certificate
+  off.
 
 The handler may therefore trust exactly one thing: that whoever sent the body
 possessed a genuine n8n license certificate. It trusts nothing else from it.
+
+### Secret string as bearer auth header
+
+The operator may set a write token on the service as
+`N8N_MONITORING_WRITE_TOKEN`. It is a plain string of the operator's making,
+read once at start-up, so a rotation needs a restart. When it is set, a report
+may authenticate with it instead of a certificate:
+
+```http
+POST /api/v1/instance-reports HTTP/1.1
+Authorization: Bearer <N8N_MONITORING_WRITE_TOKEN>
+Content-Type: application/json
+```
+
+The check is a constant-time comparison of the presented value with the
+configured one. A value that does not match is answered with `401 Unauthorized`
+and the message `Invalid write token`; the service logs the code `BAD_TOKEN`
+and nothing about the presented value. There are no users, scopes or expiry.
+
+An n8n instance sends the token when `N8N_INSTANCE_REPORTING_AUTH_TOKEN` is set
+on it, and then leaves `licenseCert` out of the body. This is the way to report
+from an instance that has no license certificate, and the credential the local
+tooling in this repository uses.
+
+Unlike the certificate, the token is a secret shared between the operator and
+their own instances, so it does prove "belongs to this operator". It does not
+narrow what the service accepts, though: the certificate path stays open, so
+the network requirements in the
+[user guide](USER_GUIDE.md#network-exposure) apply regardless.
 
 ### Rejection paths
 
 | Status | Message | Condition |
 | --- | --- | --- |
-| `401 Unauthorized` | `Missing license certificate` | Body is not a JSON object, or `licenseCert` is absent, not a string, or an empty string. |
+| `401 Unauthorized` | `Invalid write token` | A bearer header was sent, a write token is configured, and the values differ. Logged as `BAD_TOKEN`. |
+| `401 Unauthorized` | `Missing license certificate` | No bearer header (or no write token configured), and the body is not a JSON object, or `licenseCert` is absent, not a string, or an empty string. |
 | `401 Unauthorized` | `Invalid license certificate` | `PARSE_FAILED`: string shorter than 50 characters, not base64 JSON, JSON without string `licenseKey` and `x509`, `x509` not a parseable certificate, or `licenseKey` not in the `BEGIN LICENSE KEY` framing with three parts. |
 | `401 Unauthorized` | `Invalid license certificate` | `INVALID_ISSUER`: the leaf was not issued by, or does not verify against, the embedded n8n license CA. |
 | `401 Unauthorized` | `Invalid license certificate` | `DECRYPTION_FAILED`: the symmetric key does not recover with the leaf's public key, or the payload does not decrypt to a non-empty string. |

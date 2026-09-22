@@ -41,12 +41,15 @@ ghcr.io/n8n-io/n8n-airgap-monitoring:<version>
 
 In order to run, the service needs:
 
-- **One secret token**, `N8N_MONITORING_READ_TOKEN`, which you generate
-  yourself and pass as an environment variable. It is a plain string, needed
-  to download the fleet report, sent verbatim in the
-  `Authorization: Bearer <token>` header. There is no write token: a reporting
-  n8n instance authenticates with its n8n license certificate, which it already
-  holds, so nothing has to be distributed to the instances.
+- **One or two secret tokens**, which you generate yourself and pass as
+  environment variables. Each is a plain string, sent verbatim in the
+  `Authorization: Bearer <token>` header of a request.
+  - `N8N_MONITORING_READ_TOKEN` is required. It unlocks the fleet report.
+  - `N8N_MONITORING_WRITE_TOKEN` is optional. A reporting n8n instance
+    authenticates with its n8n license certificate, which it already holds, so
+    nothing has to be distributed to the instances. If you set a write token,
+    an instance may present it instead of the certificate. Use a different
+    value from the read token.
 - **A persistent volume mounted at `/data`**, on SSD-backed storage. It holds
   the SQLite database, the only copy of your usage history, so include it in
   your backups.
@@ -71,6 +74,10 @@ holds one. The service cannot tell your instances from someone else's, so if it
 is reachable from the internet, anyone with an n8n license can post reports
 into your database and pollute the usage report you share with n8n. The
 details are in [AUTHORIZATION.md](AUTHORIZATION.md#what-authorized-means).
+
+Setting a write token does not change this. It adds a second way to
+authenticate, it does not switch the certificate off, so the requirement
+stands whether or not you use one.
 
 The read endpoint does not have this problem: the read token over HTTPS is a
 proper secret. But both endpoints are served by the same host and port, so
@@ -105,6 +112,7 @@ The airgapped instance reporting is an opt-in n8n module. On **every** n8n insta
 ```sh
 N8N_ENABLED_MODULES=instance-reporting
 N8N_INSTANCE_REPORTING_BASE_URL=https://airgap-monitoring.acme.com
+N8N_INSTANCE_REPORTING_AUTH_TOKEN=<write token, only if you set one on the service>
 N8N_INSTANCE_REPORTING_LABEL=<optional label that will be included in reports>
 ```
 
@@ -114,6 +122,11 @@ Notes:
   `N8N_LICENSE_CERT`. It must be a certificate issued by n8n. An expired
   certificate is still accepted. An instance without a license certificate
   (community edition) does not report; n8n logs a warning instead.
+- If you set `N8N_MONITORING_WRITE_TOKEN` on the service, an instance may
+  authenticate with that token instead by setting
+  `N8N_INSTANCE_REPORTING_AUTH_TOKEN`. This is how an instance without a
+  license certificate can report. When the token is set, it is what the
+  service checks.
 - `N8N_INSTANCE_REPORTING_BASE_URL` is the origin only. The n8n instance will append
   the path of the reporting endpoint itself.
 - If `N8N_ENABLED_MODULES` already lists other modules, add
@@ -178,12 +191,13 @@ As of today the report always contains the complete history. In a future update 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `N8N_MONITORING_READ_TOKEN` | yes | none | Bearer token required to download the report. The service refuses to start without it. |
+| `N8N_MONITORING_WRITE_TOKEN` | no | none | Bearer token that n8n instances may present when reporting, instead of their license certificate. Unset means certificates only. |
 | `N8N_DB_PATH` | no | `/data/database.sqlite` in the image | Location of the SQLite file. Must be on persistent storage. |
 
 
-The token is read at start-up. After rotating it, restart the service.
-Reporting instances are not affected by a rotation: they authenticate with
-their license certificate, not with a token.
+Tokens are read at start-up. After rotating one, restart the service. Instances
+that authenticate with their license certificate are not affected by a
+rotation; instances that use the write token need the new value too.
 
 ### On each n8n instance
 
@@ -191,7 +205,8 @@ their license certificate, not with a token.
 | --- | --- | --- | --- |
 | `N8N_ENABLED_MODULES` | yes | none | Must include `instance-reporting`. |
 | `N8N_INSTANCE_REPORTING_BASE_URL` | yes | empty | Origin of the n8n-airgap-monitoring instance, without a path. |
-| `N8N_LICENSE_CERT` | yes | empty | The instance's n8n license certificate. It is sent with every report as the credential. Already set on a licensed airgapped instance. |
+| `N8N_LICENSE_CERT` | one of the two | empty | The instance's n8n license certificate. It is sent with every report as the credential. Already set on a licensed airgapped instance. |
+| `N8N_INSTANCE_REPORTING_AUTH_TOKEN` | one of the two | empty | The service's write token, if you set one. Sent as a bearer header instead of the certificate. |
 | `N8N_INSTANCE_REPORTING_LABEL` | no | empty | Human-readable name shown in the report. |
 
 ## Monitoring the health of n8n-airgap-monitoring
@@ -217,7 +232,7 @@ for these status codes:
 | Status | Meaning |
 | --- | --- |
 | `201` | Report stored. |
-| `401` | Missing or invalid license certificate. Check `N8N_LICENSE_CERT` on the instance: it must be a certificate issued by n8n. The service log carries a reason code (`PARSE_FAILED`, `INVALID_ISSUER`, `DECRYPTION_FAILED`, `SIGNATURE_INVALID`) and nothing else about the certificate. |
+| `401` | Missing or invalid credential. If the instance sends a token, check that `N8N_INSTANCE_REPORTING_AUTH_TOKEN` equals the service's `N8N_MONITORING_WRITE_TOKEN` (log code `BAD_TOKEN`). Otherwise check `N8N_LICENSE_CERT` on the instance: it must be a certificate issued by n8n. The service log carries a reason code (`PARSE_FAILED`, `INVALID_ISSUER`, `DECRYPTION_FAILED`, `SIGNATURE_INVALID`) and nothing else about the certificate. |
 | `400` | Malformed report. Should not happen with a supported n8n version. Report it to n8n. |
 | `409` | The exact same report (same instance id and `batchId`) was sent twice. n8n instances never do this on their own, so it points to a replayed request or a cloned instance database. Nothing is stored. |
 

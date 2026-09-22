@@ -6,13 +6,17 @@ The service exposes a single write endpoint, `POST /api/v1/instance-reports`.
 A self-hosted n8n instance posts one report per day to it, carrying its n8n
 license certificate (`N8N_LICENSE_CERT`) in the body as the credential. The
 service verifies that the certificate was issued by the n8n license CA and
-strips it from the body; nothing from it is stored.
+strips it from the body; nothing from it is stored. Alternatively, when the
+operator has set `N8N_MONITORING_WRITE_TOKEN` on the service, the instance may
+send that token as `Authorization: Bearer` instead
+(`N8N_INSTANCE_REPORTING_AUTH_TOKEN` on n8n); see
+[AUTHORIZATION.md](AUTHORIZATION.md#create-instance-report-route).
 
-The diagram shows the happy path only. The endpoint also answers `401` for a
-missing or invalid license certificate (checked before the schema, so an
-unauthenticated caller learns nothing about it), `400` for a body the schema
-rejects, and `409` when an already-accepted `batchId` is repeated for the same
-`instanceId`.
+The diagram shows the certificate path and the happy path only. The endpoint
+also answers `401` for a missing or invalid credential (checked before the
+schema, so an unauthenticated caller learns nothing about it), `400` for a body
+the schema rejects, and `409` when an already-accepted `batchId` is repeated
+for the same `instanceId`.
 
 ```mermaid
 ---
@@ -36,7 +40,7 @@ sequenceDiagram
 
     Note over N8N,API: Example data - what an n8n instance sends today<br/>"dataPoints": [<br/>{<br/>"kind": "cumulative",<br/>"name": "billableExecutions",<br/>"value": 402931<br/>},<br/>{<br/>"kind": "daily",<br/>"name": "billableExecutions",<br/>"value": 15234,<br/>"date": "2026-03-25"<br/>}<br/>]<br/>The cumulative point is the lifetime total, the daily point covers the previous completed UTC day.
 
-    API->>API: preValidation: licenseCert chains to the n8n license CA<br/>and its payload signature verifies; then licenseCert is deleted from the body
+    API->>API: preValidation: no bearer header, so licenseCert is checked:<br/>it chains to the n8n license CA and its payload signature verifies;<br/>then licenseCert is deleted from the body
     API->>API: schema validation of the remaining body
     API->>DB: INSERT INTO instance_reports<br/>(instanceId, batchId, label, n8nVersion, data, receivedAt)
     Note over DB: Append-only event store.<br/>dataPoints stored as a JSON blob.<br/>UNIQUE (instanceId, batchId).
