@@ -26,6 +26,8 @@ The verifier lives in this repository (`apps/api/src/license/`), a port of the `
 
 Trust is the embedded n8n license CA plus an optional PEM bundle in `N8N_MONITORING_ADDITIONAL_ISSUER_CERTS`. That variable exists for a CA rotation and for development CAs. Every extra issuer is named in a warning at start-up, and the Helm chart does not expose the variable.
 
+**Amendment, 2026-09-22.** The ungated override above is removed. No production persona used it: the embedded CA is valid until 2049, and a rotation would ship as a new image, which the paragraph on the verifier already accepts as the only delivery path. Keeping it meant shipping a trust-widening switch in every customer's image for a scenario with no user. Trust is now the embedded n8n license CA only. Tests replace it with a mock CA through `TEST_LICENSE_ISSUER_CERT`, honoured only under `NODE_ENV=test`, the same mechanism `ai-assistant-service` uses. The production image bakes `NODE_ENV=production`, so the variable is inert on a deployed container, and a test pins that. Local development that needs a mock-trusting server runs the image with `NODE_ENV=test`; that trade-off is accepted and belongs to the local-development follow-up.
+
 The read token stays as it is: its holder is the customer's operator, not a licensed instance.
 
 ## Alternatives Considered
@@ -47,5 +49,5 @@ The read token stays as it is: its holder is the customer's operator, not a lice
 - A rejected request answers `401` before schema validation would answer `400`, so an unauthenticated caller learns nothing about the schema. The `401` uses the same error envelope as `409`.
 - `licenseCert` is a transport-only field. It is stripped before storage and is not part of the envelope defined in `adr/2026-08-26-report-envelopes-are-immutable.md`.
 - Breaking change, accepted while the service is new: a receiver on this version rejects instances that send a token and no certificate, and an older receiver rejects instances that send a certificate and no token. The receiver and the n8n instances must be upgraded together.
-- Local development needs certificates a dev server trusts. The test generator (`apps/api/src/testing/mock-license.ts`) and the issuer override are the building blocks; a committed dev CA and a CLI follow in separate work.
+- Local development needs certificates a dev server trusts. The test generator (`apps/api/src/testing/mock-license.ts`) and the test-only issuer override are the building blocks; a committed dev CA and a CLI follow in separate work.
 - New runtime dependencies `node-rsa` and `crypto-js`, the same two the license SDK and server use. Replacing them with `node:crypto` alone is possible but untested.

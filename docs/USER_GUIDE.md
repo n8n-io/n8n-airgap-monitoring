@@ -149,7 +149,6 @@ As of today the report always contains the complete history. In a future update 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `N8N_MONITORING_READ_TOKEN` | yes | none | Bearer token required to download the report. The service refuses to start without it. |
-| `N8N_MONITORING_ADDITIONAL_ISSUER_CERTS` | no | none | PEM bundle of license issuers trusted in addition to the n8n license CA. Leave unset unless n8n announces a CA rotation. Every issuer here is named in a warning at start-up. |
 | `N8N_DB_PATH` | no | `/data/database.sqlite` in the image | Location of the SQLite file. Must be on persistent storage. |
 
 

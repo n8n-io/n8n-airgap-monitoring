@@ -38,9 +38,8 @@ podAnnotations: {}
 # it. Create a Secret with your own tooling (External Secrets Operator, Sealed
 # Secrets, kubectl ...) and name it here; the chart never stores the token.
 #
-# The chart deliberately exposes no way to trust additional license issuers.
-# Should n8n ever announce a CA rotation, pass N8N_MONITORING_ADDITIONAL_ISSUER_CERTS
-# through `extraEnv`.
+# Reporting instances are trusted by their n8n license certificate. The service
+# trusts the embedded n8n license CA only; a CA rotation ships as a new image.
 auth:
   existingSecret: ""
   # Key inside that Secret holding the read token.

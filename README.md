@@ -15,7 +15,6 @@ See also the user guide at [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/report`. The service refuses to start without it. |
-| `N8N_MONITORING_ADDITIONAL_ISSUER_CERTS` | no | — | PEM bundle of license issuers trusted in addition to the n8n license CA. Only for a CA rotation announced by n8n, or a development CA locally. Every issuer here is named in a warning at start-up. |
 | `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 
 There is no write token. A reporting n8n instance authenticates with its n8n
@@ -200,11 +199,12 @@ The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
 
-Posting a report to it needs a license certificate the service trusts. With no
-`N8N_MONITORING_ADDITIONAL_ISSUER_CERTS` set, that is a real n8n-issued one.
-Tooling to mint development certificates under a committed dev CA is planned
-as a follow-up; until then tests are the place where mock certificates exist
-(`apps/api/src/testing/mock-license.ts`).
+Posting a report to it needs a real n8n-issued license certificate: the
+service trusts the n8n license CA and nothing else. Tests are the one place
+mock certificates exist (`apps/api/src/testing/mock-license.ts`); they make
+the service trust a mock CA through `TEST_LICENSE_ISSUER_CERT`, which the
+service honours only under `NODE_ENV=test`. Tooling to mint development
+certificates under a committed dev CA is planned as a follow-up.
 
 ## Local Kubernetes demo
 
