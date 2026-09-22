@@ -1,0 +1,19 @@
+docs/AUTHORIZATION.md
+  s_d16789ff7b91c7::t_4bf6ff83e624e0 5-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5fcc981e67b0ba79dfbfe5f2b5b6ea20475aa5b3",
+  "prompts": {},
+  "sessions": {
+    "s_d16789ff7b91c7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "006564cf-28b6-42fe-8c94-ed593efd5a4e",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
