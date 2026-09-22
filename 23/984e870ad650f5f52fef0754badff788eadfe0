@@ -1,0 +1,21 @@
+docs/adr/2026-09-21-authenticate-with-license-certificate.md
+  s_619098c791e713::t_aa5a6c62c1c784 51-52
+  s_619098c791e713::t_8beec55b8fe8b4 36
+  s_619098c791e713::t_2a6a973519436d 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "23984e870ad650f5f52fef0754badff788eadfe0",
+  "prompts": {},
+  "sessions": {
+    "s_619098c791e713": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79823ab4-22ba-4e86-85e9-b5ddb0768758",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
