@@ -1,0 +1,30 @@
+docs/USER_GUIDE.md
+  s_d16789ff7b91c7::t_27b9468d03226e 75-80
+  s_d16789ff7b91c7::t_545592953d1bcd 29-33
+  s_d16789ff7b91c7::t_3533c9da42ffa2 66
+  s_d16789ff7b91c7::t_feebb2f7935d9a 56-61,67-74
+  s_d16789ff7b91c7::t_24940de22494b3 62-65
+  s_d16789ff7b91c7::t_fcdf784a58d7a0 53-55
+  s_d16789ff7b91c7::t_1a7dad8c0c48b6 209-213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "42f0113418bdba570bee2924e44fbbf892eb74ce",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_d16789ff7b91c7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "006564cf-28b6-42fe-8c94-ed593efd5a4e",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
