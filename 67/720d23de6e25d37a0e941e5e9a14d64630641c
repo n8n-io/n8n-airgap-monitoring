@@ -1,0 +1,20 @@
+README.md
+  s_619098c791e713::t_5dd335a39c574c 208-237
+  s_619098c791e713::t_0c04f655d96b26 161-165
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "67720d23de6e25d37a0e941e5e9a14d64630641c",
+  "prompts": {},
+  "sessions": {
+    "s_619098c791e713": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79823ab4-22ba-4e86-85e9-b5ddb0768758",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
