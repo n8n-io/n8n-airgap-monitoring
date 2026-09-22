@@ -1,0 +1,27 @@
+apps/api/vitest.config.mts
+  s_619098c791e713::t_96a7cbf896dbb0 6-9
+apps/api/src/plugins/license-auth.ts
+  s_619098c791e713::t_e4de9eb890c99c 18-22,26-27
+apps/api/src/plugins/license-auth.test.ts
+  s_619098c791e713::t_96106609a5964f 1-49
+apps/api/src/testing/build-app.ts
+  s_619098c791e713::t_0c7dff849efe74 14-16
+turbo.json
+  s_619098c791e713::t_4627afb97fa9dc 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "61ca46cb53b0ecca89b656703cdf1c3cd81eee54",
+  "prompts": {},
+  "sessions": {
+    "s_619098c791e713": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79823ab4-22ba-4e86-85e9-b5ddb0768758",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

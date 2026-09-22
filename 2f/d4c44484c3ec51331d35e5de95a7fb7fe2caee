@@ -1,0 +1,29 @@
+apps/api/src/testing/cli/mock-report.ts
+  s_a55ffb8d1329e1::t_14add890b50307 17
+  s_a55ffb8d1329e1::t_c6a93b43baf32a 47-49
+  s_afc77a1f28f061::t_faf2a8531eafd2 39-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2fd4c44484c3ec51331d35e5de95a7fb7fe2caee",
+  "prompts": {},
+  "sessions": {
+    "s_a55ffb8d1329e1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cd4e7c7b-797e-4197-973f-d2298afa98ab",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    },
+    "s_afc77a1f28f061": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "015d0883-4727-4845-b897-c3db8c84e889",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

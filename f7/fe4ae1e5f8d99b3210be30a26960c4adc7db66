@@ -1,0 +1,38 @@
+scripts/local-k8s-demo/.gitignore
+  s_619098c791e713::t_8ec2b49a687652 5-6
+scripts/local-k8s-demo/README.md
+  s_619098c791e713::t_57c2d2fdbc089a 109-119
+  s_619098c791e713::t_4cebe92072c951 14-15
+  s_619098c791e713::t_cbd1f0e6b1fa43 41
+scripts/local-k8s-demo/backfill-reports.py
+  s_619098c791e713::t_a26eedbb91e538 86
+  s_619098c791e713::t_90ae43106d504e 25-29
+  s_619098c791e713::t_5e6a29b1ecae6e 138
+  s_619098c791e713::t_eee421dc92bdf7 129-131
+scripts/local-k8s-demo/Makefile
+  s_619098c791e713::t_7b809a5332d4a9 186
+  s_619098c791e713::t_e6c46cb7e37abd 233,241
+  s_619098c791e713::t_50fdee88963b78 167,171
+  s_619098c791e713::t_4186bbb419b24b 74
+  s_619098c791e713::t_2f818e4f5f2f01 127-135,140-142,154-158
+  s_619098c791e713::t_5611e18a5b0717 15-23
+  s_619098c791e713::t_d95d704af8e97c 85-86
+scripts/local-k8s-demo/k8s/n8n-instance.template.yaml
+  s_619098c791e713::t_029a4b66f23823 91-96,101-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f7fe4ae1e5f8d99b3210be30a26960c4adc7db66",
+  "prompts": {},
+  "sessions": {
+    "s_619098c791e713": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79823ab4-22ba-4e86-85e9-b5ddb0768758",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

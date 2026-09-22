@@ -1,0 +1,22 @@
+apps/api/src/plugins/license-auth.test.ts
+  s_12a01315027d22::t_8a5b19c02fca26 32
+  s_12a01315027d22::t_49f8effc646ffd 1
+  s_12a01315027d22::t_0a23f50959d00d 15-17,19
+  s_12a01315027d22::t_f3b1744ba406f4 42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6fd2a2fa0319cb0c170d4c1a9bf57da71e834232",
+  "prompts": {},
+  "sessions": {
+    "s_12a01315027d22": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1cb4e34e-9bef-470a-b7f2-b1017eb687d5",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
