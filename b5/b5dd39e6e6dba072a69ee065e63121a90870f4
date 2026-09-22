@@ -1,0 +1,34 @@
+docs/RELEASE.md
+  s_7cc8b96a0529e9::t_4d7afe1b1968bd 38
+  s_7cc8b96a0529e9::t_5ee8751ce2abcd 4-5
+  s_7cc8b96a0529e9::t_1abcca510d2cba 61-64,66-69
+  h_c63dce324dfc7b 65
+.github/workflows/push-pr-image.yml
+  s_7cc8b96a0529e9::t_fbff4c4a834d2d 1-45,47-72,74-89,91-103,105-110,112
+  s_7cc8b96a0529e9::t_4ebaa4b2eff7aa 90
+  s_7cc8b96a0529e9::t_0dc267f97992ef 46
+  s_7cc8b96a0529e9::t_1478910bc7cd3d 111
+  s_7cc8b96a0529e9::t_da3a7d5dd43182 73
+  s_7cc8b96a0529e9::t_2b6f7a4e6eed98 104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b5b5dd39e6e6dba072a69ee065e63121a90870f4",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_7cc8b96a0529e9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4116cc6-a07e-427f-9ec4-fc9fe932925e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
