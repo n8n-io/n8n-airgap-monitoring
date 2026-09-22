@@ -2,6 +2,30 @@
 
 How n8n-airgap-monitoring decides whether to act on an incoming request.
 
+## Simple string token auth for GET /api/v1/report
+
+The report download is guarded by one shared secret, the read token. The
+operator generates it and sets it on the service as `N8N_MONITORING_READ_TOKEN`;
+the service refuses to start without it. The token is read once at start-up,
+so a rotation needs a restart.
+
+A request must carry the token verbatim as a bearer token:
+
+```http
+GET /api/v1/report HTTP/1.1
+Authorization: Bearer <N8N_MONITORING_READ_TOKEN>
+```
+
+The check is `@fastify/bearer-auth` with the read token as its only key. A
+request without an `Authorization` header, or with a bearer token that does
+not equal the configured value, is answered with `401 Unauthorized`. There is
+nothing else to it: no users, no scopes, no expiry.
+
+Reporting n8n instances never hold this token, so an instance that can write
+reports cannot read the fleet's data. How to download the report and share it
+is covered in the
+[user guide](USER_GUIDE.md#3-download-usage-reports-from-n8n-airgap-monitoring).
+
 ## License-cert based auth on POST /api/v1/instance-reports
 
 A reporting n8n instance proves that it is a licensed instance by sending its
