@@ -158,6 +158,11 @@ For production mode
 
 Run the test cases.
 
+### `pnpm --filter api mock-license` and `pnpm --filter api mock-report`
+
+Development helpers for posting reports without an n8n instance. See
+[Local development](#local-development).
+
 ## Docker
 
 The [`Dockerfile`](Dockerfile) builds a single image containing the API, so a
@@ -200,11 +205,36 @@ container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
 
 Posting a report to it needs a real n8n-issued license certificate: the
-service trusts the n8n license CA and nothing else. Tests are the one place
-mock certificates exist (`apps/api/src/testing/mock-license.ts`); they make
-the service trust a mock CA through `TEST_LICENSE_ISSUER_CERT`, which the
-service honours only under `NODE_ENV=test`. Tooling to mint development
-certificates under a committed dev CA is planned as a follow-up.
+service trusts the n8n license CA and nothing else. See
+[Local development](#local-development) for how to post without one.
+
+### Local development
+
+A reporting instance authenticates with its n8n license certificate, so there
+are two ways to exercise the receiver locally:
+
+- **With an n8n instance.** Point a licensed local n8n at the receiver via
+  `N8N_INSTANCE_REPORTING_BASE_URL`. Nothing else is needed; the instance
+  brings its own certificate, and the receiver runs exactly as in production.
+- **Without one.** Generate a throwaway CA, run the receiver in test mode so it
+  trusts that CA, and post bodies from `mock-report`:
+
+  ```sh
+  pnpm --filter api mock-license ca --out .dev-ca
+  NODE_ENV=test TEST_LICENSE_ISSUER_CERT="$(cat .dev-ca/ca.cert.pem)" pnpm dev
+  pnpm --filter api --silent mock-report --ca .dev-ca --label demo --days 3 | \
+    curl -sS -X POST localhost:3456/api/v1/instance-reports -H 'content-type: application/json' -d @-
+  ```
+
+  `mock-report` also accepts a real certificate in `N8N_LICENSE_CERT` instead
+  of `--ca`, which works against a production-mode receiver.
+
+The `TEST_LICENSE_ISSUER_CERT` override replaces the n8n CA and is honoured
+only under `NODE_ENV=test`; the production image bakes `NODE_ENV=production`,
+so a mock certificate never reaches a deployed receiver. This is the mechanism
+ai-assistant-service uses for its tests. No CA is committed: `.dev-ca` is
+whatever you generated, and the [Kubernetes demo](#local-kubernetes-demo)
+generates its own per machine.
 
 ## Local Kubernetes demo
 
