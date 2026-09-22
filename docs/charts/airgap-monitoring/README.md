@@ -12,8 +12,8 @@ controller, image registry) are plain values.
 | --- | --- | --- |
 | Deployment | 1 replica, `strategy: Recreate` | Fixed. SQLite on a ReadWriteOnce volume has exactly one writer. |
 | PersistentVolumeClaim | 10Gi, RWO, cluster default StorageClass, kept on uninstall | Holds the SQLite database, the only copy of the fleet's usage history. |
-| Service | ClusterIP on port 3000 | In-cluster URL for reporting instances and for report downloads. |
-| Ingress | Disabled | For instances that report from outside the cluster. |
+| Service | ClusterIP on port 3000 | In-cluster URL for reporting instances and for report downloads. Reachable only inside the cluster. |
+| Ingress | Disabled | For instances that report from outside the cluster. Must stay off the public internet, see [Network exposure](#network-exposure). |
 
 ## Prerequisites
 
@@ -25,6 +25,8 @@ controller, image registry) are plain values.
 - A Secret in the release namespace holding the read token.
 - Reporting n8n instances with an n8n license certificate (`N8N_LICENSE_CERT`).
   It is their credential; there is no write token.
+- A network in which only your own n8n instances can reach the service's
+  data ingestion endpoint. See [Network exposure](#network-exposure).
 
 ## Install
 
@@ -71,11 +73,41 @@ controller, image registry) are plain values.
    which a licensed airgapped instance already has. Nothing else is needed.
 
    Instances outside the cluster need an Ingress (`ingress.*`) and use its
-   hostname instead. Terminate TLS on it: each report carries the instance's
-   license certificate and the report download carries the read token, so the
-   chart refuses to render an Ingress without `ingress.tls` unless you set
+   hostname instead. Read [Network exposure](#network-exposure) before enabling
+   it. Terminate TLS on it: each report carries the instance's license
+   certificate and the report download carries the read token, so the chart
+   refuses to render an Ingress without `ingress.tls` unless you set
    `ingress.allowInsecureHttp=true` because TLS terminates further upstream.
    Make sure the ingress controller does not log request bodies.
+
+## Network exposure
+
+> **Warning:** The write endpoint, `POST /api/v1/instance-reports`, must only
+> be reachable from your own n8n instances. Never expose it to the public
+> internet. Enforce this on the network level.
+
+The endpoint accepts any valid n8n license certificate, and every n8n customer
+holds one. The service cannot tell your instances from someone else's, so an
+internet-reachable service lets anyone with an n8n license write into your
+database.
+
+The chart's defaults are already private: a ClusterIP Service and no Ingress.
+Instances inside the cluster need nothing more. The chart ships no
+NetworkPolicy, because every environment enforces network boundaries in its
+own way; use whatever you already use for internal services.
+
+For instances outside the cluster, enable the Ingress and make sure that
+`POST /api/v1/instance-reports` is reachable by your n8n instances and by
+nothing else. How you achieve that is up to your environment, for example
+with a private network or a source allowlist on the proxy, but any mechanism
+that gives the same guarantee is fine. The chart takes no position on it.
+
+The read endpoint, `GET /api/v1/report`, is a different case. Its token over
+TLS is enough protection, so it could be reachable from outside. But it runs
+on the same service as the write endpoint. Opening the service to the internet
+so that you can download the report also opens the write endpoint. Either
+download from inside the network, or make sure that only `GET /api/v1/report`
+is reachable from outside.
 
 ## Sizing
 
@@ -147,5 +179,6 @@ The ones you will need. Everything else is documented in
 | `persistence.storageClassName` | cluster default | An SSD-backed class. |
 | `persistence.size` | `10Gi` | |
 | `persistence.existingClaim` | `""` | Reuse a PVC, for example one restored from a snapshot. |
-| `ingress.*` | disabled | Standard `className`, `annotations`, `hosts`, `tls`. `tls` is required when enabled unless `allowInsecureHttp=true`. |
+| `service.type` | `ClusterIP` | Leave at the default. `LoadBalancer` or `NodePort` would make the ingest endpoint reachable from outside the cluster without any of the safeguards in [Network exposure](#network-exposure). |
+| `ingress.*` | disabled | Standard `className`, `annotations`, `hosts`, `tls`. `tls` is required when enabled unless `allowInsecureHttp=true`. Keep the host private, see [Network exposure](#network-exposure). |
 | `resources` | see [Compute](#compute) | |
