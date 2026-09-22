@@ -1,0 +1,110 @@
+docs/AUTHORIZATION.md
+  s_619098c791e713::t_81b1213d9d3d07 29-56,67
+  s_619098c791e713::t_508c53c8d2a0ad 183-184
+  s_619098c791e713::t_c42ea3b29273ed 89
+  s_619098c791e713::t_7c487fa713e803 169-171
+  s_619098c791e713::t_5057f51b9e203f 131,143-145,150-168,172-177
+  s_619098c791e713::t_83be97903ef484 178
+docs/charts/airgap-monitoring/values.schema.json
+  s_619098c791e713::t_68f88bdd654f8f 29-30
+Dockerfile
+  s_619098c791e713::t_10ef534e250659 34-36
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_619098c791e713::t_1545e21dbef6cc 275-308,310
+  s_619098c791e713::t_db4717fb556fdd 309
+  s_619098c791e713::t_c6ced85ebc9810 311-313
+docs/adr/2026-09-21-authenticate-with-license-certificate.md
+  s_619098c791e713::t_87bcb5543ee081 22
+  s_619098c791e713::t_94a51c799aa40a 47-48
+  s_619098c791e713::t_34f57a5524d1cf 35-36
+  h_c63dce324dfc7b 21
+  s_619098c791e713::t_209f417ba296d3 53-54
+README.md
+  s_619098c791e713::t_d7323964c80375 192-193,198-199
+  s_619098c791e713::t_4ebb8db52f0df9 217-219,223-224,226-227,230-232,235-242
+  s_619098c791e713::t_ad53cca8a0b3dd 97
+  s_619098c791e713::t_424fd136b1e93d 63-69
+  s_619098c791e713::t_da1bf8c4e9241e 170,172
+  s_619098c791e713::t_23716c424bbe76 18,21-23
+apps/api/src/plugins/report-auth.ts
+  s_619098c791e713::t_5e3ce2c79c5208 1-114
+apps/api/src/testing/build-app.ts
+  s_619098c791e713::t_8c715feadc50c8 12-15,17
+apps/api/tsconfig.json
+  s_619098c791e713::t_39b350f115d532 7
+docker-compose.yml
+  s_619098c791e713::t_827dd472310757 12-14
+scripts/local-k8s-demo/k8s/n8n-instance.template.yaml
+  s_619098c791e713::t_5ed6fa8af666d9 91-93,98-99
+scripts/local-k8s-demo/README.md
+  s_619098c791e713::t_c6cfc7718261b3 107-112
+  s_619098c791e713::t_aa9ed1afda3419 39
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.ts
+  s_619098c791e713::t_ce15ec8cc0bf93 74-76
+  s_619098c791e713::t_609ed41f072132 29-32
+docs/charts/airgap-monitoring/values.yaml
+  s_619098c791e713::t_0bfd1add0c85d5 34-36,38-48,51,53
+docs/DIAGRAMS.md
+  s_619098c791e713::t_ba0f2c530dd135 43
+  s_619098c791e713::t_8192b05f3fc0d8 9-13,15-19
+apps/api/src/plugins/config.ts
+  s_619098c791e713::t_9d3784f92301a4 6-11,27
+scripts/local-k8s-demo/backfill-reports.py
+  s_619098c791e713::t_7a62a27a28eda5 134-137
+  s_619098c791e713::t_d593a5a23c501b 25,27-28
+  s_619098c791e713::t_1d5c37551124e1 85
+docs/charts/airgap-monitoring/README.md
+  s_619098c791e713::t_0b274cd40b266c 170-173
+  s_619098c791e713::t_6abc650c52f6ce 77-80
+  s_619098c791e713::t_75ea6ee411e1b4 43-47,52-53
+  s_619098c791e713::t_e12d2c5d8e6d75 25-28
+  s_619098c791e713::t_2e09124b260f90 185-186
+apps/api/src/testing/cli/mock-report.ts
+  s_619098c791e713::t_4a02c564dc72ff 2-3,5-7,9-10,14,17,54-55,63
+docs/USER_GUIDE.md
+  s_619098c791e713::t_4dca2933f60dab 44-52
+  s_619098c791e713::t_ad19918363a2e7 78-81
+  s_619098c791e713::t_fe95fc19cc74d9 194,198-200
+  s_619098c791e713::t_e4c7f5dd4b3737 208-209
+  s_619098c791e713::t_b4f987e99b3239 115,125-129
+  s_619098c791e713::t_fe12e3bfacc25a 235
+scripts/local-k8s-demo/Makefile
+  s_619098c791e713::t_3e2cfbaa8e4417 222
+  s_619098c791e713::t_61c0fd8c04a72d 69
+  s_619098c791e713::t_3ed5fb6417107e 12-16
+  s_619098c791e713::t_a63d32f967854d 167
+  s_619098c791e713::t_e88a39d2e34c61 214
+  s_619098c791e713::t_8ef43e0d334269 149
+  s_619098c791e713::t_af50967eb63a60 81
+  s_619098c791e713::t_ad2f9ab3f5b9d3 126-127,131,140
+docs/charts/airgap-monitoring/templates/deployment.yaml
+  s_619098c791e713::t_ce302ee62418f3 66-73
+apps/api/src/plugins/report-auth.test.ts
+  s_619098c791e713::t_36f6691770d588 20,23,27,33,36-37,43,46-82
+apps/api/src/app.ts
+  s_619098c791e713::t_aba619a81b913f 6
+  s_619098c791e713::t_8e3a20c0194728 33
+apps/api/src/plugins/license-auth.e2e.test.ts
+  s_619098c791e713::t_acb9531d4d46cc 1-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "93074324e26015bdfcf3659435eadd53374f55de",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_619098c791e713": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79823ab4-22ba-4e86-85e9-b5ddb0768758",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
