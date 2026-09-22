@@ -26,6 +26,11 @@ is shared with n8n, which supports us in providing a smooth experience for airga
 The n8n-airgap-monitoring service is hosted as one container with one volume.
 It is deliberately simple in order to make it easy to use.
 
+Reporting instances authenticate with their n8n license certificate. That
+certificate proves "licensed by n8n", not "belongs to you", so keeping the
+service off the public internet is part of its security model. See
+[Network exposure](#network-exposure) below.
+
 ## 1. Self-host n8n-airgap-monitoring
 
 The service ships as a single Docker image:
@@ -45,10 +50,34 @@ In order to run, the service needs:
 - **A persistent volume mounted at `/data`**, on SSD-backed storage. It holds
   the SQLite database, the only copy of your usage history, so include it in
   your backups.
-- **Port 3000** reachable from every n8n instance. If that path leaves a trusted
-  network, terminate TLS in front of the service: the read token travels as a
-  bearer header and each report carries the instance's license certificate.
-  Make sure any proxy in front of the service does not log request bodies.
+- **A private network path.** The service must be reachable from every n8n
+  instance and from wherever you download the report, and from nowhere else.
+  If that path leaves a trusted network, terminate TLS in front of the service:
+  the read token travels as a bearer header and each report carries the
+  instance's license certificate. Make sure any proxy in front of the service
+  does not log request bodies.
+
+### Network exposure
+
+> **Warning:** The write endpoint, `POST /api/v1/instance-reports`, must only
+> be reachable from your own n8n instances. Never expose it to the public
+> internet. Enforce this on the network level, for example with a private
+> network, firewall rules, an internal load balancer or a Kubernetes
+> NetworkPolicy.
+
+The reason is the write endpoint's authentication. `POST /api/v1/instance-reports`
+accepts any valid n8n license certificate, and every n8n customer in the world
+holds one. The service cannot tell your instances from someone else's, so if it
+is reachable from the internet, anyone with an n8n license can post reports
+into your database and pollute the usage report you share with n8n. The
+details are in [AUTHORIZATION.md](AUTHORIZATION.md#what-authorized-means).
+
+The read endpoint does not have this problem: the read token over HTTPS is a
+proper secret. But both endpoints are served by the same host and port, so
+exposing the service to download the report from outside exposes the write
+endpoint with it. Either download from inside the network, or have your proxy
+or firewall block `POST /api/v1/instance-reports` from the outside while
+allowing `GET /api/v1/report`.
 
 A single replica of this service is optimized to handle thousands of n8n
 instances reporting to it. The SQLite database only supports one writer, so do
@@ -176,6 +205,11 @@ Download it and check `lastReportAt` per instance. An instance whose
 for error logs from the instance-reporting module. An instance you expect but do not see at all
 has never reached the n8n-airgap-monitoring service, which is usually a wrong URL or a network
 policy.
+
+**Are only your instances reporting?** An `instanceId` in the report that you
+cannot match to one of your n8n instances means the service is reachable by
+outsiders. Check [Network exposure](#network-exposure) and close the path, then
+report the situation to n8n so the foreign data can be excluded.
 
 **Is the n8n-airgap-monitoring service rejecting reports?** It logs every request. Look
 for these status codes:
