@@ -11,6 +11,8 @@ has arrived.
 ## Prerequisites
 
 - `docker`, `kind`, `kubectl`, `helm`, `python3`
+- `pnpm install` run once at the repo root: the Makefile mints the demo's license
+  certificates with the API package's `mock-license` script.
 - The n8n image built locally as `n8nio/n8n:local` (from an n8n checkout, e.g.
   `pnpm build:docker`). The monitoring image is built by `make up` from this repo's root
   `Dockerfile` and deployed with the customer-facing Helm chart in
@@ -36,7 +38,7 @@ reload, and restart it. The n8n pods are not restarted automatically — after r
 |---|---|---|
 | n8n-1 (`axolotl`) | http://localhost:3003 | `admin@n8n.io` / `hello1234` |
 | n8n-2 (`narwhal`) | http://localhost:3004 | `admin@n8n.io` / `hello1234` |
-| monitoring API | http://localhost:3010 | bearer token `demo-write-token` |
+| monitoring API | http://localhost:3010 | read token `demo-read-token` |
 
 The instance owner is provisioned from environment variables
 (`N8N_INSTANCE_OWNER_MANAGED_BY_ENV`), so there is no setup wizard to click through.
@@ -104,8 +106,17 @@ deterministic `batchId` per day.
 
 - The cluster is named `airgap-demo` and uses an isolated kubeconfig at `.kubeconfig`, so
   it never touches `~/.kube/config` and coexists with other local clusters.
-- The write token is a fixed demo value defined at the top of the Makefile. It is shared
-  by both sides of the reporting handshake and must stay in sync.
+- Reporting instances authenticate with their n8n license certificate, and the demo has
+  no real licenses. `make up` therefore generates a throwaway CA into `.dev-ca`
+  (gitignored, deleted by `make nuke`), deploys the monitoring service with
+  `NODE_ENV=test` and `TEST_LICENSE_ISSUER_CERT` set to that CA, and mints one
+  certificate per instance from it into `N8N_LICENSE_CERT`. The service honours the
+  override only in test mode, so the same image in production trusts the n8n CA and
+  nothing else. Apart from those two environment values, the Helm release is identical to
+  what customers get. Each n8n pod logs one license error at boot because it cannot
+  validate the mock certificate; reporting is unaffected, since the module is enabled by
+  environment, not by license.
+- `make backfill` mints its certificate the same way, so nothing is copied from anywhere.
 - Each instance keeps its `N8N_ENCRYPTION_KEY` across reinstalls (the Makefile reuses the
   existing secret), so data on the volume stays decryptable.
 - Drop a `.env` file next to this README to inject extra variables into both n8n pods —

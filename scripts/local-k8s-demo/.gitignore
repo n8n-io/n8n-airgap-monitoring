@@ -2,3 +2,5 @@
 .kubeconfig
 .pids
 logs
+# Throwaway license CA the demo receiver trusts; generated per machine by `make up`.
+.dev-ca

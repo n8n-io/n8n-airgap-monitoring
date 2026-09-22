@@ -9,13 +9,18 @@ MONITORING_IMAGE := airgap-monitoring:local
 REPO_ROOT        := $(CURDIR)/../..
 PIDS_FILE        := .pids
 
-# Demo credentials. WRITE_TOKEN is shared by both sides of the reporting
-# handshake: the instances send it as a bearer token and the service checks it
-# against its own N8N_MONITORING_WRITE_TOKEN, so the two must stay equal.
-WRITE_TOKEN      := demo-write-token
 # READ_TOKEN guards the report download. Only the monitoring service needs it,
 # but the service refuses to boot without it, so it must be in the secret.
 READ_TOKEN       := demo-read-token
+
+# Reporting instances authenticate with their n8n license certificate. The
+# demo has no real licenses, so `make up` generates a throwaway CA into
+# DEV_CA_DIR (gitignored, removed by `make nuke`), runs the monitoring service
+# in test mode so it trusts that CA, and mints one certificate per instance
+# from it. Apart from those two environment values the Helm release is the one
+# customers get. MOCK_LICENSE needs the repo's dev dependencies installed.
+DEV_CA_DIR       := $(CURDIR)/.dev-ca
+MOCK_LICENSE     := cd $(REPO_ROOT) && pnpm --filter api --silent mock-license
 OWNER_EMAIL      := admin@n8n.io
 OWNER_PASSWORD   := hello1234
 
@@ -65,8 +70,8 @@ up: cluster images install ## Full setup: cluster + images + deploy + port-forwa
 	@printf '  %-20s http://localhost:%s\n' "monitoring API" "$(MONITORING_PORT)"
 	@echo ""
 	@echo "  n8n login           $(OWNER_EMAIL) / $(OWNER_PASSWORD)"
-	@echo "  write token         $(WRITE_TOKEN)"
 	@echo "  read token          $(READ_TOKEN)"
+	@echo "  license CA          .dev-ca (throwaway; the monitoring service runs in test mode to trust it)"
 	@echo ""
 	@echo "  Both instances report once a day, at a random UTC time chosen on first boot,"
 	@echo "  to the cluster-internal URL"
@@ -77,7 +82,8 @@ up: cluster images install ## Full setup: cluster + images + deploy + port-forwa
 down: unforward uninstall ## Teardown: stop port-forwards + remove workloads (keeps the cluster)
 
 .PHONY: nuke
-nuke: down delete-cluster ## Full destruction: teardown + delete the kind cluster
+nuke: down delete-cluster ## Full destruction: teardown + delete the kind cluster + the demo CA
+	@rm -rf $(DEV_CA_DIR)
 
 # ── Cluster ───────────────────────────────────────────────────────────────────
 
@@ -118,16 +124,25 @@ images: cluster ## Build the monitoring image and load both images into kind
 .PHONY: install
 install: install-monitoring install-n8n ## Deploy the monitoring service and both n8n instances
 
+.PHONY: dev-ca
+# Reused while it exists, so `make up` on a running cluster keeps the CA the
+# deployed instances were minted from.
+dev-ca: ## Generate the throwaway license CA in .dev-ca (no-op if it exists)
+	@if [ ! -f $(DEV_CA_DIR)/ca.cert.pem ]; then \
+		echo "==> Generating demo license CA in $(DEV_CA_DIR)"; \
+		$(MOCK_LICENSE) ca --out $(DEV_CA_DIR); \
+	fi
+
 .PHONY: install-monitoring
 # The same Helm chart customers use (docs/charts/airgap-monitoring), pointed at
 # the side-loaded image. The release name equals the chart name, so the
 # Deployment and Service are called plain `airgap-monitoring`, which the
-# port-forward, wait and reports targets rely on.
-install-monitoring: ## Deploy the airgap-monitoring service from the Helm chart
+# port-forward, wait and reports targets rely on. The two extraEnv values put
+# the service in test mode and hand it the demo CA; see DEV_CA_DIR above.
+install-monitoring: dev-ca ## Deploy the airgap-monitoring service from the Helm chart
 	@echo "==> Installing airgap-monitoring"
 	@kubectl create namespace $(MONITORING_NS) --dry-run=client -o yaml | kubectl apply -f -
 	@kubectl create secret generic airgap-monitoring-tokens -n $(MONITORING_NS) \
-		--from-literal=N8N_MONITORING_WRITE_TOKEN=$(WRITE_TOKEN) \
 		--from-literal=N8N_MONITORING_READ_TOKEN=$(READ_TOKEN) \
 		--dry-run=client -o yaml | kubectl apply -f -
 	@helm upgrade --install airgap-monitoring $(REPO_ROOT)/docs/charts/airgap-monitoring \
@@ -136,7 +151,11 @@ install-monitoring: ## Deploy the airgap-monitoring service from the Helm chart
 		--set image.tag=$(lastword $(subst :, ,$(MONITORING_IMAGE))) \
 		--set image.pullPolicy=Never \
 		--set auth.existingSecret=airgap-monitoring-tokens \
-		--set persistence.size=1Gi
+		--set persistence.size=1Gi \
+		--set extraEnv[0].name=NODE_ENV \
+		--set extraEnv[0].value=test \
+		--set extraEnv[1].name=TEST_LICENSE_ISSUER_CERT \
+		--set-file extraEnv[1].value=$(DEV_CA_DIR)/ca.cert.pem
 	@# The image tag never changes between rebuilds, so a restart is what picks
 	@# up a freshly loaded image.
 	@kubectl rollout restart deployment/airgap-monitoring -n $(MONITORING_NS) >/dev/null
@@ -145,10 +164,11 @@ install-monitoring: ## Deploy the airgap-monitoring service from the Helm chart
 # The encryption key is reused when the secret already exists: n8n bakes it into
 # the credentials it has written to the volume, so regenerating it on every run
 # would make that data undecryptable after a restart.
-install-n8n: ## Deploy both n8n instances
+install-n8n: dev-ca ## Deploy both n8n instances
 	@for spec in $(INSTANCES); do \
 		ns=$${spec%%:*}; identifier=$${spec##*:}; \
 		echo "==> Installing $$ns (identifier: $$identifier)"; \
+		license_cert=$$($(MOCK_LICENSE) cert --ca $(DEV_CA_DIR)) || exit 1; \
 		kubectl create namespace $$ns --dry-run=client -o yaml | kubectl apply -f -; \
 		enc_key=$$(kubectl get secret n8n-secrets -n $$ns -o jsonpath='{.data.N8N_ENCRYPTION_KEY}' 2>/dev/null | base64 -d); \
 		if [ -z "$$enc_key" ]; then enc_key=$$(openssl rand -hex 32); fi; \
@@ -163,7 +183,7 @@ install-n8n: ## Deploy both n8n instances
 		sed -e "s|__NAMESPACE__|$$ns|g" \
 			-e "s|__IDENTIFIER__|$$identifier|g" \
 			-e "s|__INGEST_BASE_URL__|$(INGEST_BASE_URL)|g" \
-			-e "s|__WRITE_TOKEN__|$(WRITE_TOKEN)|g" \
+			-e "s|__LICENSE_CERT__|$$license_cert|g" \
 			k8s/n8n-instance.template.yaml | kubectl apply -f -; \
 	done
 
@@ -210,7 +230,7 @@ seed: ## Create and activate the schedule-trigger workflow on both instances
 # Only the collector is backfilled, not n8n's own insights tables. n8n therefore
 # still reports yesterday as 0 until it has run across a UTC midnight, which is
 # why the invented days stop at the day before yesterday — see backfill-reports.py.
-backfill: ## Post BACKFILL_DAYS of invented daily history to the collector
+backfill: dev-ca ## Post BACKFILL_DAYS of invented daily history to the collector
 	@if [ "$(BACKFILL_DAYS)" -lt 1 ]; then \
 		echo "==> BACKFILL_DAYS=$(BACKFILL_DAYS), skipping backfill"; \
 	else \
@@ -218,7 +238,7 @@ backfill: ## Post BACKFILL_DAYS of invented daily history to the collector
 			ns=$${spec%%:*}; rest=$${spec#*:}; port=$${rest%%:*}; identifier=$${spec##*:}; \
 			N8N_EMAIL=$(OWNER_EMAIL) \
 			N8N_PASSWORD=$(OWNER_PASSWORD) \
-			N8N_MONITORING_WRITE_TOKEN=$(WRITE_TOKEN) \
+			N8N_LICENSE_CERT=$$($(MOCK_LICENSE) cert --ca $(DEV_CA_DIR)) \
 			N8N_ENCRYPTION_KEY=$$(kubectl get secret n8n-secrets -n $$ns -o jsonpath='{.data.N8N_ENCRYPTION_KEY}' | base64 -d) \
 			./backfill-reports.py http://localhost:$$port http://localhost:$(MONITORING_PORT) \
 				$$identifier $(BACKFILL_DAYS) || exit 1; \
