@@ -1,0 +1,38 @@
+apps/api/src/testing/dev-ca.test.ts
+  s_619098c791e713::t_527b24762e7ad2 1-22
+.gitignore
+  s_619098c791e713::t_094f1b6f3744f2 75-77
+apps/api/src/testing/cli/mock-license.ts
+  s_619098c791e713::t_7e483c789058bf 1-43
+apps/api/src/testing/cli/mock-report.ts
+  s_619098c791e713::t_03240954384a37 1-71
+apps/api/package.json
+  s_619098c791e713::t_3faaf24882e656 17-19
+apps/api/src/testing/dev-ca.ts
+  s_619098c791e713::t_5ad0c573f82946 5-12
+  s_619098c791e713::t_ff3c09ddfbba77 25-31
+  s_619098c791e713::t_6ee3c2ab7d6d27 1-4,13-24,32-43
+apps/api/tsconfig.json
+  s_619098c791e713::t_1fa6793c3b7162 7-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "34fbc4fc9f0dd485e4dc98c7954240c5a05a018f",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_619098c791e713": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79823ab4-22ba-4e86-85e9-b5ddb0768758",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
