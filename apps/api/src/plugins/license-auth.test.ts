@@ -1,4 +1,4 @@
-import { afterEach, expect, test } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 import { build } from "../testing/build-app";
 import { generateMockLicense } from "../testing/mock-license";
 
@@ -12,13 +12,11 @@ const report = {
   licenseCert: generateMockLicense(),
 };
 
-// The plugin reads both variables when it registers, so each test sets them
-// before build() and puts them back afterwards for the rest of the run.
-const saved = { nodeEnv: process.env.NODE_ENV, testCert: process.env.TEST_LICENSE_ISSUER_CERT };
-
+// The plugin reads both variables when it registers, so each test stubs them
+// before build(). unstubAllEnvs restores whatever was set before the stub,
+// so the file does not depend on when build-app.ts assigns the cert.
 afterEach(() => {
-  process.env.NODE_ENV = saved.nodeEnv;
-  process.env.TEST_LICENSE_ISSUER_CERT = saved.testCert;
+  vi.unstubAllEnvs();
 });
 
 test("trusts the test CA under NODE_ENV=test", async () => {
@@ -31,7 +29,7 @@ test("trusts the test CA under NODE_ENV=test", async () => {
 // The production image bakes NODE_ENV=production. Setting the variable on a
 // deployed container must change nothing.
 test("ignores TEST_LICENSE_ISSUER_CERT outside NODE_ENV=test", async () => {
-  process.env.NODE_ENV = "production";
+  vi.stubEnv("NODE_ENV", "production");
   const app = await build();
 
   const res = await app.inject({ method: "POST", url: URL, payload: report });
@@ -41,7 +39,7 @@ test("ignores TEST_LICENSE_ISSUER_CERT outside NODE_ENV=test", async () => {
 // A test run that lost the variable must not quietly fall back to accepting
 // only real certificates while mock ones fail: the fixture is the mock CA.
 test("uses the embedded n8n CA when TEST_LICENSE_ISSUER_CERT is unset", async () => {
-  delete process.env.TEST_LICENSE_ISSUER_CERT;
+  vi.stubEnv("TEST_LICENSE_ISSUER_CERT", undefined);
   const app = await build();
 
   const res = await app.inject({ method: "POST", url: URL, payload: report });
