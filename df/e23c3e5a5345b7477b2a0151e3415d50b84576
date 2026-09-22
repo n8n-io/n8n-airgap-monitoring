@@ -1,0 +1,27 @@
+docs/AUTHORIZATION.md
+  h_c63dce324dfc7b 122
+  s_d16789ff7b91c7::t_ab2340307edd35 63
+  s_d16789ff7b91c7::t_a032d76b976cd2 1-62,64-65,68-121,123-185
+  s_d16789ff7b91c7::t_713a1c87a1b768 66-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dfe23c3e5a5345b7477b2a0151e3415d50b84576",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_d16789ff7b91c7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "006564cf-28b6-42fe-8c94-ed593efd5a4e",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
