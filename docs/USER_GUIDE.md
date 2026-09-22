@@ -26,10 +26,12 @@ is shared with n8n, which supports us in providing a smooth experience for airga
 The n8n-airgap-monitoring service is hosted as one container with one volume.
 It is deliberately simple in order to make it easy to use.
 
-Reporting instances authenticate with their n8n license certificate. That
-certificate proves "licensed by n8n", not "belongs to you", so keeping the
-service off the public internet is part of its security model. See
-[Network exposure](#network-exposure) below.
+Reporting instances authenticate in one of two ways, and you choose which when
+you deploy the service. Either they present a write token that you generate
+and distribute to them, or they present their n8n license certificate. The
+certificate proves "licensed by n8n", not "belongs to you", so if you choose
+it, keeping the service off the public internet is part of its security model.
+See [Network exposure](#network-exposure) below.
 
 ## 1. Self-host n8n-airgap-monitoring
 
@@ -45,39 +47,45 @@ In order to run, the service needs:
   environment variables. Each is a plain string, sent verbatim in the
   `Authorization: Bearer <token>` header of a request.
   - `N8N_MONITORING_READ_TOKEN` is required. It unlocks the fleet report.
-  - `N8N_MONITORING_WRITE_TOKEN` is optional. A reporting n8n instance
-    authenticates with its n8n license certificate, which it already holds, so
-    nothing has to be distributed to the instances. If you set a write token,
-    an instance may present it instead of the certificate. Use a different
-    value from the read token.
+  - `N8N_MONITORING_WRITE_TOKEN` is optional and decides how instances
+    authenticate. Set it, and every instance must present it; license
+    certificates are then not accepted, and the service is safe to reach from
+    anywhere over TLS. Leave it unset, and instances authenticate with their
+    n8n license certificate, which they already hold, so nothing has to be
+    distributed, but the service must then be reachable only by your own
+    instances. Use a different value from the read token.
 - **A persistent volume mounted at `/data`**, on SSD-backed storage. It holds
   the SQLite database, the only copy of your usage history, so include it in
   your backups.
-- **A private network path.** The service must be reachable from every n8n
-  instance and from wherever you download the report, and from nowhere else.
-  If that path leaves a trusted network, terminate TLS in front of the service:
-  the read token travels as a bearer header and each report carries the
-  instance's license certificate. Make sure any proxy in front of the service
-  does not log request bodies.
+- **A network path** from every n8n instance and from wherever you download
+  the report. If that path leaves a trusted network, terminate TLS in front of
+  the service: the tokens travel as bearer headers and, without a write token,
+  each report carries the instance's license certificate. Make sure any proxy
+  in front of the service does not log request bodies. If you run without a
+  write token, the path must also be private; see
+  [Network exposure](#network-exposure).
 
 ### Network exposure
 
-> **Warning:** The write endpoint, `POST /api/v1/instance-reports`, must only
-> be reachable from your own n8n instances. Never expose it to the public
-> internet. Enforce this on the network level, for example with a private
-> network, firewall rules, an internal load balancer or a Kubernetes
-> NetworkPolicy.
+This section applies when you run the service **without** a write token, so
+that instances authenticate with their license certificate. With a write token
+set, only holders of your token can write, and the service needs no network
+restriction beyond TLS.
 
-The reason is the write endpoint's authentication. `POST /api/v1/instance-reports`
-accepts any valid n8n license certificate, and every n8n customer in the world
-holds one. The service cannot tell your instances from someone else's, so if it
-is reachable from the internet, anyone with an n8n license can post reports
-into your database and pollute the usage report you share with n8n. The
-details are in [AUTHORIZATION.md](AUTHORIZATION.md#what-authorized-means).
+> **Warning:** Without a write token, the write endpoint,
+> `POST /api/v1/instance-reports`, must only be reachable from your own n8n
+> instances. Never expose it to the public internet. Enforce this on the
+> network level, for example with a private network, firewall rules, an
+> internal load balancer or a Kubernetes NetworkPolicy.
 
-Setting a write token does not change this. It adds a second way to
-authenticate, it does not switch the certificate off, so the requirement
-stands whether or not you use one.
+The reason is the write endpoint's authentication in that mode.
+`POST /api/v1/instance-reports` accepts any valid n8n license certificate, and
+every n8n customer in the world holds one. The service cannot tell your
+instances from someone else's, so if it is reachable from the internet, anyone
+with an n8n license can post reports into your database and pollute the usage
+report you share with n8n. The details are in
+[AUTHORIZATION.md](AUTHORIZATION.md#what-authorized-means). If you cannot
+guarantee the network restriction, set a write token instead.
 
 The read endpoint does not have this problem: the read token over HTTPS is a
 proper secret. But both endpoints are served by the same host and port, so
@@ -122,11 +130,10 @@ Notes:
   `N8N_LICENSE_CERT`. It must be a certificate issued by n8n. An expired
   certificate is still accepted. An instance without a license certificate
   (community edition) does not report; n8n logs a warning instead.
-- If you set `N8N_MONITORING_WRITE_TOKEN` on the service, an instance may
-  authenticate with that token instead by setting
-  `N8N_INSTANCE_REPORTING_AUTH_TOKEN`. This is how an instance without a
-  license certificate can report. When the token is set, it is what the
-  service checks.
+- If you set `N8N_MONITORING_WRITE_TOKEN` on the service, every instance must
+  send that value as `N8N_INSTANCE_REPORTING_AUTH_TOKEN`; the service then
+  does not accept license certificates. This is also how an instance without
+  a license certificate can report.
 - `N8N_INSTANCE_REPORTING_BASE_URL` is the origin only. The n8n instance will append
   the path of the reporting endpoint itself.
 - If `N8N_ENABLED_MODULES` already lists other modules, add
@@ -191,7 +198,7 @@ As of today the report always contains the complete history. In a future update 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `N8N_MONITORING_READ_TOKEN` | yes | none | Bearer token required to download the report. The service refuses to start without it. |
-| `N8N_MONITORING_WRITE_TOKEN` | no | none | Bearer token that n8n instances may present when reporting, instead of their license certificate. Unset means certificates only. |
+| `N8N_MONITORING_WRITE_TOKEN` | no | none | Setting it switches the service to token mode: n8n instances must present it as a bearer token, and license certificates are not accepted. Unset means certificate mode. |
 | `N8N_DB_PATH` | no | `/data/database.sqlite` in the image | Location of the SQLite file. Must be on persistent storage. |
 
 
@@ -205,8 +212,8 @@ rotation; instances that use the write token need the new value too.
 | --- | --- | --- | --- |
 | `N8N_ENABLED_MODULES` | yes | none | Must include `instance-reporting`. |
 | `N8N_INSTANCE_REPORTING_BASE_URL` | yes | empty | Origin of the n8n-airgap-monitoring instance, without a path. |
-| `N8N_LICENSE_CERT` | one of the two | empty | The instance's n8n license certificate. It is sent with every report as the credential. Already set on a licensed airgapped instance. |
-| `N8N_INSTANCE_REPORTING_AUTH_TOKEN` | one of the two | empty | The service's write token, if you set one. Sent as a bearer header instead of the certificate. |
+| `N8N_LICENSE_CERT` | without a write token | empty | The instance's n8n license certificate. It is sent with every report as the credential. Already set on a licensed airgapped instance. |
+| `N8N_INSTANCE_REPORTING_AUTH_TOKEN` | with a write token | empty | The service's write token. Sent as a bearer header; the certificate is then not sent. |
 | `N8N_INSTANCE_REPORTING_LABEL` | no | empty | Human-readable name shown in the report. |
 
 ## Monitoring the health of n8n-airgap-monitoring
@@ -232,7 +239,7 @@ for these status codes:
 | Status | Meaning |
 | --- | --- |
 | `201` | Report stored. |
-| `401` | Missing or invalid credential. If the instance sends a token, check that `N8N_INSTANCE_REPORTING_AUTH_TOKEN` equals the service's `N8N_MONITORING_WRITE_TOKEN` (log code `BAD_TOKEN`). Otherwise check `N8N_LICENSE_CERT` on the instance: it must be a certificate issued by n8n. The service log carries a reason code (`PARSE_FAILED`, `INVALID_ISSUER`, `DECRYPTION_FAILED`, `SIGNATURE_INVALID`) and nothing else about the certificate. |
+| `401` | Missing or invalid credential. With a write token set on the service, every instance must set `N8N_INSTANCE_REPORTING_AUTH_TOKEN` to the same value; `Missing write token` means the instance sent none, `BAD_TOKEN` in the log means it differs. Without a write token, check `N8N_LICENSE_CERT` on the instance: it must be a certificate issued by n8n. The service log carries a reason code (`PARSE_FAILED`, `INVALID_ISSUER`, `DECRYPTION_FAILED`, `SIGNATURE_INVALID`) and nothing else about the certificate. |
 | `400` | Malformed report. Should not happen with a supported n8n version. Report it to n8n. |
 | `409` | The exact same report (same instance id and `batchId`) was sent twice. n8n instances never do this on their own, so it points to a replayed request or a cloned instance database. Nothing is stored. |
 

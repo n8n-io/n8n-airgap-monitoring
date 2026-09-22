@@ -9,12 +9,12 @@ import app from "../app";
 import { TEST_ISSUER_CERT_PEM } from "./mock-license";
 
 process.env.N8N_MONITORING_READ_TOKEN = "test-read-token";
-// Reports authenticate with either credential. The write token is set so the
-// bearer path is testable; the test CA is trusted once here, so every test
-// mints certificates through mock-license.ts and nothing else. The auth
-// plugin honours TEST_LICENSE_ISSUER_CERT only under NODE_ENV=test, which the
-// Vitest config pins.
-process.env.N8N_MONITORING_WRITE_TOKEN = "test-write-token";
+// Certificate mode by default: no write token, and the test CA is trusted once
+// here, so every test mints certificates through mock-license.ts and nothing
+// else. Tests of token mode stub N8N_MONITORING_WRITE_TOKEN before build().
+// The auth plugin honours TEST_LICENSE_ISSUER_CERT only under NODE_ENV=test,
+// which the Vitest config pins.
+delete process.env.N8N_MONITORING_WRITE_TOKEN;
 process.env.TEST_LICENSE_ISSUER_CERT = TEST_ISSUER_CERT_PEM;
 
 // Automatically build and tear down our instance

@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { build } from "../../../testing/build-app";
 import {
   generateMockLicense,
@@ -272,43 +272,73 @@ test("rejects malformed instance reports", async () => {
   expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
 });
 
-// The second credential: the operator-set write token as a bearer header.
-// build-app.ts configures it as "test-write-token".
-const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
+// Token mode: the operator set a write token, so it is the only credential and
+// certificates are not looked at. build-app.ts defaults to certificate mode,
+// hence the stub before every build() here.
+describe("in token mode", () => {
+  const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
 
-test("accepts the write token as a bearer header without a certificate", async () => {
-  const app = await build();
-
-  const res = await app.inject({ method: "POST", url: URL, headers: bearer("test-write-token"), payload: validReport });
-
-  expect(res.statusCode).toBe(201);
-});
-
-// A bearer header decides the request: a wrong token is not rescued by a valid
-// certificate in the body, so a caller cannot probe the token for free.
-test("rejects a wrong write token even when the body carries a valid certificate", async () => {
-  const app = await build();
-
-  const res = await app.inject({ method: "POST", url: URL, headers: bearer("wrong"), payload: authorized() });
-
-  expect(res.statusCode).toBe(401);
-  expect(res.body).not.toContain("test-write-token");
-  expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
-});
-
-test("never stores a certificate that rides along with a bearer-authenticated report", async () => {
-  const app = await build();
-
-  const res = await app.inject({
-    method: "POST",
-    url: URL,
-    headers: bearer("test-write-token"),
-    payload: authorized(),
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
-  expect(res.statusCode).toBe(201);
 
-  const [row] = (await app.dataSource.query("SELECT * FROM instance_reports")) as Record<string, unknown>[];
-  expect(JSON.stringify(row)).not.toContain(licenseCert);
+  async function buildInTokenMode() {
+    vi.stubEnv("N8N_MONITORING_WRITE_TOKEN", "test-write-token");
+    return await build();
+  }
+
+  test("accepts the write token as a bearer header", async () => {
+    const app = await buildInTokenMode();
+
+    const res = await app.inject({
+      method: "POST",
+      url: URL,
+      headers: bearer("test-write-token"),
+      payload: validReport,
+    });
+
+    expect(res.statusCode).toBe(201);
+  });
+
+  test("rejects a wrong write token without leaking the right one", async () => {
+    const app = await buildInTokenMode();
+
+    const res = await app.inject({ method: "POST", url: URL, headers: bearer("wrong"), payload: validReport });
+
+    expect(res.statusCode).toBe(401);
+    expect(res.json()).toMatchObject({ message: "Invalid write token" });
+    expect(res.body).not.toContain("test-write-token");
+    expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
+  });
+
+  // The point of the mode: a licensee's certificate alone opens nothing, so the
+  // endpoint is safe without network rules that restrict it to the operator's
+  // own instances.
+  test("rejects a valid license certificate, since only the token is a credential", async () => {
+    const app = await buildInTokenMode();
+
+    const res = await app.inject({ method: "POST", url: URL, payload: authorized() });
+
+    expect(res.statusCode).toBe(401);
+    expect(res.json()).toMatchObject({ message: "Missing write token" });
+    expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
+  });
+
+  test("never stores a certificate that rides along with a token-authenticated report", async () => {
+    const app = await buildInTokenMode();
+
+    const res = await app.inject({
+      method: "POST",
+      url: URL,
+      headers: bearer("test-write-token"),
+      payload: authorized(),
+    });
+    expect(res.statusCode).toBe(201);
+
+    const [row] = (await app.dataSource.query("SELECT * FROM instance_reports")) as Record<string, unknown>[];
+    expect(JSON.stringify(row)).not.toContain(licenseCert);
+    expect(Object.keys(row)).not.toContain("licenseCert");
+  });
 });
 
 test("ignores unknown top level fields so newer instances stay compatible", async () => {

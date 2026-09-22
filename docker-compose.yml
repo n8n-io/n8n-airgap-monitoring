@@ -9,8 +9,9 @@ services:
       - "3001:3000"
     environment:
       N8N_MONITORING_READ_TOKEN: dev-read-token
-      # Reports authenticate with this token as a bearer header, or with an
-      # n8n license certificate in the body; see docs/AUTHORIZATION.md.
+      # Setting a write token runs the service in token mode: reports carry it
+      # as a bearer header and license certificates are not accepted. Drop the
+      # line for certificate mode; see docs/AUTHORIZATION.md.
       N8N_MONITORING_WRITE_TOKEN: dev-write-token
     volumes:
       # A named volume, not a bind mount: the container runs as `node` and a

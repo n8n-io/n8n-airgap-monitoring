@@ -4,9 +4,10 @@ import fp from "fastify-plugin";
 export interface Config {
   readToken: string;
   /**
-   * Optional shared secret that reporting instances may present as a bearer
-   * token instead of their license certificate. Undefined when unset, in which
-   * case only license certificates are accepted; see plugins/report-auth.ts.
+   * Optional shared secret that selects the authentication mode for reports.
+   * Set: reporting instances must present it as a bearer token and license
+   * certificates are not accepted. Undefined: only license certificates are
+   * accepted. See plugins/report-auth.ts.
    */
   writeToken: string | undefined;
   dbPath: string;

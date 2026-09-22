@@ -15,12 +15,13 @@ See also the user guide at [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/report`. The service refuses to start without it. |
-| `N8N_MONITORING_WRITE_TOKEN` | no | — | Bearer token that reporting n8n instances may present on `POST /api/v1/instance-reports` instead of their license certificate. Unset means certificates only. |
+| `N8N_MONITORING_WRITE_TOKEN` | no | — | Selects the authentication mode of `POST /api/v1/instance-reports`. Set: instances must present it as a bearer token and license certificates are not accepted. Unset: instances authenticate with their license certificate. |
 | `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 
-A reporting n8n instance authenticates with its n8n license certificate, or
-with the write token when you set one. See [Reporting usage](#reporting-usage)
-and [docs/AUTHORIZATION.md](docs/AUTHORIZATION.md).
+A reporting n8n instance authenticates with its n8n license certificate, or,
+if you set a write token, with that token alone. See
+[Reporting usage](#reporting-usage) and
+[docs/AUTHORIZATION.md](docs/AUTHORIZATION.md).
 
 ## Reporting usage
 
@@ -60,11 +61,12 @@ a header because a real certificate is about 7 KB and sits too close to the
 8 KB per-header limit of common reverse proxies. See
 [adr/2026-09-21-authenticate-with-license-certificate.md](docs/adr/2026-09-21-authenticate-with-license-certificate.md).
 
-Alternatively, if `N8N_MONITORING_WRITE_TOKEN` is set on the service, an
-instance may send that token as `Authorization: Bearer <token>` instead of
-`licenseCert` (set `N8N_INSTANCE_REPORTING_AUTH_TOKEN` on the instance). A
-bearer header, when present and a token is configured, decides the request on
-its own. Both credentials are described in
+That is certificate mode, the default. If `N8N_MONITORING_WRITE_TOKEN` is set
+on the service, it runs in token mode instead: every instance must send that
+token as `Authorization: Bearer <token>` (set
+`N8N_INSTANCE_REPORTING_AUTH_TOKEN` on the instance), `licenseCert` is left
+out, and a certificate is not accepted as a credential. Both modes are
+described in
 [docs/AUTHORIZATION.md](docs/AUTHORIZATION.md#create-instance-report-route).
 
 `label` is optional, human-readable, and purely cosmetic: `instanceId` remains
@@ -214,14 +216,14 @@ The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
 
-Posting a report to it needs one of the two credentials: the compose file's
-write token as a bearer header, or a real n8n-issued license certificate in the
-body. See [Local development](#local-development).
+The compose file sets a write token, so the service runs in token mode and a
+report needs that token as a bearer header. See
+[Local development](#local-development).
 
 ### Local development
 
-A reporting instance authenticates with the write token or with its n8n
-license certificate, so there are two ways to exercise the receiver locally:
+The service runs in token mode when `N8N_MONITORING_WRITE_TOKEN` is set and in
+certificate mode otherwise, so there are two ways to exercise it locally:
 
 - **Without an n8n instance.** Post bodies from `mock-report` with the write
   token. Against compose:
@@ -236,10 +238,11 @@ license certificate, so there are two ways to exercise the receiver locally:
   `N8N_MONITORING_WRITE_TOKEN` set and post to port 3456 the same way. The
   [Kubernetes demo](#local-kubernetes-demo) and its backfill script use the
   write token too.
-- **With a licensed n8n instance.** Point it at the receiver via
-  `N8N_INSTANCE_REPORTING_BASE_URL` and set nothing else; the instance brings
-  its certificate. `mock-report` embeds a certificate from `N8N_LICENSE_CERT`
-  when that variable is set, for posting by hand without a token.
+- **With a licensed n8n instance.** Start the receiver without a write token,
+  point the instance at it via `N8N_INSTANCE_REPORTING_BASE_URL` and set
+  nothing else; the instance brings its certificate. `mock-report` embeds a
+  certificate from `N8N_LICENSE_CERT` when that variable is set, for posting
+  by hand in certificate mode.
 
 ## Local Kubernetes demo
 

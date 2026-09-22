@@ -104,11 +104,11 @@ deterministic `batchId` per day.
 
 - The cluster is named `airgap-demo` and uses an isolated kubeconfig at `.kubeconfig`, so
   it never touches `~/.kube/config` and coexists with other local clusters.
-- The demo instances have no n8n license, so they authenticate with the write token
-  instead of a license certificate. It is a fixed demo value defined at the top of the
-  Makefile, set on the service as `N8N_MONITORING_WRITE_TOKEN` and on each instance as
+- The demo instances have no n8n license, so the service runs in token mode: the write
+  token is a fixed demo value defined at the top of the Makefile, set on the service as
+  `N8N_MONITORING_WRITE_TOKEN` and on each instance as
   `N8N_INSTANCE_REPORTING_AUTH_TOKEN`, and the two must stay in sync. `make backfill`
-  uses the same token. Both credentials are described in
+  uses the same token. Both modes are described in
   [docs/AUTHORIZATION.md](../../docs/AUTHORIZATION.md).
 - Each instance keeps its `N8N_ENCRYPTION_KEY` across reinstalls (the Makefile reuses the
   existing secret), so data on the volume stays decryptable.

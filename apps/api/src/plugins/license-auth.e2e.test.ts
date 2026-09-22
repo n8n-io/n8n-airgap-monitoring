@@ -2,12 +2,14 @@ import { expect, test } from "vitest";
 import { build } from "../testing/build-app";
 import { generateMockLicense } from "../testing/mock-license";
 
-// The compose file, the k8s demo and the backfill script all use the write
-// token, so outside this suite nothing exercises the certificate path against
-// a listening server. This test does: a real socket, a real HTTP body of
+// The compose file, the k8s demo and the backfill script all run in token
+// mode, so outside this suite nothing exercises certificate mode against a
+// listening server. This test does: a real socket, a real HTTP body of
 // realistic size, no inject() shortcut, from request to stored row.
 test("a license certificate authenticates a report over real HTTP", async () => {
   const app = await build();
+  // Certificate mode: the harness sets no write token.
+  expect(app.config.writeToken).toBeUndefined();
   const baseUrl = await app.listen({ port: 0, host: "127.0.0.1" });
 
   const report = {

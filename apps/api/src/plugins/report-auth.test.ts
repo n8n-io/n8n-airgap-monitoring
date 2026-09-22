@@ -46,16 +46,15 @@ test("uses the embedded n8n CA when TEST_LICENSE_ISSUER_CERT is unset", async ()
   expect(res.statusCode).toBe(401);
 });
 
-// The write token is optional. Without it the service boots, and a bearer
-// header is simply not a credential: the request falls through to the
-// certificate check, so the behaviour is exactly the certificate-only one.
-test("boots without a write token and then ignores bearer headers", async () => {
-  vi.stubEnv("N8N_MONITORING_WRITE_TOKEN", undefined);
+// Certificate mode is the default, and in it a bearer header is not a
+// credential at all: it is neither checked nor a substitute for the
+// certificate.
+test("ignores bearer headers in certificate mode", async () => {
   const app = await build();
   expect(app.config.writeToken).toBeUndefined();
 
   const { licenseCert: _omitted, ...bare } = report;
-  const headers = { authorization: "Bearer test-write-token" };
+  const headers = { authorization: "Bearer anything" };
 
   const withoutCert = await app.inject({ method: "POST", url: URL, headers, payload: bare });
   expect(withoutCert.statusCode).toBe(401);
@@ -65,9 +64,10 @@ test("boots without a write token and then ignores bearer headers", async () => 
   expect(withCert.statusCode).toBe(201);
 });
 
-// An empty value is the same as unset, so a templated `WRITE_TOKEN=` line in a
-// deployment does not turn the empty string into a valid credential.
-test("treats an empty write token as unset", async () => {
+// A blank value is the same as unset, so a templated `WRITE_TOKEN=` line in a
+// deployment leaves the service in certificate mode rather than turning the
+// empty string into a credential.
+test("treats a blank write token as unset and stays in certificate mode", async () => {
   vi.stubEnv("N8N_MONITORING_WRITE_TOKEN", "   ");
   const app = await build();
   expect(app.config.writeToken).toBeUndefined();
@@ -79,4 +79,5 @@ test("treats an empty write token as unset", async () => {
     payload: { instanceId: "x" },
   });
   expect(res.statusCode).toBe(401);
+  expect(res.json()).toMatchObject({ message: "Missing license certificate" });
 });

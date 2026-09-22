@@ -9,10 +9,10 @@ MONITORING_IMAGE := airgap-monitoring:local
 REPO_ROOT        := $(CURDIR)/../..
 PIDS_FILE        := .pids
 
-# Demo credentials. The demo instances have no n8n license, so they authenticate
-# with the write token, which is shared by both sides of the reporting
-# handshake: the instances send it as a bearer token and the service checks it
-# against its own N8N_MONITORING_WRITE_TOKEN, so the two must stay equal.
+# Demo credentials. The demo instances have no n8n license, so the service runs
+# in token mode: WRITE_TOKEN is shared by both sides of the reporting handshake,
+# the instances send it as a bearer token and the service checks it against its
+# own N8N_MONITORING_WRITE_TOKEN, so the two must stay equal.
 WRITE_TOKEN      := demo-write-token
 # READ_TOKEN guards the report download. Only the monitoring service needs it,
 # but the service refuses to boot without it, so it must be in the secret.

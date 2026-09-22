@@ -38,11 +38,14 @@ podAnnotations: {}
 #   read token:  required. Unlocks the fleet report on GET /api/v1/report; the
 #                service refuses to start without it. Never hand it to an n8n
 #                instance.
-#   write token: optional. Reporting n8n instances authenticate with their n8n
-#                license certificate, which they already hold. If you set a
-#                write token, an instance may instead present it as a bearer
-#                token (N8N_INSTANCE_REPORTING_AUTH_TOKEN on the instance).
-#                Leave the key out of the Secret to accept certificates only.
+#   write token: optional, and it selects how instances authenticate. Present
+#                in the Secret: every instance must send it as a bearer token
+#                (N8N_INSTANCE_REPORTING_AUTH_TOKEN on the instance), license
+#                certificates are not accepted, and the ingest endpoint needs
+#                no network restriction beyond TLS. Absent: instances
+#                authenticate with their n8n license certificate, which they
+#                already hold, and the endpoint must be reachable only by your
+#                own instances (see README, Network exposure).
 #
 # The service trusts the embedded n8n license CA only; a CA rotation ships as a
 # new image.

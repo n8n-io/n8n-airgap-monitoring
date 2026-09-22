@@ -63,8 +63,8 @@ spec:
                 secretKeyRef:
                   name: {{ $secret }}
                   key: {{ .Values.auth.readTokenKey }}
-            # Optional: without this key in the Secret, reporting instances
-            # authenticate with their license certificate only.
+            # Optional. Present: instances must send it as a bearer token and
+            # certificates are not accepted. Absent: certificate mode.
             - name: N8N_MONITORING_WRITE_TOKEN
               valueFrom:
                 secretKeyRef:

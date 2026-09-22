@@ -7,19 +7,22 @@ import { LicenseCertError, verifyLicenseCert } from "../license/license-cert";
 /** Name of the body field carrying the certificate. Stripped before the body goes anywhere else. */
 export const LICENSE_CERT_FIELD = "licenseCert";
 
+type Verifier = (request: FastifyRequest) => void;
+
 /**
- * Authenticates a reporting n8n instance. Two credentials are accepted:
+ * Authenticates a reporting n8n instance. The operator picks one of two modes
+ * by whether `N8N_MONITORING_WRITE_TOKEN` is set; the choice is made once at
+ * start-up and there is no mode that accepts both:
  *
- * 1. The write token, `N8N_MONITORING_WRITE_TOKEN`, sent verbatim as
- *    `Authorization: Bearer <token>`. Only in play when the operator has set
- *    the variable.
- * 2. The instance's n8n license certificate, sent as `licenseCert` in the
- *    request body. Possession of a certificate n8n issued is the whole check:
- *    no identity is read from it and nothing is stored.
- *
- * A bearer header decides the request when a write token is configured: a
- * wrong token is 401 even if the body carries a valid certificate. Without a
- * header, or without a configured token, the certificate check runs.
+ * - Token mode (variable set): the request must carry the token verbatim as
+ *   `Authorization: Bearer <token>`. Certificates are not looked at, so only
+ *   holders of the operator's secret can write, and the endpoint needs no
+ *   network restriction beyond TLS.
+ * - Certificate mode (variable unset): the request must carry the instance's
+ *   n8n license certificate as `licenseCert` in the body. Possession of a
+ *   certificate n8n issued is the whole check: no identity is read from it and
+ *   nothing is stored. Any licensee's certificate passes, so the endpoint must
+ *   be reachable only by the operator's own instances.
  *
  * The certificate travels in the body, not a header, because a real one is
  * about 7 KB and grows with every feature flag, which sits too close to the
@@ -33,9 +36,8 @@ export const LICENSE_CERT_FIELD = "licenseCert";
  */
 export default fp(
   async (fastify: FastifyInstance) => {
-    const testCert = process.env.NODE_ENV === "test" ? process.env.TEST_LICENSE_ISSUER_CERT : undefined;
-    const issuer = new X509Certificate(testCert || N8N_LICENSE_ISSUER_CERT_PEM);
-    const writeToken = fastify.config.writeToken;
+    const { writeToken } = fastify.config;
+    const verify: Verifier = writeToken !== undefined ? bearerVerifier(writeToken) : certificateVerifier();
 
     /**
      * Runs as `preValidation`, so the body is parsed but the route schema has
@@ -43,44 +45,56 @@ export default fp(
      * 400, and an unauthenticated caller learns nothing about the schema.
      */
     async function authenticateReport(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
-      const bearer = bearerTokenOf(request);
-      if (bearer !== undefined && writeToken !== undefined) {
-        if (!tokensEqual(bearer, writeToken)) {
-          request.log.warn({ code: "BAD_TOKEN" }, "Rejected write token");
-          throw fastify.httpErrors.unauthorized("Invalid write token");
-        }
-      } else {
-        verifyCertificateIn(request);
-      }
+      verify(request);
 
       // The service persists the whole report object, so a certificate must
-      // not still be in it, whichever credential authenticated the request.
+      // not still be in it, in either mode. The route schema would strip it
+      // too, but a second write path must not depend on that.
       if (isRecord(request.body)) {
         delete request.body[LICENSE_CERT_FIELD];
       }
     }
 
-    function verifyCertificateIn(request: FastifyRequest): void {
-      const body: unknown = request.body;
-      if (!isRecord(body)) {
-        throw fastify.httpErrors.unauthorized("Missing license certificate");
-      }
-
-      const cert = body[LICENSE_CERT_FIELD];
-      if (typeof cert !== "string" || cert.length === 0) {
-        throw fastify.httpErrors.unauthorized("Missing license certificate");
-      }
-
-      try {
-        verifyLicenseCert(cert, issuer);
-      } catch (error) {
-        if (error instanceof LicenseCertError) {
-          // The code is the only thing about the certificate that may be logged.
-          request.log.warn({ code: error.code }, "Rejected license certificate");
-          throw fastify.httpErrors.unauthorized("Invalid license certificate");
+    function bearerVerifier(expected: string): Verifier {
+      return (request) => {
+        const presented = bearerTokenOf(request);
+        if (presented === undefined) {
+          throw fastify.httpErrors.unauthorized("Missing write token");
         }
-        throw error;
-      }
+        if (!tokensEqual(presented, expected)) {
+          // The presented value is never logged.
+          request.log.warn({ code: "BAD_TOKEN" }, "Rejected write token");
+          throw fastify.httpErrors.unauthorized("Invalid write token");
+        }
+      };
+    }
+
+    function certificateVerifier(): Verifier {
+      const testCert = process.env.NODE_ENV === "test" ? process.env.TEST_LICENSE_ISSUER_CERT : undefined;
+      const issuer = new X509Certificate(testCert || N8N_LICENSE_ISSUER_CERT_PEM);
+
+      return (request) => {
+        const body: unknown = request.body;
+        if (!isRecord(body)) {
+          throw fastify.httpErrors.unauthorized("Missing license certificate");
+        }
+
+        const cert = body[LICENSE_CERT_FIELD];
+        if (typeof cert !== "string" || cert.length === 0) {
+          throw fastify.httpErrors.unauthorized("Missing license certificate");
+        }
+
+        try {
+          verifyLicenseCert(cert, issuer);
+        } catch (error) {
+          if (error instanceof LicenseCertError) {
+            // The code is the only thing about the certificate that may be logged.
+            request.log.warn({ code: error.code }, "Rejected license certificate");
+            throw fastify.httpErrors.unauthorized("Invalid license certificate");
+          }
+          throw error;
+        }
+      };
     }
 
     fastify.decorate("authenticateReport", authenticateReport);

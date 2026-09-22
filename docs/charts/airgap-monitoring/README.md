@@ -23,11 +23,14 @@ controller, image registry) are plain values.
   registry your cluster can reach. Pin the exact version; `latest` and
   `stable` move.
 - A Secret in the release namespace holding the read token, and optionally a
-  write token.
-- Reporting n8n instances with a credential the service accepts: their n8n
-  license certificate (`N8N_LICENSE_CERT`), or the write token if you set one.
-- A network in which only your own n8n instances can reach the service's
-  data ingestion endpoint. See [Network exposure](#network-exposure).
+  write token. The write token decides how instances authenticate, see the
+  next two points.
+- Either a write token distributed to every reporting n8n instance
+  (`N8N_INSTANCE_REPORTING_AUTH_TOKEN`), or, without one, instances that hold
+  an n8n license certificate (`N8N_LICENSE_CERT`).
+- Without a write token, a network in which only your own n8n instances can
+  reach the service's data ingestion endpoint. See
+  [Network exposure](#network-exposure).
 
 ## Install
 
@@ -42,9 +45,12 @@ controller, image registry) are plain values.
 
 2. Create the token Secret with your usual secrets tooling. The read token is
    required: it unlocks the fleet report and must never reach an n8n instance.
-   The write token is optional: add it if your instances should authenticate
-   with a shared secret instead of their license certificate, and make it a
-   different value. Shown with `kubectl` for brevity:
+   The write token is optional and picks the mode: with it, every instance
+   must present it and license certificates are not accepted, which makes the
+   ingest endpoint safe to expose over TLS; without it, instances authenticate
+   with their license certificate and you must restrict the network instead.
+   Use a different value from the read token. Shown with `kubectl` for
+   brevity:
 
    ```sh
    kubectl create namespace airgap-monitoring
@@ -73,11 +79,11 @@ controller, image registry) are plain values.
    N8N_INSTANCE_REPORTING_LABEL=<optional human-readable name>
    ```
 
-   The instance authenticates with its license certificate (`N8N_LICENSE_CERT`),
-   which a licensed airgapped instance already has, and nothing else is needed.
-   If you created a write token, an instance may instead set
-   `N8N_INSTANCE_REPORTING_AUTH_TOKEN=<write token>`. Both credentials are
-   described in [AUTHORIZATION.md](../../AUTHORIZATION.md#create-instance-report-route).
+   If you created a write token, add `N8N_INSTANCE_REPORTING_AUTH_TOKEN=<write token>`
+   on every instance. Without one, the instance authenticates with its license
+   certificate (`N8N_LICENSE_CERT`), which a licensed airgapped instance already
+   has, and nothing else is needed. Both modes are described in
+   [AUTHORIZATION.md](../../AUTHORIZATION.md#create-instance-report-route).
 
    Instances outside the cluster need an Ingress (`ingress.*`) and use its
    hostname instead. Read [Network exposure](#network-exposure) before enabling
@@ -89,14 +95,21 @@ controller, image registry) are plain values.
 
 ## Network exposure
 
-> **Warning:** The write endpoint, `POST /api/v1/instance-reports`, must only
-> be reachable from your own n8n instances. Never expose it to the public
-> internet. Enforce this on the network level.
+This section applies when the Secret holds no write token, so that instances
+authenticate with their license certificate. With a write token, only holders
+of your token can write, and the ingest endpoint needs no network restriction
+beyond TLS.
 
-The endpoint accepts any valid n8n license certificate, and every n8n customer
-holds one. The service cannot tell your instances from someone else's, so an
-internet-reachable service lets anyone with an n8n license write into your
-database.
+> **Warning:** Without a write token, the write endpoint,
+> `POST /api/v1/instance-reports`, must only be reachable from your own n8n
+> instances. Never expose it to the public internet. Enforce this on the
+> network level.
+
+In that mode the endpoint accepts any valid n8n license certificate, and every
+n8n customer holds one. The service cannot tell your instances from someone
+else's, so an internet-reachable service lets anyone with an n8n license write
+into your database. If you cannot guarantee the restriction, set a write token
+instead.
 
 The chart's defaults are already private: a ClusterIP Service and no Ingress.
 Instances inside the cluster need nothing more. The chart ships no
@@ -183,10 +196,10 @@ The ones you will need. Everything else is documented in
 | `image.tag` | chart `appVersion` | Pin an exact release. |
 | `imagePullSecrets` | `[]` | For a private mirror. |
 | `auth.existingSecret` | `""` | **Required.** Secret holding the read token and, optionally, the write token. |
-| `auth.readTokenKey` / `auth.writeTokenKey` | `N8N_MONITORING_READ_TOKEN` / `N8N_MONITORING_WRITE_TOKEN` | Keys in that Secret. The write-token key may be absent. |
+| `auth.readTokenKey` / `auth.writeTokenKey` | `N8N_MONITORING_READ_TOKEN` / `N8N_MONITORING_WRITE_TOKEN` | Keys in that Secret. A present write-token key puts the service in token mode; an absent one in certificate mode. |
 | `persistence.storageClassName` | cluster default | An SSD-backed class. |
 | `persistence.size` | `10Gi` | |
 | `persistence.existingClaim` | `""` | Reuse a PVC, for example one restored from a snapshot. |
-| `service.type` | `ClusterIP` | Leave at the default. `LoadBalancer` or `NodePort` would make the ingest endpoint reachable from outside the cluster without any of the safeguards in [Network exposure](#network-exposure). |
-| `ingress.*` | disabled | Standard `className`, `annotations`, `hosts`, `tls`. `tls` is required when enabled unless `allowInsecureHttp=true`. Keep the host private, see [Network exposure](#network-exposure). |
+| `service.type` | `ClusterIP` | Leave at the default. `LoadBalancer` or `NodePort` would make the ingest endpoint reachable from outside the cluster, which without a write token bypasses the safeguards in [Network exposure](#network-exposure). |
+| `ingress.*` | disabled | Standard `className`, `annotations`, `hosts`, `tls`. `tls` is required when enabled unless `allowInsecureHttp=true`. Without a write token, keep the host private, see [Network exposure](#network-exposure). |
 | `resources` | see [Compute](#compute) | |

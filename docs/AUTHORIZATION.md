@@ -28,34 +28,28 @@ is covered in the
 
 ## Create instance report route
 
-`POST /api/v1/instance-reports` accepts two credentials. A request needs one
-of them:
+`POST /api/v1/instance-reports` runs in one of two modes. The operator picks
+the mode by whether `N8N_MONITORING_WRITE_TOKEN` is set on the service; the
+choice is read once at start-up, and there is no mode that accepts both
+credentials.
 
-- the instance's n8n license certificate, in the request body, or
-- the write token, `N8N_MONITORING_WRITE_TOKEN`, as a bearer header.
+| `N8N_MONITORING_WRITE_TOKEN` | Mode | Accepted credential | What keeps outsiders out |
+| --- | --- | --- | --- |
+| unset | certificate mode | the instance's n8n license certificate, in the request body | the network: only your own instances may reach the endpoint |
+| set | token mode | that token, as an `Authorization: Bearer` header | the token itself, over TLS |
 
-The certificate is always accepted. The write token is accepted only when the
-operator has set the variable on the service; it is optional, and the service
-starts without it.
-
-The check runs as a Fastify `preValidation` hook on the route. The body has
-been parsed as JSON at that point, but the route schema has not seen it yet,
-so a bad credential is answered with `401` before a malformed report would be
-answered with `400`, and an unauthenticated caller learns nothing about the
-schema. Which credential is checked:
-
-1. If the request carries an `Authorization: Bearer` header and a write token
-   is configured, the token decides. A wrong token is `401` even if the body
-   also carries a valid certificate.
-2. Otherwise, the certificate in the body is checked.
-
-Whichever credential authenticated the request, `licenseCert` is deleted from
-the body before the route schema and the service that persists the report see
-it.
+In either mode the check runs as a Fastify `preValidation` hook on the route.
+The body has been parsed as JSON at that point, but the route schema has not
+seen it yet, so a bad credential is answered with `401` before a malformed
+report would be answered with `400`, and an unauthenticated caller learns
+nothing about the schema. In either mode `licenseCert` is deleted from the
+body before the route schema and the service that persists the report see it,
+so a certificate sent to a token-mode service is neither verified nor stored.
 
 ### License certificate in request body
 
-A reporting n8n instance proves that it is a licensed instance by sending its
+This is certificate mode, active when no write token is set. A reporting n8n
+instance proves that it is a licensed instance by sending its
 n8n license certificate with every report. Possession of a certificate that the
 n8n license CA issued is the whole check: the service reads no identity from
 it, stores nothing from it, and contacts no external system to verify it. The
@@ -139,77 +133,15 @@ issued. It binds the request to no identity and no tenant:
 - `instanceId`, `label` and every other report field are self-declared by the
   caller. They are not compared with anything in the certificate.
 - Any n8n licensee's certificate is accepted, not only certificates of the
-  customer operating this service. This is accepted because the service is
-  only reachable inside the customer's network. Configuring a write token does
-  not change this: it adds a credential, it does not switch the certificate
-  off.
+  customer operating this service. This is why certificate mode requires the
+  endpoint to be reachable only from the customer's own instances. An
+  operator who cannot or does not want to guarantee that runs the service in
+  token mode instead, where the certificate is not a credential.
 
 The handler may therefore trust exactly one thing: that whoever sent the body
 possessed a genuine n8n license certificate. It trusts nothing else from it.
 
-### Secret string as bearer auth header
-
-The operator may set a write token on the service as
-`N8N_MONITORING_WRITE_TOKEN`. It is a plain string of the operator's making,
-read once at start-up, so a rotation needs a restart. When it is set, a report
-may authenticate with it instead of a certificate:
-
-```http
-POST /api/v1/instance-reports HTTP/1.1
-Authorization: Bearer <N8N_MONITORING_WRITE_TOKEN>
-Content-Type: application/json
-```
-
-The check is a constant-time comparison of the presented value with the
-configured one. A value that does not match is answered with `401 Unauthorized`
-and the message `Invalid write token`; the service logs the code `BAD_TOKEN`
-and nothing about the presented value. There are no users, scopes or expiry.
-
-An n8n instance sends the token when `N8N_INSTANCE_REPORTING_AUTH_TOKEN` is set
-on it, and then leaves `licenseCert` out of the body. This is the way to report
-from an instance that has no license certificate, and the credential the local
-tooling in this repository uses.
-
-Unlike the certificate, the token is a secret shared between the operator and
-their own instances, so it does prove "belongs to this operator". It does not
-narrow what the service accepts, though: the certificate path stays open, so
-the network requirements in the
-[user guide](USER_GUIDE.md#network-exposure) apply regardless.
-
-### Rejection paths
-
-| Status | Message | Condition |
-| --- | --- | --- |
-| `401 Unauthorized` | `Invalid write token` | A bearer header was sent, a write token is configured, and the values differ. Logged as `BAD_TOKEN`. |
-| `401 Unauthorized` | `Missing license certificate` | No bearer header (or no write token configured), and the body is not a JSON object, or `licenseCert` is absent, not a string, or an empty string. |
-| `401 Unauthorized` | `Invalid license certificate` | `PARSE_FAILED`: string shorter than 50 characters, not base64 JSON, JSON without string `licenseKey` and `x509`, `x509` not a parseable certificate, or `licenseKey` not in the `BEGIN LICENSE KEY` framing with three parts. |
-| `401 Unauthorized` | `Invalid license certificate` | `INVALID_ISSUER`: the leaf was not issued by, or does not verify against, the embedded n8n license CA. |
-| `401 Unauthorized` | `Invalid license certificate` | `DECRYPTION_FAILED`: the symmetric key does not recover with the leaf's public key, or the payload does not decrypt to a non-empty string. |
-| `401 Unauthorized` | `Invalid license certificate` | `SIGNATURE_INVALID`: the payload signature does not verify against the leaf's public key. |
-| `400 Bad Request` | schema error | Certificate accepted, but the remaining body fails the route schema. Runs only after the certificate check. |
-| `409 Conflict` | names the repeated `batchId` | Certificate accepted and body valid, but a report with the same `instanceId` and `batchId` is already stored. |
-
-All error responses share the envelope `{ "statusCode", "error", "message" }`.
-The failure code appears in the service log only, never in the response; the
-[user guide](USER_GUIDE.md#monitoring-the-health-of-n8n-airgap-monitoring)
-explains how to act on it.
-
-### Configuration
-
-No environment variable affects this check.
-
-The trusted issuer is a single X.509 CA certificate compiled into the service
-image: the constant `N8N_LICENSE_ISSUER_CERT_PEM` in
-`apps/api/src/license/issuer-cert.ts`. Its subject is `license.n8n.io` and it
-is valid until 2049. It is the same CA certificate that the public
-`@n8n_io/license-sdk` embeds. No operator setting adds to or replaces it; a CA
-rotation ships as a new image.
-
-The verifier is a local port of the check `ai-assistant-service` performs.
-Verification is fully offline: the service makes no network call to n8n's
-license server or anywhere else while checking a certificate.
-
-### What is not verified
+#### What is not verified
 
 The following are deliberately not checked, as stated in the verifier's source
 and in ADR 10:
@@ -229,7 +161,24 @@ Reuse of a certificate across requests is not restricted. The only replay
 guard on the endpoint is the `409` for a repeated `instanceId` and `batchId`
 pair, which is a property of the report envelope, not of the certificate.
 
-### Sequence
+#### Configuration
+
+The only setting that affects this check is the mode switch: an unset
+`N8N_MONITORING_WRITE_TOKEN` is what puts the service in certificate mode. No
+variable changes what the check itself accepts.
+
+The trusted issuer is a single X.509 CA certificate compiled into the service
+image: the constant `N8N_LICENSE_ISSUER_CERT_PEM` in
+`apps/api/src/license/issuer-cert.ts`. Its subject is `license.n8n.io` and it
+is valid until 2049. It is the same CA certificate that the public
+`@n8n_io/license-sdk` embeds. No operator setting adds to or replaces it; a CA
+rotation ships as a new image.
+
+The verifier is a local port of the check `ai-assistant-service` performs.
+Verification is fully offline: the service makes no network call to n8n's
+license server or anywhere else while checking a certificate.
+
+#### Sequence
 
 ```mermaid
 ---
@@ -260,3 +209,55 @@ sequenceDiagram
         API-->>N8N: 201 Created, { id }
     end
 ```
+
+### Secret string as bearer auth header
+
+This is token mode, active when the operator sets a write token on the service
+as `N8N_MONITORING_WRITE_TOKEN`. It is a plain string of the operator's
+making, read once at start-up, so a rotation needs a restart. Every report
+must then carry it:
+
+```http
+POST /api/v1/instance-reports HTTP/1.1
+Authorization: Bearer <N8N_MONITORING_WRITE_TOKEN>
+Content-Type: application/json
+```
+
+The check is a constant-time comparison of the presented value with the
+configured one. A request without a bearer header is answered with
+`401 Unauthorized` and the message `Missing write token`, whatever its body
+carries; a value that does not match is answered with `401 Unauthorized` and
+the message `Invalid write token`, and the service logs the code `BAD_TOKEN`
+and nothing about the presented value. There are no users, scopes or expiry.
+License certificates are not a credential in this mode.
+
+An n8n instance sends the token when `N8N_INSTANCE_REPORTING_AUTH_TOKEN` is set
+on it, and then leaves `licenseCert` out of the body. This is the way to report
+from an instance that has no license certificate, and the credential the local
+tooling in this repository uses.
+
+Unlike the certificate, the token is a secret shared between the operator and
+their own instances, so it proves "belongs to this operator" rather than
+"licensed by n8n". That is what makes token mode safe without network rules
+that restrict the endpoint to the operator's instances; TLS and ordinary
+secret handling are enough. The trade is that every instance must be given
+the token.
+
+### Rejection paths
+
+| Status | Message | Condition |
+| --- | --- | --- |
+| `401 Unauthorized` | `Missing write token` | Token mode, and the request has no `Authorization: Bearer` header. A certificate in the body does not help. |
+| `401 Unauthorized` | `Invalid write token` | Token mode, and the bearer value differs from the configured token. Logged as `BAD_TOKEN`. |
+| `401 Unauthorized` | `Missing license certificate` | Certificate mode, and the body is not a JSON object, or `licenseCert` is absent, not a string, or an empty string. A bearer header does not help. |
+| `401 Unauthorized` | `Invalid license certificate` | `PARSE_FAILED`: string shorter than 50 characters, not base64 JSON, JSON without string `licenseKey` and `x509`, `x509` not a parseable certificate, or `licenseKey` not in the `BEGIN LICENSE KEY` framing with three parts. |
+| `401 Unauthorized` | `Invalid license certificate` | `INVALID_ISSUER`: the leaf was not issued by, or does not verify against, the embedded n8n license CA. |
+| `401 Unauthorized` | `Invalid license certificate` | `DECRYPTION_FAILED`: the symmetric key does not recover with the leaf's public key, or the payload does not decrypt to a non-empty string. |
+| `401 Unauthorized` | `Invalid license certificate` | `SIGNATURE_INVALID`: the payload signature does not verify against the leaf's public key. |
+| `400 Bad Request` | schema error | Certificate accepted, but the remaining body fails the route schema. Runs only after the certificate check. |
+| `409 Conflict` | names the repeated `batchId` | Certificate accepted and body valid, but a report with the same `instanceId` and `batchId` is already stored. |
+
+All error responses share the envelope `{ "statusCode", "error", "message" }`.
+The failure code appears in the service log only, never in the response; the
+[user guide](USER_GUIDE.md#monitoring-the-health-of-n8n-airgap-monitoring)
+explains how to act on it.

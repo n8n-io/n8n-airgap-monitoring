@@ -71,8 +71,9 @@ const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> 
   fastify.post<{ Body: CreateInstanceReport }>(
     "/",
     {
-      // Either the write token as a bearer header or an n8n-issued license
-      // certificate in the body; see plugins/report-auth.ts.
+      // The write token as a bearer header, or an n8n-issued license
+      // certificate in the body, whichever mode the deployment configured;
+      // see plugins/report-auth.ts.
       preValidation: fastify.authenticateReport,
       schema: {
         body: instanceReportSchema,
