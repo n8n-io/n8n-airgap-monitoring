@@ -15,22 +15,16 @@ export const LICENSE_CERT_FIELD = "licenseCert";
  * The certificate travels in the body, not a header, because a real one is
  * about 7 KB and grows with every feature flag, which sits too close to the
  * 8 KB per-header default of common reverse proxies.
+ *
+ * Trust is the embedded n8n license CA. Tests replace it with a mock CA via
+ * `TEST_LICENSE_ISSUER_CERT`, honoured only under `NODE_ENV=test`, the same
+ * mechanism ai-assistant-service uses. The production image bakes
+ * `NODE_ENV=production`, so the variable is inert on a deployed container.
  */
 export default fp(
   async (fastify: FastifyInstance) => {
-    const issuers: X509Certificate[] = parseIssuerCertsPem(N8N_LICENSE_ISSUER_CERT_PEM);
-
-    const extra = parseIssuerCertsPem(fastify.config.additionalIssuerCertsPem);
-    if (extra.length > 0) {
-      // Loud on purpose: the only legitimate reasons are a CA rotation or a
-      // development setup, and a development CA in a real deployment must be
-      // visible in the first lines of the log.
-      fastify.log.warn(
-        { issuers: extra.map((cert) => cert.subject.replace(/\n/g, ", ")) },
-        "Trusting additional license issuers beyond the n8n license CA",
-      );
-      issuers.push(...extra);
-    }
+    const testCert = process.env.NODE_ENV === "test" ? process.env.TEST_LICENSE_ISSUER_CERT : undefined;
+    const issuers: X509Certificate[] = parseIssuerCertsPem(testCert || N8N_LICENSE_ISSUER_CERT_PEM);
 
     /**
      * Runs as `preValidation`, so the body is parsed but the route schema has

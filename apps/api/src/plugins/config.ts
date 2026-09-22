@@ -3,12 +3,6 @@ import fp from "fastify-plugin";
 
 export interface Config {
   readToken: string;
-  /**
-   * PEM bundle of license issuers trusted in addition to the n8n license CA.
-   * Empty in a normal deployment. Set for a CA rotation, or to a development
-   * CA locally. Every issuer here is named in a warning at start-up.
-   */
-  additionalIssuerCertsPem: string;
   dbPath: string;
 }
 
@@ -27,7 +21,6 @@ export default fp(
 
     const config: Config = {
       readToken,
-      additionalIssuerCertsPem: process.env.N8N_MONITORING_ADDITIONAL_ISSUER_CERTS?.trim() ?? "",
       dbPath: process.env.N8N_DB_PATH?.trim() || "./data/database.sqlite",
     };
 

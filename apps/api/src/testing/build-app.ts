@@ -11,7 +11,9 @@ import { TEST_ISSUER_CERT_PEM } from "./mock-license";
 process.env.N8N_MONITORING_READ_TOKEN = "test-read-token";
 // Reports authenticate with a license certificate. Trust the test CA once here,
 // so every test mints certificates through mock-license.ts and nothing else.
-process.env.N8N_MONITORING_ADDITIONAL_ISSUER_CERTS = TEST_ISSUER_CERT_PEM;
+// The auth plugin honours this variable only under NODE_ENV=test, which the
+// Vitest config pins.
+process.env.TEST_LICENSE_ISSUER_CERT = TEST_ISSUER_CERT_PEM;
 
 // Automatically build and tear down our instance
 async function build() {
