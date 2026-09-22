@@ -1,0 +1,81 @@
+Dockerfile
+  s_619098c791e713::t_fd12bd22e6cd46 35-37
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_619098c791e713::t_075c3ba883785c 1
+  s_619098c791e713::t_897e740b293cc5 275-279,281-283,285-288,290-291,300-301,303-304,306,308-311,314-341
+  s_619098c791e713::t_a220af84b4bb52 293-298
+apps/api/src/plugins/report-auth.test.ts
+  s_619098c791e713::t_8b323559c59150 49-52,57,67-70,82
+README.md
+  s_619098c791e713::t_8af25aaf66c05c 18,21-24
+  s_619098c791e713::t_68e2944fe52e26 219-221,225-226
+  s_619098c791e713::t_939dee2a6d82bd 64-69
+  s_619098c791e713::t_8e0452a2d9fea5 241-245
+scripts/local-k8s-demo/README.md
+  s_619098c791e713::t_bf61ee89ad9d1b 107-109,111
+docker-compose.yml
+  s_619098c791e713::t_b29f6c3bc07038 12-14
+docs/USER_GUIDE.md
+  s_619098c791e713::t_3abd0c1be88aa9 201
+  s_619098c791e713::t_e6cadd48515010 50-56
+  s_619098c791e713::t_bf397e39bed984 215-216
+  s_619098c791e713::t_2ac37c8fd2f3f9 242
+  s_619098c791e713::t_5e4edf628b2bb5 29-34
+  s_619098c791e713::t_721d2126f43808 60-66,70-88
+  s_619098c791e713::t_1f94dc959c2d21 133-136
+docs/charts/airgap-monitoring/values.yaml
+  s_619098c791e713::t_5590ad36882461 41-48
+docs/adr/2026-09-21-authenticate-with-license-certificate.md
+  s_619098c791e713::t_c39713b815be7d 36-37
+  s_619098c791e713::t_38606549bf96be 48-50
+  s_619098c791e713::t_57be25bbe2628b 21
+docs/charts/airgap-monitoring/README.md
+  s_619098c791e713::t_8a392ab80a2d50 199
+  s_619098c791e713::t_33836d9a6fe00a 203-204
+  s_619098c791e713::t_8eaeac983fac7d 82-86
+  s_619098c791e713::t_9c06b895c34301 26-33
+  s_619098c791e713::t_c08243d5a3a1a1 48-53
+  s_619098c791e713::t_f5302f0f2e560f 98-101,103-112
+scripts/local-k8s-demo/Makefile
+  s_619098c791e713::t_2c753f6c81c176 12-15
+apps/api/src/plugins/config.ts
+  s_619098c791e713::t_d18152f2fd81de 7-10
+apps/api/src/plugins/license-auth.e2e.test.ts
+  s_619098c791e713::t_439567fcd9709c 5-7,11-12
+apps/api/src/plugins/report-auth.ts
+  s_619098c791e713::t_cf073d01c2ee21 10-11,13-15,17-25,39-40,48,51-52,58-70,72-74,76-79,81-97
+docs/DIAGRAMS.md
+  s_619098c791e713::t_1671cc02fce751 44
+  s_619098c791e713::t_9d48e727b4d2a2 9-13,16
+docs/AUTHORIZATION.md
+  s_619098c791e713::t_ce44069d4007b4 144,164-181,212
+  s_619098c791e713::t_eb395115fc43e6 250-252
+  s_619098c791e713::t_70d7e72bc2f7a8 136-139
+  s_619098c791e713::t_096915936be18c 227-244
+  s_619098c791e713::t_02f3abefe199ba 51-52
+  s_619098c791e713::t_5ce5344c39034a 31-47
+  s_619098c791e713::t_9053177d4dbaee 215-218
+  s_619098c791e713::t_43da6cdf75cd66 213-214,219-226,245-249,253-263
+apps/api/src/testing/build-app.ts
+  s_619098c791e713::t_ca1f648b9f5b35 12-17
+docs/charts/airgap-monitoring/templates/deployment.yaml
+  s_619098c791e713::t_c55f496aefa27e 66-67
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.ts
+  s_619098c791e713::t_cdda11d3ab1ddd 74-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "031ae4a62cd5bab76ecd52d58bb421596f9d6c23",
+  "prompts": {},
+  "sessions": {
+    "s_619098c791e713": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79823ab4-22ba-4e86-85e9-b5ddb0768758",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
