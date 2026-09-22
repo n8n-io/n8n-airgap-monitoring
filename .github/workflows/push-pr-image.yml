@@ -1,0 +1,112 @@
+name: Push PR Image
+
+# Builds the head of an open pull request and pushes it as `test-pr-{number}`,
+# so a change can be deployed somewhere before it is merged.
+#
+# `test-pr-*` is a namespace of its own, disjoint from every tag the release
+# process owns: nothing here can touch `alpha`, `{version}`, `latest` or
+# `stable`. The tag moves on every run for the same PR, so anything deploying it
+# needs `imagePullPolicy: Always` (or an explicit digest) to pick up a rebuild.
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'Number of the open PR to build (e.g. 42)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: read
+
+# Keyed by PR so two PRs can build at once, and a second run for the same PR
+# supersedes the first rather than racing it onto the same tag.
+concurrency:
+  group: push-pr-image-${{ inputs.pr }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/n8n-airgap-monitoring
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      # Resolved to a commit sha here and checked out by sha below: the branch
+      # can move between this lookup and the build, and the summary has to name
+      # the commit the image was actually built from.
+      - name: Resolve PR head
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ inputs.pr }}
+        run: |
+          if ! json=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
+            --json state,headRefName,headRefOid 2>&1); then
+            echo "::error::Could not read PR #${PR} in ${GITHUB_REPOSITORY}: ${json}"
+            exit 1
+          fi
+
+          state=$(jq -r .state <<<"$json")
+          if [[ "$state" != "OPEN" ]]; then
+            echo "::error::PR #${PR} is ${state}, not OPEN. This workflow only builds open PRs; use Release Alpha to build a merged commit."
+            exit 1
+          fi
+
+          {
+            echo "sha=$(jq -r .headRefOid <<<"$json")"
+            echo "branch=$(jq -r .headRefName <<<"$json")"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ steps.pr.outputs.sha }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      # QEMU is only needed for the emulated arm64 leg of the build.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      # Reads the shared build cache but deliberately does not write to it: these
+      # are throwaway builds of unmerged code, and the Actions cache is small
+      # enough that letting them in would evict the release workflows' entries.
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.IMAGE }}:test-pr-${{ inputs.pr }}
+          cache-from: type=gha
+
+      - name: Summary
+        env:
+          PR: ${{ inputs.pr }}
+          SHA: ${{ steps.pr.outputs.sha }}
+          BRANCH: ${{ steps.pr.outputs.branch }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ### Pushed \`${IMAGE}:test-pr-${PR}\`
+
+          | | |
+          | --- | --- |
+          | PR | #${PR} (\`${BRANCH}\`) |
+          | Commit | \`${SHA}\` |
+          | Digest | \`${DIGEST}\` |
+
+          The tag moves on every run for this PR. Pin \`${IMAGE}@${DIGEST}\` to hold this exact build.
+          EOF

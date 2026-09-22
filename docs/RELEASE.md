@@ -1,7 +1,8 @@
 # Release Process
 
 One image, `ghcr.io/n8n-io/n8n-airgap-monitoring`, published in two ways: an
-alpha on every push to `main`, and a versioned release through a release PR. The
+alpha on every push to `main`, and a versioned release through a release PR.
+Throwaway `test-pr-{n}` images can also be built on demand from an open PR. The
 version lives in the root `package.json` and is the only version that matters;
 `apps/api/package.json` is not published anywhere. The Helm chart's
 `appVersion` in `docs/charts/airgap-monitoring/Chart.yaml` is written from the
@@ -34,6 +35,7 @@ flowchart TD
 | ----------- | ------------------------------------------------ | --------------------------- |
 | `{sha}`     | never                                            | for reproducing a `main` build |
 | `alpha`     | every push to `main` that touches the image      | no                          |
+| `test-pr-{n}` | every manual build of that PR                  | no, for manual testing only |
 | `{version}` | never                                            | **yes, for airgapped deployments** |
 | `latest`    | every versioned release                          | no                          |
 | `stable`    | every versioned release, rolled back on a bad one | acceptable                  |
@@ -55,6 +57,15 @@ builds for `linux/amd64` and `linux/arm64`, and pushes `alpha` and the full comm
 sha. A docs-only merge produces no image, so not every commit on `main` has a sha
 tag. Run the workflow manually to build a commit the filter skipped, or with
 "push" disabled for a dry run.
+
+## PR test image
+
+`push-pr-image` builds the head of an open PR and pushes it as `test-pr-{number}`,
+for trying a change on a real deployment before merging it. Go to Actions → Push
+PR Image and give it the PR number.
+
+Nothing cleans these images up. Delete the package version from the GHCR UI when
+the PR is done with.
 
 ## Versioned release
 
