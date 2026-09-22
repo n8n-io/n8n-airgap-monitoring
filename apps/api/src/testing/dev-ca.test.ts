@@ -15,8 +15,8 @@ test("a CA written to disk mints certificates that verify against what was writt
   const read = readDevCa(dir);
   expect(read).toEqual(written);
 
-  const issuers = [new X509Certificate(read.certPem)];
-  expect(() => verifyLicenseCert(generateMockLicense({ ca: read }), issuers)).not.toThrow();
+  const issuer = new X509Certificate(read.certPem);
+  expect(() => verifyLicenseCert(generateMockLicense({ ca: read }), issuer)).not.toThrow();
   // The default test CA is a different CA, so the file-backed one must not vouch for it.
-  expect(() => verifyLicenseCert(generateMockLicense(), issuers)).toThrow();
+  expect(() => verifyLicenseCert(generateMockLicense(), issuer)).toThrow();
 });

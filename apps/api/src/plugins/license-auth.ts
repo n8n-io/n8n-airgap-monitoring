@@ -1,8 +1,8 @@
-import type { X509Certificate } from "node:crypto";
+import { X509Certificate } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
 import { N8N_LICENSE_ISSUER_CERT_PEM } from "../license/issuer-cert";
-import { LicenseCertError, parseIssuerCertsPem, verifyLicenseCert } from "../license/license-cert";
+import { LicenseCertError, verifyLicenseCert } from "../license/license-cert";
 
 /** Name of the body field carrying the certificate. Stripped before the body goes anywhere else. */
 export const LICENSE_CERT_FIELD = "licenseCert";
@@ -24,7 +24,7 @@ export const LICENSE_CERT_FIELD = "licenseCert";
 export default fp(
   async (fastify: FastifyInstance) => {
     const testCert = process.env.NODE_ENV === "test" ? process.env.TEST_LICENSE_ISSUER_CERT : undefined;
-    const issuers: X509Certificate[] = parseIssuerCertsPem(testCert || N8N_LICENSE_ISSUER_CERT_PEM);
+    const issuer = new X509Certificate(testCert || N8N_LICENSE_ISSUER_CERT_PEM);
 
     /**
      * Runs as `preValidation`, so the body is parsed but the route schema has
@@ -43,7 +43,7 @@ export default fp(
       }
 
       try {
-        verifyLicenseCert(cert, issuers);
+        verifyLicenseCert(cert, issuer);
       } catch (error) {
         if (error instanceof LicenseCertError) {
           // The code is the only thing about the certificate that may be logged.

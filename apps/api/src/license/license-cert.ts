@@ -31,13 +31,13 @@ const LICENSE_KEY_PATTERN =
   /^-----BEGIN LICENSE KEY-----(?<encryptedSymmetricKey>[^|]+)\|\|(?<encryptedData>[^|]+)\|\|(?<signature>[^|]+)-----END LICENSE KEY-----$/;
 
 /**
- * Proves that `containerStr` is a license certificate issued by one of
- * `issuers`. Resolves to nothing: the design uses the certificate as proof of
+ * Proves that `containerStr` is a license certificate issued by `issuer`.
+ * Resolves to nothing: the design uses the certificate as proof of
  * possession only, so no field is extracted for the caller.
  *
  * Steps, each failing with its own {@link LicenseCertErrorCode}:
  * 1. base64 → `{ x509, licenseKey }`
- * 2. the `x509` leaf was issued by, and its signature verifies against, an issuer
+ * 2. the `x509` leaf was issued by, and its signature verifies against, the issuer
  * 3. the leaf's public key recovers the symmetric key
  * 4. the symmetric key decrypts the payload
  * 5. the leaf's public key verifies the payload signature
@@ -48,11 +48,11 @@ const LICENSE_KEY_PATTERN =
  *
  * @throws {LicenseCertError}
  */
-export function verifyLicenseCert(containerStr: string, issuers: readonly X509Certificate[]): void {
+export function verifyLicenseCert(containerStr: string, issuer: X509Certificate): void {
   const { x509, licenseKey } = parseContainer(containerStr);
   const leaf = parseLeaf(x509);
 
-  if (!issuers.some((issuer) => leaf.checkIssued(issuer) && leaf.verify(issuer.publicKey))) {
+  if (!(leaf.checkIssued(issuer) && leaf.verify(issuer.publicKey))) {
     throw new LicenseCertError("certificate was not issued by an approved issuer", "INVALID_ISSUER");
   }
 
@@ -132,22 +132,4 @@ function verifyLicenseKey(key: NodeRSA, licenseKey: string): void {
   if (!key.verify(Buffer.from(payload), signature, "utf8", "base64")) {
     throw new LicenseCertError("payload signature is invalid", "SIGNATURE_INVALID");
   }
-}
-
-/**
- * Splits one string holding any number of PEM certificates, as an env var
- * carrying a bundle does, into X509 objects.
- *
- * @throws {Error} naming the offending block when one does not parse
- */
-export function parseIssuerCertsPem(pemBundle: string): X509Certificate[] {
-  const blocks = pemBundle.match(/-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/g) ?? [];
-
-  return blocks.map((block, index) => {
-    try {
-      return new X509Certificate(block);
-    } catch (error) {
-      throw new Error(`issuer certificate #${index + 1} could not be parsed: ${(error as Error).message}`);
-    }
-  });
 }

@@ -9,9 +9,9 @@ import {
   TEST_CA,
 } from "../testing/mock-license";
 import { N8N_LICENSE_ISSUER_CERT_PEM } from "./issuer-cert";
-import { LicenseCertError, parseIssuerCertsPem, verifyLicenseCert } from "./license-cert";
+import { LicenseCertError, verifyLicenseCert } from "./license-cert";
 
-const trusted = [new X509Certificate(TEST_CA.certPem)];
+const trusted = new X509Certificate(TEST_CA.certPem);
 
 function codeOf(fn: () => void): string {
   try {
@@ -29,14 +29,6 @@ test("accepts a certificate signed by a trusted issuer", () => {
 
 test("accepts an expired certificate, since expiry is not this check's concern", () => {
   expect(() => verifyLicenseCert(generateMockLicense({ expired: true }), trusted)).not.toThrow();
-});
-
-test("accepts a certificate from any one of several trusted issuers", () => {
-  const rotated = generateMockCa("rotated.license.n8n.io");
-  const issuers = [...trusted, new X509Certificate(rotated.certPem)];
-
-  expect(() => verifyLicenseCert(generateMockLicense({ ca: rotated }), issuers)).not.toThrow();
-  expect(() => verifyLicenseCert(generateMockLicense(), issuers)).not.toThrow();
 });
 
 test("rejects a well-formed certificate from an untrusted issuer", () => {
@@ -79,18 +71,8 @@ test("rejects a license key whose symmetric key was not produced by the leaf's k
 });
 
 test("the embedded n8n issuer certificate parses and is a CA valid until 2049", () => {
-  const [issuer, ...rest] = parseIssuerCertsPem(N8N_LICENSE_ISSUER_CERT_PEM);
+  const issuer = new X509Certificate(N8N_LICENSE_ISSUER_CERT_PEM);
 
-  expect(rest).toHaveLength(0);
   expect(issuer.subject).toContain("license.n8n.io");
   expect(new Date(issuer.validTo).getFullYear()).toBe(2049);
-});
-
-test("parseIssuerCertsPem splits a bundle and reports a broken block", () => {
-  const two = `${TEST_CA.certPem}\n${generateMockCa("second").certPem}`;
-  expect(parseIssuerCertsPem(two)).toHaveLength(2);
-  expect(parseIssuerCertsPem("")).toHaveLength(0);
-
-  const broken = "-----BEGIN CERTIFICATE-----\nnot-base64!\n-----END CERTIFICATE-----";
-  expect(() => parseIssuerCertsPem(broken)).toThrow(/issuer certificate #1/);
 });
