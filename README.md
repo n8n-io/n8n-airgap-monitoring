@@ -221,7 +221,7 @@ are two ways to exercise the receiver locally:
 
   ```sh
   pnpm --filter api mock-license ca --out .dev-ca
-  NODE_ENV=test TEST_LICENSE_ISSUER_CERT="$(cat .dev-ca/ca.cert.pem)" pnpm dev
+  NODE_ENV=test N8N_MONITORING_READ_TOKEN=dev-read-token TEST_LICENSE_ISSUER_CERT="$(cat .dev-ca/ca.cert.pem)" pnpm dev
   pnpm --filter api --silent mock-report --ca .dev-ca --label demo --days 3 | \
     curl -sS -X POST localhost:3456/api/v1/instance-reports -H 'content-type: application/json' -d @-
   ```
