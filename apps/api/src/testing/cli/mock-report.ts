@@ -14,6 +14,7 @@ import { generateMockLicense } from "../mock-license.ts";
 
 const USAGE = `usage: mock-report [--ca DIR] [--instance-id ID] [--label LABEL] [--days N] [--expired]
   --ca DIR       mint the certificate from the dev CA in DIR; otherwise N8N_LICENSE_CERT is used
+  --label LABEL  1-200 characters
   --days N       add N daily data points ending yesterday (default 0)
   --expired      mint an expired certificate (with --ca only)`;
 
@@ -35,11 +36,17 @@ const { values } = parseArgs({
   },
 });
 
-if (values.help) fail(USAGE);
+if (values.help) {
+  process.stdout.write(`${USAGE}\n`);
+  process.exit(0);
+}
 
 const days = Number(values.days);
 if (!Number.isInteger(days) || days < 0) fail(`--days must be a non-negative integer\n${USAGE}`);
 if (values.expired && !values.ca) fail(`--expired needs --ca\n${USAGE}`);
+if (values.label !== undefined && (values.label.length < 1 || values.label.length > 200)) {
+  fail(`--label must be 1-200 characters\n${USAGE}`);
+}
 
 let licenseCert: string;
 if (values.ca) {
