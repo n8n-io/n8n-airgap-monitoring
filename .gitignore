@@ -72,3 +72,6 @@ dist
 
 # local usage event database
 data
+
+# throwaway license CA for local development (see README, Local development)
+.dev-ca

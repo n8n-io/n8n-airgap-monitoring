@@ -20,7 +20,6 @@ REPORT="$TMP/report.json"
 LOG="$TMP/server.log"
 BASE_URL="http://127.0.0.1:$PORT"
 
-export N8N_MONITORING_WRITE_TOKEN="bench-write-token"
 export N8N_MONITORING_READ_TOKEN="bench-read-token"
 export N8N_DB_PATH="$DB_PATH"
 
