@@ -1,0 +1,29 @@
+apps/api/src/license/license-cert.test.ts
+  s_cc80fb712df6a6::t_63c36783110436 12,14
+  s_cc80fb712df6a6::t_45886aca533017 74
+apps/api/src/license/license-cert.ts
+  s_cc80fb712df6a6::t_7ab40069c04dfd 34-35,40
+  s_cc80fb712df6a6::t_dbe6c3dc63b018 51,55
+apps/api/src/plugins/license-auth.ts
+  s_cc80fb712df6a6::t_9c0ce203afadb2 27
+  s_cc80fb712df6a6::t_db9810768ed667 1,5
+  s_cc80fb712df6a6::t_e8a9c9785d369e 46
+apps/api/src/testing/dev-ca.test.ts
+  s_cc80fb712df6a6::t_baa37f311e138f 18-19,21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "de84b2a3acc398ec9152a262d29c66ce94942647",
+  "prompts": {},
+  "sessions": {
+    "s_cc80fb712df6a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ee863644-a77b-4901-b015-a51adfdf3ce3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
