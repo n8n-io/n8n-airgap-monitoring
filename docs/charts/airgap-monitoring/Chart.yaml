@@ -4,7 +4,7 @@ name: airgap-monitoring
 version: 0.1.0
 # The airgap-monitoring release this chart deploys by default (image tag).
 # Keep in step with the root package.json version when a release is cut.
-appVersion: "0.1.1"
+appVersion: "0.2.0"
 kubeVersion: ">=1.25.0-0"
 type: application
 description: >-
