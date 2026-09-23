@@ -14,7 +14,7 @@ export default defineConfig({
       include: ["apps/*/src/**/*.ts"],
       // Tests, type-only barrels and the test harness carry no logic worth
       // measuring; excluding them keeps the percentage honest.
-      exclude: ["**/*.test.ts", "**/index.ts", "**/test-utils/**"],
+      exclude: ["**/*.test.ts", "**/*.bench.ts", "**/index.ts", "**/test-utils/**"],
     },
   },
 });

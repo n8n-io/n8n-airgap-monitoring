@@ -5,6 +5,7 @@
   "license": "LicenseRef-n8n-enterprise",
   "scripts": {
     "test": "vitest run",
+    "bench": "vitest bench --run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "pnpm run build && fastify start -l info dist/app.js",
     "build": "tsc -p tsconfig.build.json",

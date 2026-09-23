@@ -27,8 +27,8 @@ export interface MockLicenseOptions {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** A self-signed certificate acting as both CA and leaf, like the ai-assistant-service mock. */
-export function generateMockCa(commonName = "test.license.n8n.io"): MockCa {
-  const keyPair = forge.pki.rsa.generateKeyPair(2048);
+export function generateMockCa(commonName = "test.license.n8n.io", keyBits = 2048): MockCa {
+  const keyPair = forge.pki.rsa.generateKeyPair(keyBits);
   const cert = forge.pki.createCertificate();
 
   cert.publicKey = keyPair.publicKey;
