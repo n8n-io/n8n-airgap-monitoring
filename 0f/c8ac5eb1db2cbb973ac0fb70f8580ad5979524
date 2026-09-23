@@ -1,0 +1,25 @@
+README.md
+  h_c63dce324dfc7b 130-132
+  s_eaf9e629bcba8f::t_f04d3aaa4ac232 120,125-127,129,133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0fc8ac5eb1db2cbb973ac0fb70f8580ad5979524",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_eaf9e629bcba8f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f598dc96-e07b-445c-87e1-491a046f08e5",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
