@@ -117,19 +117,20 @@ Its shape is:
 ```json
 {
   "data": {
-    "generatedAt": "2026-09-03T14:30:00.000Z",
+    "generatedAt": "2026-09-16T14:30:00.000Z",
     "instances": [
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
         "label": "prod",
-        "firstSeen": "2026-03-20T02:00:00.000Z",
-        "lastReportAt": "2026-03-26T02:00:00.000Z",
+        "n8nVersion": "2.40.1",
+        "firstSeen": "2026-09-12T10:39:00.199Z",
+        "lastReportAt": "2026-09-16T10:39:00.180Z",
         "dataPoints": {
-          "prodExecutions": [
-            { "kind": "daily", "date": "2026-03-25", "value": 15234, "batchId": "a1b2c3d4", "receivedAt": "2026-03-26T02:00:00.000Z" }
-          ],
-          "activeWorkflows": [
-            { "kind": "cumulative", "value": 87, "batchId": "a1b2c3d4", "receivedAt": "2026-03-26T02:00:00.000Z" }
+          "billableExecutions": [
+            { "kind": "cumulative", "value": 230, "batchId": "fQnmKThPEaNxiFdR", "receivedAt": "2026-09-12T10:39:00.199Z" },
+            { "kind": "daily", "date": "2026-09-11", "value": 230, "batchId": "fQnmKThPEaNxiFdR", "receivedAt": "2026-09-12T10:39:00.199Z" },
+            { "kind": "cumulative", "value": 950, "batchId": "vVTe725nPq3nAIhD", "receivedAt": "2026-09-13T10:39:00.189Z" },
+            { "kind": "daily", "date": "2026-09-12", "value": 720, "batchId": "vVTe725nPq3nAIhD", "receivedAt": "2026-09-13T10:39:00.189Z" }
           ]
         }
       }
