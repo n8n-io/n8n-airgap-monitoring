@@ -9,7 +9,7 @@ In-cluster URL for N8N_INSTANCE_REPORTING_BASE_URL on the reporting n8n instance
 {{- end }}
 {{- if not .Values.ingress.tls }}
 
-WARNING: ingress.tls is empty. Bearer tokens will cross the network in clear text.
+WARNING: ingress.tls is empty. The read token and the instances' license certificates will cross the network in clear text.
 {{- end }}
 {{- end }}
 

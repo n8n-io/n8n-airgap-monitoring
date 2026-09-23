@@ -23,6 +23,9 @@ Python's standard library only, matching seed-workflow.py.
 
 Usage: backfill-reports.py N8N_URL MONITORING_URL LABEL DAYS
 Env:   N8N_EMAIL, N8N_PASSWORD, N8N_ENCRYPTION_KEY, N8N_MONITORING_WRITE_TOKEN
+
+The reports authenticate with the write token as a bearer header, the same
+credential the demo's n8n instances use.
 """
 
 from __future__ import annotations
@@ -37,7 +40,7 @@ import urllib.error
 import urllib.request
 from http.cookiejar import CookieJar
 
-METRIC = "billableExecutionPerDay"
+METRIC = "billableExecutions"
 
 
 def instance_id_from(encryption_key: str) -> str:

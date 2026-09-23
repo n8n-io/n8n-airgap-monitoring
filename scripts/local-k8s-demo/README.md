@@ -36,7 +36,7 @@ reload, and restart it. The n8n pods are not restarted automatically — after r
 |---|---|---|
 | n8n-1 (`axolotl`) | http://localhost:3003 | `admin@n8n.io` / `hello1234` |
 | n8n-2 (`narwhal`) | http://localhost:3004 | `admin@n8n.io` / `hello1234` |
-| monitoring API | http://localhost:3010 | bearer token `demo-write-token` |
+| monitoring API | http://localhost:3010 | write token `demo-write-token`, read token `demo-read-token` |
 
 The instance owner is provisioned from environment variables
 (`N8N_INSTANCE_OWNER_MANAGED_BY_ENV`), so there is no setup wizard to click through.
@@ -88,9 +88,9 @@ reporter, and writing both would put two rows with the same date in the store.
 The two metrics behave differently, which is worth knowing before concluding something is
 broken:
 
-- `billableExecutionTotal` is a lifetime cumulative count and starts moving within a
+- `billableExecutions` is a lifetime cumulative count and starts moving within a
   minute or two of seeding.
-- `billableExecutionPerDay` covers **yesterday's** completed UTC day. n8n deliberately
+- `billableExecutions` covers **yesterday's** completed UTC day. n8n deliberately
   never reports a partial day, so on a cluster created today this reads 0 no matter how
   many executions run — it turns non-zero after the first UTC midnight. The backfilled
   days sit further back in the history.
@@ -104,8 +104,12 @@ deterministic `batchId` per day.
 
 - The cluster is named `airgap-demo` and uses an isolated kubeconfig at `.kubeconfig`, so
   it never touches `~/.kube/config` and coexists with other local clusters.
-- The write token is a fixed demo value defined at the top of the Makefile. It is shared
-  by both sides of the reporting handshake and must stay in sync.
+- The demo instances have no n8n license, so the service runs in token mode: the write
+  token is a fixed demo value defined at the top of the Makefile, set on the service as
+  `N8N_MONITORING_WRITE_TOKEN` and on each instance as
+  `N8N_INSTANCE_REPORTING_AUTH_TOKEN`, and the two must stay in sync. `make backfill`
+  uses the same token. Both modes are described in
+  [docs/AUTHORIZATION.md](../../docs/AUTHORIZATION.md).
 - Each instance keeps its `N8N_ENCRYPTION_KEY` across reinstalls (the Makefile reuses the
   existing secret), so data on the volume stays decryptable.
 - Drop a `.env` file next to this README to inject extra variables into both n8n pods —

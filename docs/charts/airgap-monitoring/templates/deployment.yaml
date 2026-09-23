@@ -1,4 +1,4 @@
-{{- $secret := required "auth.existingSecret is required: the name of a Secret holding both tokens. The service refuses to start without them." .Values.auth.existingSecret }}
+{{- $secret := required "auth.existingSecret is required: the name of a Secret holding the read token. The service refuses to start without it." .Values.auth.existingSecret }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -58,16 +58,19 @@ spec:
           env:
             - name: N8N_DB_PATH
               value: /data/database.sqlite
-            - name: N8N_MONITORING_WRITE_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $secret }}
-                  key: {{ .Values.auth.writeTokenKey }}
             - name: N8N_MONITORING_READ_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: {{ $secret }}
                   key: {{ .Values.auth.readTokenKey }}
+            # Optional. Present: instances must send it as a bearer token and
+            # certificates are not accepted. Absent: certificate mode.
+            - name: N8N_MONITORING_WRITE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secret }}
+                  key: {{ .Values.auth.writeTokenKey }}
+                  optional: true
             {{- with .Values.nodeOptions }}
             - name: NODE_OPTIONS
               value: {{ . | quote }}

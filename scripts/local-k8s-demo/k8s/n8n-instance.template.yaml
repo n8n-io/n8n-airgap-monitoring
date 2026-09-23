@@ -88,8 +88,9 @@ spec:
               value: "$2b$10$LbD6Xck7zXofxajs5JKaNeQV37h9B8HhMfTNnuYR5l6hIS.T8VVwS"
 
             # Instance reporting. The webhook URL resolves through cluster DNS, so
-            # the traffic never leaves the cluster, and the auth token has to match
-            # the service's N8N_MONITORING_WRITE_TOKEN.
+            # the traffic never leaves the cluster. The demo instances have no
+            # license certificate, so they authenticate with the write token,
+            # which has to match the service's N8N_MONITORING_WRITE_TOKEN.
             - name: N8N_ENABLED_MODULES
               value: 'instance-reporting'
             - name: N8N_INSTANCE_REPORTING_BASE_URL

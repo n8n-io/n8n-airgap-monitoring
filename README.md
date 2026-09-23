@@ -14,20 +14,24 @@ See also the user guide at [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `N8N_MONITORING_WRITE_TOKEN` | yes | — | Bearer token that reporting n8n instances must present on `POST /api/v1/instance-reports`. The service refuses to start without it. |
 | `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/report`. The service refuses to start without it. |
+| `N8N_MONITORING_WRITE_TOKEN` | no | — | Selects the authentication mode of `POST /api/v1/instance-reports`. Set: instances must present it as a bearer token and license certificates are not accepted. Unset: instances authenticate with their license certificate. |
 | `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
+
+A reporting n8n instance authenticates with its n8n license certificate, or,
+if you set a write token, with that token alone. See
+[Reporting usage](#reporting-usage) and
+[docs/AUTHORIZATION.md](docs/AUTHORIZATION.md).
 
 ## Reporting usage
 
 Each n8n instance sets `N8N_INSTANCE_REPORTING_BASE_URL` to this service's base
-URL (the instance appends `/api/v1/instance-reports` itself) and
-`N8N_INSTANCE_REPORTING_AUTH_TOKEN` to the write token, then sends one report
-per day:
+URL (the instance appends `/api/v1/instance-reports` itself), then sends one
+report per day. The report carries the instance's license certificate in
+`licenseCert`, the same string the instance holds in `N8N_LICENSE_CERT`:
 
 ```http
 POST /api/v1/instance-reports
-Authorization: Bearer <N8N_MONITORING_WRITE_TOKEN>
 Content-Type: application/json
 
 {
@@ -43,9 +47,27 @@ Content-Type: application/json
       "value": 15234,
       "date": "2026-03-25"
     }
-  ]
+  ],
+  "licenseCert": "<base64 n8n license certificate>"
 }
 ```
+
+`licenseCert` is the credential. The service checks that the certificate chains
+to the n8n license CA and that its payload signature verifies, then drops it:
+nothing from the certificate is read, stored or exported, and expiry is not
+checked, so an instance whose license has run out still reports. Possession of
+a certificate n8n issued is the whole check. It travels in the body rather than
+a header because a real certificate is about 7 KB and sits too close to the
+8 KB per-header limit of common reverse proxies. See
+[adr/2026-09-21-authenticate-with-license-certificate.md](docs/adr/2026-09-21-authenticate-with-license-certificate.md).
+
+That is certificate mode, the default. If `N8N_MONITORING_WRITE_TOKEN` is set
+on the service, it runs in token mode instead: every instance must send that
+token as `Authorization: Bearer <token>` (set
+`N8N_INSTANCE_REPORTING_AUTH_TOKEN` on the instance), `licenseCert` is left
+out, and a certificate is not accepted as a credential. Both modes are
+described in
+[docs/AUTHORIZATION.md](docs/AUTHORIZATION.md#create-instance-report-route).
 
 `label` is optional, human-readable, and purely cosmetic: `instanceId` remains
 the identity, so relabeling an instance never splits or merges its history. It
@@ -73,8 +95,10 @@ new metrics without a change here. Each entry is one of:
 Values may be counters, percentages or decimals, and may increase or decrease
 between reports.
 
-Responses are `201` with the stored event id, `400` for a malformed report,
-and `401` for a missing or wrong token. Every report is appended as its own
+Responses are `201` with the stored event id, `401` for a missing or invalid
+credential, and `400` for a malformed report. Authentication runs
+before validation, so an unauthenticated caller learns nothing about the
+schema. Every report is appended as its own
 event rather than overwriting the previous one, so usage history stays
 auditable; a reporting UI would read the newest event per instance.
 
@@ -93,19 +117,20 @@ Its shape is:
 ```json
 {
   "data": {
-    "generatedAt": "2026-09-03T14:30:00.000Z",
+    "generatedAt": "2026-09-16T14:30:00.000Z",
     "instances": [
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
         "label": "prod",
-        "firstSeen": "2026-03-20T02:00:00.000Z",
-        "lastReportAt": "2026-03-26T02:00:00.000Z",
+        "n8nVersion": "2.40.1",
+        "firstSeen": "2026-09-12T10:39:00.199Z",
+        "lastReportAt": "2026-09-16T10:39:00.180Z",
         "dataPoints": {
-          "prodExecutions": [
-            { "kind": "daily", "date": "2026-03-25", "value": 15234, "batchId": "a1b2c3d4", "receivedAt": "2026-03-26T02:00:00.000Z" }
-          ],
-          "activeWorkflows": [
-            { "kind": "cumulative", "value": 87, "batchId": "a1b2c3d4", "receivedAt": "2026-03-26T02:00:00.000Z" }
+          "billableExecutions": [
+            { "kind": "cumulative", "value": 230, "batchId": "fQnmKThPEaNxiFdR", "receivedAt": "2026-09-12T10:39:00.199Z" },
+            { "kind": "daily", "date": "2026-09-11", "value": 230, "batchId": "fQnmKThPEaNxiFdR", "receivedAt": "2026-09-12T10:39:00.199Z" },
+            { "kind": "cumulative", "value": 950, "batchId": "vVTe725nPq3nAIhD", "receivedAt": "2026-09-13T10:39:00.189Z" },
+            { "kind": "daily", "date": "2026-09-12", "value": 720, "batchId": "vVTe725nPq3nAIhD", "receivedAt": "2026-09-13T10:39:00.189Z" }
           ]
         }
       }
@@ -145,6 +170,11 @@ For production mode
 
 Run the test cases.
 
+### `pnpm --filter api mock-report`
+
+Prints a schema-valid report body for posting without an n8n instance. See
+[Local development](#local-development).
+
 ## Docker
 
 The [`Dockerfile`](Dockerfile) builds a single image containing the API, so a
@@ -161,14 +191,15 @@ Defaults baked into the image:
 | User | `node` (non-root, uid 1000) |
 | Health | `HEALTHCHECK` polling `/healthz` |
 
-`N8N_MONITORING_WRITE_TOKEN` and `N8N_MONITORING_READ_TOKEN` are deliberately
-**not** set. The service refuses to boot without either, so you must supply both.
+`N8N_MONITORING_READ_TOKEN` is deliberately **not** set. The service refuses to
+boot without it, so you must supply it. `N8N_MONITORING_WRITE_TOKEN` is
+optional, see [Configuration](#configuration).
 
 ### Running the image locally
 
 `docker compose up --build` builds the image and starts it on
-[http://localhost:3001](http://localhost:3001) with a throwaway token and a
-named volume:
+[http://localhost:3001](http://localhost:3001) with throwaway read and write
+tokens and a named volume:
 
 ```sh
 docker compose up --build          # or: docker-compose up --build
@@ -185,6 +216,34 @@ container and its data volume.
 The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
+
+The compose file sets a write token, so the service runs in token mode and a
+report needs that token as a bearer header. See
+[Local development](#local-development).
+
+### Local development
+
+The service runs in token mode when `N8N_MONITORING_WRITE_TOKEN` is set and in
+certificate mode otherwise, so there are two ways to exercise it locally:
+
+- **Without an n8n instance.** Post bodies from `mock-report` with the write
+  token. Against compose:
+
+  ```sh
+  pnpm --filter api --silent mock-report --label demo --days 3 | \
+    curl -sS -X POST localhost:3001/api/v1/instance-reports \
+      -H 'authorization: Bearer dev-write-token' -H 'content-type: application/json' -d @-
+  ```
+
+  Against `pnpm dev`, start it with `N8N_MONITORING_READ_TOKEN` and
+  `N8N_MONITORING_WRITE_TOKEN` set and post to port 3456 the same way. The
+  [Kubernetes demo](#local-kubernetes-demo) and its backfill script use the
+  write token too.
+- **With a licensed n8n instance.** Start the receiver without a write token,
+  point the instance at it via `N8N_INSTANCE_REPORTING_BASE_URL` and set
+  nothing else; the instance brings its certificate. `mock-report` embeds a
+  certificate from `N8N_LICENSE_CERT` when that variable is set, for posting
+  by hand in certificate mode.
 
 ## Local Kubernetes demo
 

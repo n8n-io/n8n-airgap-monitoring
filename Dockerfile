@@ -30,8 +30,11 @@ COPY --from=build --chown=node:node /out ./
 
 ENV NODE_ENV=production
 ENV N8N_DB_PATH=/data/database.sqlite
-# N8N_MONITORING_WRITE_TOKEN is deliberately unset: the API refuses to boot
-# without it rather than defaulting to open access.
+# N8N_MONITORING_READ_TOKEN is deliberately unset: the API refuses to boot
+# without it rather than defaulting to open access. N8N_MONITORING_WRITE_TOKEN
+# is optional and selects the mode: unset, reporting instances authenticate
+# with their n8n license certificate; set, they must present this token as a
+# bearer header and certificates are not accepted.
 
 RUN mkdir -p /data && chown node:node /data
 VOLUME /data

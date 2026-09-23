@@ -3,13 +3,21 @@
 ## n8n instance reports data to airgap-monitoring service
 
 The service exposes a single write endpoint, `POST /api/v1/instance-reports`.
-A self-hosted n8n instance posts one report per day to it; the operator sets the
-same secret on both sides (`N8N_INSTANCE_REPORTING_AUTH_TOKEN` on n8n,
-`N8N_MONITORING_WRITE_TOKEN` here).
+A self-hosted n8n instance posts one report per day to it, carrying its n8n
+license certificate (`N8N_LICENSE_CERT`) in the body as the credential. The
+service verifies that the certificate was issued by the n8n license CA and
+strips it from the body; nothing from it is stored. That is certificate mode.
+When the operator has set `N8N_MONITORING_WRITE_TOKEN` on the service, it runs
+in token mode instead: the instance sends that token as `Authorization: Bearer`
+(`N8N_INSTANCE_REPORTING_AUTH_TOKEN` on n8n), omits the certificate, and the
+certificate step below is replaced by a constant-time token comparison; see
+[AUTHORIZATION.md](AUTHORIZATION.md#create-instance-report-route).
 
-The diagram shows the happy path only. The endpoint also answers `401` for a
-missing or wrong token, `400` for a body the schema rejects, and `409` when an
-already-accepted `batchId` is repeated for the same `instanceId`.
+The diagram shows certificate mode and the happy path only. The endpoint
+also answers `401` for a missing or invalid credential (checked before the
+schema, so an unauthenticated caller learns nothing about it), `400` for a body
+the schema rejects, and `409` when an already-accepted `batchId` is repeated
+for the same `instanceId`.
 
 ```mermaid
 ---
@@ -27,13 +35,14 @@ sequenceDiagram
     N8N->>N8N: findTodaysPending() or createPending(collectDataPoints())
     Note right of N8N: An envelope is immutable. A retry resends the<br/>pending report verbatim under the same batchId<br/>instead of re-measuring.
 
-    N8N->>API: POST /api/v1/instance-reports<br/>Authorization: Bearer N8N_INSTANCE_REPORTING_AUTH_TOKEN<br/>Content-Type: application/json
+    N8N->>API: POST /api/v1/instance-reports<br/>Content-Type: application/json
 
-    Note over N8N,API: Body<br/>instanceId - instanceSettings.instanceId, the reporting identity<br/>batchId - id of the pending report row on the n8n side<br/>label - optional, N8N_INSTANCE_REPORTING_IDENTIFIER, omitted when unset<br/>n8nVersion - N8N_VERSION<br/>dataPoints - non-empty array, each entry either<br/>kind cumulative: name, value<br/>kind daily: name, value, date as YYYY-MM-DD
+    Note over N8N,API: Body<br/>instanceId - instanceSettings.instanceId, the reporting identity<br/>batchId - id of the pending report row on the n8n side<br/>label - optional, N8N_INSTANCE_REPORTING_LABEL, omitted when unset<br/>n8nVersion - N8N_VERSION<br/>dataPoints - non-empty array, each entry either<br/>kind cumulative: name, value<br/>kind daily: name, value, date as YYYY-MM-DD<br/>licenseCert - License.loadCertStr(), the credential; not part of the stored envelope
 
     Note over N8N,API: Example data - what an n8n instance sends today<br/>"dataPoints": [<br/>{<br/>"kind": "cumulative",<br/>"name": "billableExecutions",<br/>"value": 402931<br/>},<br/>{<br/>"kind": "daily",<br/>"name": "billableExecutions",<br/>"value": 15234,<br/>"date": "2026-03-25"<br/>}<br/>]<br/>The cumulative point is the lifetime total, the daily point covers the previous completed UTC day.
 
-    API->>API: bearer-auth: token equals N8N_MONITORING_WRITE_TOKEN
+    API->>API: preValidation (certificate mode): licenseCert chains to the n8n license CA<br/>and its payload signature verifies; then licenseCert is deleted from the body
+    API->>API: schema validation of the remaining body
     API->>DB: INSERT INTO instance_reports<br/>(instanceId, batchId, label, n8nVersion, data, receivedAt)
     Note over DB: Append-only event store.<br/>dataPoints stored as a JSON blob.<br/>UNIQUE (instanceId, batchId).
     DB-->>API: lastInsertRowid
@@ -48,7 +57,6 @@ The two data points every n8n report carries today, for the last completed UTC d
 
 ```http
 POST /api/v1/instance-reports HTTP/1.1
-Authorization: Bearer <shared token>
 Content-Type: application/json
 ```
 
@@ -66,7 +74,8 @@ Content-Type: application/json
       "value": 15234,
       "date": "2026-03-25"
     }
-  ]
+  ],
+  "licenseCert": "<base64 n8n license certificate, about 7 KB>"
 }
 ```
 
@@ -79,9 +88,9 @@ implementation is in
 
 The service exposes a single read endpoint, `GET /api/v1/report`. A customer
 downloads the full usage report, every value every instance ever reported, as
-one JSON file and shares it with n8n. The endpoint is guarded by a second,
-separate secret (`N8N_MONITORING_READ_TOKEN`), so a reporting n8n instance that
-only holds the write token cannot read the fleet's data.
+one JSON file and shares it with n8n. The endpoint is guarded by a secret
+(`N8N_MONITORING_READ_TOKEN`) that reporting n8n instances never hold, so an
+instance that can write reports cannot read the fleet's data.
 
 The report is streamed, one instance at a time, instead of being built in memory
 (see [ADR 9](adr/2026-09-11-stream-instance-report.md)). Peak memory tracks
@@ -90,7 +99,7 @@ N+1 queries and that a DB failure after the first chunk yields a truncated file
 rather than an error status, because the `200` is already on the wire.
 
 The diagram shows the happy path only. The endpoint also answers `401` for a
-missing or wrong token, including the write token.
+missing or wrong token.
 
 ```mermaid
 ---

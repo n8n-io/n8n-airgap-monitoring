@@ -30,20 +30,30 @@ commonLabels: {}
 # Annotations on the pod template, for example sidecar injection.
 podAnnotations: {}
 
-# ----- Authentication tokens -----
-# The service refuses to start without both tokens. Create a Secret with your
-# own tooling (External Secrets Operator, Sealed Secrets, kubectl ...) and
-# name it here; the chart never stores tokens itself.
-#   write token: presented by every n8n instance on POST /api/v1/instance-reports
-#                (set as N8N_INSTANCE_REPORTING_AUTH_TOKEN on the instances).
-#   read token:  required to download the fleet report from GET /api/v1/report.
-#                Hand it out separately; an instance holding only the write
-#                token must not be able to read the fleet's data.
+# ----- Authentication -----
+# Two secrets, both plain strings, in one Secret you create with your own
+# tooling (External Secrets Operator, Sealed Secrets, kubectl ...) and name
+# here; the chart never stores them.
+#
+#   read token:  required. Unlocks the fleet report on GET /api/v1/report; the
+#                service refuses to start without it. Never hand it to an n8n
+#                instance.
+#   write token: optional, and it selects how instances authenticate. Present
+#                in the Secret: every instance must send it as a bearer token
+#                (N8N_INSTANCE_REPORTING_AUTH_TOKEN on the instance), license
+#                certificates are not accepted, and the ingest endpoint needs
+#                no network restriction beyond TLS. Absent: instances
+#                authenticate with their n8n license certificate, which they
+#                already hold, and the endpoint must be reachable only by your
+#                own instances (see README, Network exposure).
+#
+# The service trusts the embedded n8n license CA only; a CA rotation ships as a
+# new image.
 auth:
   existingSecret: ""
-  # Keys inside that Secret holding each token.
-  writeTokenKey: N8N_MONITORING_WRITE_TOKEN
+  # Keys inside that Secret. The write-token key may be absent.
   readTokenKey: N8N_MONITORING_READ_TOKEN
+  writeTokenKey: N8N_MONITORING_WRITE_TOKEN
 
 # ----- Runtime -----
 # Cap the V8 heap below the container memory limit so garbage collection kicks
@@ -97,8 +107,9 @@ service:
 
 # ----- Ingress -----
 # Needed when the reporting n8n instances live outside this cluster. Terminate
-# TLS here: the tokens travel as bearer headers in clear text otherwise, so
-# rendering fails when `enabled` is true and `tls` is empty. Set
+# TLS here: the read token and the instances' license certificates travel in
+# clear text otherwise, so rendering fails when `enabled` is true and `tls` is
+# empty. Set
 # `allowInsecureHttp: true` only if TLS terminates in front of the ingress
 # controller, for example on a cloud load balancer.
 ingress:

@@ -1,4 +1,3 @@
-import bearerAuth from "@fastify/bearer-auth";
 import type { FastifyPluginAsync } from "fastify";
 import { DuplicateBatchError } from "../../../instance-report/instance-report.repository";
 import type { CreateInstanceReport } from "../../../instance-report/instance-report.service";
@@ -27,6 +26,10 @@ const metricSchema = {
   else: { properties: { date: false } },
 };
 
+// The request may also carry `licenseCert`, which is not listed here on
+// purpose: the reportAuth preValidation hook verifies it and removes it from
+// the body before this schema runs, so it is a credential and never part of
+// the envelope that gets stored.
 const instanceReportSchema = {
   type: "object",
   required: ["instanceId", "batchId", "n8nVersion", "dataPoints"],
@@ -65,16 +68,13 @@ const errorResponseSchema = {
 };
 
 const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> => {
-  await fastify.register(bearerAuth, {
-    keys: new Set([fastify.config.writeToken]),
-  });
-
   fastify.post<{ Body: CreateInstanceReport }>(
     "/",
     {
+      preValidation: fastify.authenticateReport,
       schema: {
         body: instanceReportSchema,
-        response: { 201: successResponseSchema, 409: errorResponseSchema },
+        response: { 201: successResponseSchema, 401: errorResponseSchema, 409: errorResponseSchema },
       },
     },
     async (request, reply) => {

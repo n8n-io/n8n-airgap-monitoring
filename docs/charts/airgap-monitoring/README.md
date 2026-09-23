@@ -12,8 +12,8 @@ controller, image registry) are plain values.
 | --- | --- | --- |
 | Deployment | 1 replica, `strategy: Recreate` | Fixed. SQLite on a ReadWriteOnce volume has exactly one writer. |
 | PersistentVolumeClaim | 10Gi, RWO, cluster default StorageClass, kept on uninstall | Holds the SQLite database, the only copy of the fleet's usage history. |
-| Service | ClusterIP on port 3000 | In-cluster URL for reporting instances and for report downloads. |
-| Ingress | Disabled | For instances that report from outside the cluster. |
+| Service | ClusterIP on port 3000 | In-cluster URL for reporting instances and for report downloads. Reachable only inside the cluster. |
+| Ingress | Disabled | For instances that report from outside the cluster. Must stay off the public internet, see [Network exposure](#network-exposure). |
 
 ## Prerequisites
 
@@ -22,7 +22,15 @@ controller, image registry) are plain values.
 - The image `ghcr.io/n8n-io/n8n-airgap-monitoring:<version>` mirrored into a
   registry your cluster can reach. Pin the exact version; `latest` and
   `stable` move.
-- A Secret in the release namespace holding the two bearer tokens.
+- A Secret in the release namespace holding the read token, and optionally a
+  write token. The write token decides how instances authenticate, see the
+  next two points.
+- Either a write token distributed to every reporting n8n instance
+  (`N8N_INSTANCE_REPORTING_AUTH_TOKEN`), or, without one, instances that hold
+  an n8n license certificate (`N8N_LICENSE_CERT`).
+- Without a write token, a network in which only your own n8n instances can
+  reach the service's data ingestion endpoint. See
+  [Network exposure](#network-exposure).
 
 ## Install
 
@@ -35,15 +43,20 @@ controller, image registry) are plain values.
    docker push registry.example.internal/n8n/n8n-airgap-monitoring:$VERSION
    ```
 
-2. Create the token Secret with your usual secrets tooling. Both tokens are
-   required and must differ: every n8n instance holds the write token, and it
-   must not also unlock the fleet report. Shown with `kubectl` for brevity:
+2. Create the token Secret with your usual secrets tooling. The read token is
+   required: it unlocks the fleet report and must never reach an n8n instance.
+   The write token is optional and picks the mode: with it, every instance
+   must present it and license certificates are not accepted, which makes the
+   ingest endpoint safe to expose over TLS; without it, instances authenticate
+   with their license certificate and you must restrict the network instead.
+   Use a different value from the read token. Shown with `kubectl` for
+   brevity:
 
    ```sh
    kubectl create namespace airgap-monitoring
    kubectl -n airgap-monitoring create secret generic airgap-monitoring-tokens \
-     --from-literal=N8N_MONITORING_WRITE_TOKEN="$(openssl rand -hex 32)" \
-     --from-literal=N8N_MONITORING_READ_TOKEN="$(openssl rand -hex 32)"
+     --from-literal=N8N_MONITORING_READ_TOKEN="$(openssl rand -hex 32)" \
+     --from-literal=N8N_MONITORING_WRITE_TOKEN="$(openssl rand -hex 32)"   # optional
    ```
 
 3. Install from a checkout of this repository:
@@ -63,14 +76,58 @@ controller, image registry) are plain values.
    ```sh
    N8N_ENABLED_MODULES=instance-reporting
    N8N_INSTANCE_REPORTING_BASE_URL=http://airgap-monitoring.airgap-monitoring.svc.cluster.local:3000
-   N8N_INSTANCE_REPORTING_AUTH_TOKEN=<write token>
    N8N_INSTANCE_REPORTING_LABEL=<optional human-readable name>
    ```
 
+   If you created a write token, add `N8N_INSTANCE_REPORTING_AUTH_TOKEN=<write token>`
+   on every instance. Without one, the instance authenticates with its license
+   certificate (`N8N_LICENSE_CERT`), which a licensed airgapped instance already
+   has, and nothing else is needed. Both modes are described in
+   [AUTHORIZATION.md](../../AUTHORIZATION.md#create-instance-report-route).
+
    Instances outside the cluster need an Ingress (`ingress.*`) and use its
-   hostname instead. Terminate TLS on it: the tokens travel as bearer headers,
-   so the chart refuses to render an Ingress without `ingress.tls` unless you
-   set `ingress.allowInsecureHttp=true` because TLS terminates further upstream.
+   hostname instead. Read [Network exposure](#network-exposure) before enabling
+   it. Terminate TLS on it: each report carries the instance's license
+   certificate and the report download carries the read token, so the chart
+   refuses to render an Ingress without `ingress.tls` unless you set
+   `ingress.allowInsecureHttp=true` because TLS terminates further upstream.
+   Make sure the ingress controller does not log request bodies.
+
+## Network exposure
+
+This section applies when the Secret holds no write token, so that instances
+authenticate with their license certificate. With a write token, only holders
+of your token can write, and the ingest endpoint needs no network restriction
+beyond TLS.
+
+> **Warning:** Without a write token, the write endpoint,
+> `POST /api/v1/instance-reports`, must only be reachable from your own n8n
+> instances. Never expose it to the public internet. Enforce this on the
+> network level.
+
+In that mode the endpoint accepts any valid n8n license certificate, and every
+n8n customer holds one. The service cannot tell your instances from someone
+else's, so an internet-reachable service lets anyone with an n8n license write
+into your database. If you cannot guarantee the restriction, set a write token
+instead.
+
+The chart's defaults are already private: a ClusterIP Service and no Ingress.
+Instances inside the cluster need nothing more. The chart ships no
+NetworkPolicy, because every environment enforces network boundaries in its
+own way; use whatever you already use for internal services.
+
+For instances outside the cluster, enable the Ingress and make sure that
+`POST /api/v1/instance-reports` is reachable by your n8n instances and by
+nothing else. How you achieve that is up to your environment, for example
+with a private network or a source allowlist on the proxy, but any mechanism
+that gives the same guarantee is fine. The chart takes no position on it.
+
+The read endpoint, `GET /api/v1/report`, is a different case. Its token over
+TLS is enough protection, so it could be reachable from outside. But it runs
+on the same service as the write endpoint. Opening the service to the internet
+so that you can download the report also opens the write endpoint. Either
+download from inside the network, or make sure that only `GET /api/v1/report`
+is reachable from outside.
 
 ## Sizing
 
@@ -124,9 +181,9 @@ restore, create a PVC from the snapshot and install with
 ## Token rotation
 
 The service reads its tokens at start-up, so after changing the Secret restart
-the Deployment. Rotating the write token means every n8n instance must be
-updated too. n8n instances still on the old token get `401` responses until then and retry
-later, so nothing is lost.
+the Deployment. Instances that authenticate with their license certificate are
+unaffected. Instances that use the write token need the new value too; until
+they have it they get `401` responses and retry later, so nothing is lost.
 
 ## Values
 
@@ -138,10 +195,11 @@ The ones you will need. Everything else is documented in
 | `image.repository` | `ghcr.io/n8n-io/n8n-airgap-monitoring` | Your mirror. |
 | `image.tag` | chart `appVersion` | Pin an exact release. |
 | `imagePullSecrets` | `[]` | For a private mirror. |
-| `auth.existingSecret` | `""` | **Required.** Secret holding both tokens. |
-| `auth.writeTokenKey` / `auth.readTokenKey` | `N8N_MONITORING_WRITE_TOKEN` / `N8N_MONITORING_READ_TOKEN` | Keys in that Secret. |
+| `auth.existingSecret` | `""` | **Required.** Secret holding the read token and, optionally, the write token. |
+| `auth.readTokenKey` / `auth.writeTokenKey` | `N8N_MONITORING_READ_TOKEN` / `N8N_MONITORING_WRITE_TOKEN` | Keys in that Secret. A present write-token key puts the service in token mode; an absent one in certificate mode. |
 | `persistence.storageClassName` | cluster default | An SSD-backed class. |
 | `persistence.size` | `10Gi` | |
 | `persistence.existingClaim` | `""` | Reuse a PVC, for example one restored from a snapshot. |
-| `ingress.*` | disabled | Standard `className`, `annotations`, `hosts`, `tls`. `tls` is required when enabled unless `allowInsecureHttp=true`. |
+| `service.type` | `ClusterIP` | Leave at the default. `LoadBalancer` or `NodePort` would make the ingest endpoint reachable from outside the cluster, which without a write token bypasses the safeguards in [Network exposure](#network-exposure). |
+| `ingress.*` | disabled | Standard `className`, `annotations`, `hosts`, `tls`. `tls` is required when enabled unless `allowInsecureHttp=true`. Without a write token, keep the host private, see [Network exposure](#network-exposure). |
 | `resources` | see [Compute](#compute) | |

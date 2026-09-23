@@ -121,24 +121,21 @@ test("streamInstanceReports groups points by name and tags each with its batchId
         batchId: "b1",
         receivedAt: "2026-03-25T02:00:00.000Z",
         dataPoints: [
-          { kind: "daily", name: "billableExecutionPerDay", value: 100, date: "2026-03-24" },
-          { kind: "cumulative", name: "billableExecutionTotal", value: 900000 },
+          { kind: "daily", name: "billableExecutions", value: 100, date: "2026-03-24" },
+          { kind: "cumulative", name: "billableExecutions", value: 900000 },
         ],
       }),
       row({
         batchId: "b2",
         receivedAt: "2026-03-26T02:00:00.000Z",
-        dataPoints: [{ kind: "cumulative", name: "billableExecutionTotal", value: 900110 }],
+        dataPoints: [{ kind: "cumulative", name: "billableExecutions", value: 900110 }],
       }),
     ]),
   );
 
   expect(instance.dataPoints).toEqual({
-    billableExecutionPerDay: [
+    billableExecutions: [
       { kind: "daily", date: "2026-03-24", value: 100, batchId: "b1", receivedAt: "2026-03-25T02:00:00.000Z" },
-    ],
-    // Both cumulative readings survive — no "latest only".
-    billableExecutionTotal: [
       { kind: "cumulative", value: 900000, batchId: "b1", receivedAt: "2026-03-25T02:00:00.000Z" },
       { kind: "cumulative", value: 900110, batchId: "b2", receivedAt: "2026-03-26T02:00:00.000Z" },
     ],

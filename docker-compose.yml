@@ -8,12 +8,15 @@ services:
       # commonly taken by something else already (Grafana, for one).
       - "3001:3000"
     environment:
-      N8N_MONITORING_WRITE_TOKEN: dev-write-token
       N8N_MONITORING_READ_TOKEN: dev-read-token
+      # Setting a write token runs the service in token mode: reports carry it
+      # as a bearer header and license certificates are not accepted. Drop the
+      # line for certificate mode; see docs/AUTHORIZATION.md.
+      N8N_MONITORING_WRITE_TOKEN: dev-write-token
     volumes:
       # A named volume, not a bind mount: the container runs as `node` and a
       # bind-mounted host directory hits uid mismatches.
-      - cmfae-data:/data
+      - airgap-monitoring-data:/data
 
 volumes:
-  cmfae-data:
+  airgap-monitoring-data:
