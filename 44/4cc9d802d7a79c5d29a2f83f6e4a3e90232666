@@ -1,0 +1,31 @@
+docs/AUTHORIZATION.md
+  h_c63dce324dfc7b 235
+docs/USER_GUIDE.md
+  s_21e29daa7cb6d1::t_473db780859ef1 129-131,133
+  h_c63dce324dfc7b 134
+  s_21e29daa7cb6d1::t_52a353b0f081a4 132
+docs/adr/2026-09-21-authenticate-with-license-certificate.md
+  s_21e29daa7cb6d1::t_0eb5630d65fe45 21
+  s_21e29daa7cb6d1::t_2072531e1e7df7 49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "444cc9d802d7a79c5d29a2f83f6e4a3e90232666",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_21e29daa7cb6d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "73eec773-b80b-4396-8da0-1f640e2086ac",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
