@@ -113,7 +113,7 @@ at the end covers what else to watch.
 
 ## 2. Configure your self-hosted n8n instances to report to n8n-airgap-monitoring
 
-In order to enable the `instance-reporting` module, your n8n instance needs to be on version `2.41.1` or higher (or `2.39.6` when using `N8N_INSTANCE_REPORTING_AUTH_TOKEN` for authorization).
+In order to enable the `instance-reporting` module, your n8n instance needs to be on version `2.40.6` or higher (or `2.39.6` when using `N8N_INSTANCE_REPORTING_AUTH_TOKEN` for authorization).
 
 The airgapped instance reporting is an opt-in n8n module. On **every** n8n instance that should report, set:
 
