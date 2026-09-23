@@ -1,0 +1,28 @@
+scripts/local-k8s-demo/README.md
+  h_c63dce324dfc7b 91,93
+scripts/bench/seed.py
+  h_c63dce324dfc7b 31-32
+apps/api/src/instance-report/instance-report.service.test.ts
+  h_c63dce324dfc7b 124-125,131,137,141
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  h_c63dce324dfc7b 98-99,108-109,126,130,147,153,162,214-215
+apps/api/src/test-utils/cli/mock-report.ts
+  h_c63dce324dfc7b 49,62
+apps/api/src/test/integration/license-cert-auth.test.ts
+  h_c63dce324dfc7b 19
+scripts/local-k8s-demo/backfill-reports.py
+  h_c63dce324dfc7b 43
+apps/api/src/plugins/license-auth.e2e.test.ts
+  h_c63dce324dfc7b 1-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "807ef66887ec852e13d7773ade3834ed952797c3",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
