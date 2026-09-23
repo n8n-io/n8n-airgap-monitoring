@@ -28,8 +28,8 @@ def rows(instances: int, days: int):
             total += volume
             data = json.dumps(
                 [
-                    {"kind": "daily", "name": "billableExecutionPerDay", "value": volume, "date": day},
-                    {"kind": "cumulative", "name": "billableExecutionTotal", "value": total},
+                    {"kind": "daily", "name": "billableExecutions", "value": volume, "date": day},
+                    {"kind": "cumulative", "name": "billableExecutions", "value": total},
                 ],
                 separators=(",", ":"),
             )

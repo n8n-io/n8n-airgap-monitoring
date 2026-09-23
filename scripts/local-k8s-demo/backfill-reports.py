@@ -40,7 +40,7 @@ import urllib.error
 import urllib.request
 from http.cookiejar import CookieJar
 
-METRIC = "billableExecutionPerDay"
+METRIC = "billableExecutions"
 
 
 def instance_id_from(encryption_key: str) -> str:

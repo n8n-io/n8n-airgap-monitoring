@@ -88,9 +88,9 @@ reporter, and writing both would put two rows with the same date in the store.
 The two metrics behave differently, which is worth knowing before concluding something is
 broken:
 
-- `billableExecutionTotal` is a lifetime cumulative count and starts moving within a
+- `billableExecutions` is a lifetime cumulative count and starts moving within a
   minute or two of seeding.
-- `billableExecutionPerDay` covers **yesterday's** completed UTC day. n8n deliberately
+- `billableExecutions` covers **yesterday's** completed UTC day. n8n deliberately
   never reports a partial day, so on a cluster created today this reads 0 no matter how
   many executions run — it turns non-zero after the first UTC midnight. The backfilled
   days sit further back in the history.

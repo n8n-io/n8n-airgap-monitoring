@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { build } from "../../test-utils/build-app";
-import { generateMockLicense } from "../../test-utils/mock-license";
+import { build } from "../testing/build-app";
+import { generateMockLicense } from "../testing/mock-license";
 
 // The compose file, the k8s demo and the backfill script all run in token
 // mode, so outside this suite nothing exercises certificate mode against a

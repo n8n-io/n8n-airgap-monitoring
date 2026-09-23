@@ -95,8 +95,8 @@ test("reports each instance's id, first-seen day and full metric history", async
     batchId: "b1",
     label: "prod",
     dataPoints: [
-      { kind: "daily", name: "billableExecutionPerDay", value: 100, date: "2026-03-24" },
-      { kind: "cumulative", name: "billableExecutionTotal", value: 900000 },
+      { kind: "daily", name: "billableExecutions", value: 100, date: "2026-03-24" },
+      { kind: "cumulative", name: "billableExecutions", value: 900000 },
     ],
     receivedAt: "2026-03-25T02:00:00.000Z",
   });
@@ -105,8 +105,8 @@ test("reports each instance's id, first-seen day and full metric history", async
     batchId: "b2",
     label: "prod-renamed",
     dataPoints: [
-      { kind: "daily", name: "billableExecutionPerDay", value: 110, date: "2026-03-25" },
-      { kind: "cumulative", name: "billableExecutionTotal", value: 900110 },
+      { kind: "daily", name: "billableExecutions", value: 110, date: "2026-03-25" },
+      { kind: "cumulative", name: "billableExecutions", value: 900110 },
     ],
     receivedAt: "2026-03-26T02:00:00.000Z",
   });
@@ -123,11 +123,11 @@ test("reports each instance's id, first-seen day and full metric history", async
           lastReportAt: "2026-03-26T02:00:00.000Z",
           label: "prod-renamed",
           dataPoints: {
-            billableExecutionPerDay: [
+            billableExecutions: [
               { kind: "daily", date: "2026-03-24", value: 100, batchId: "b1", receivedAt: "2026-03-25T02:00:00.000Z" },
               { kind: "daily", date: "2026-03-25", value: 110, batchId: "b2", receivedAt: "2026-03-26T02:00:00.000Z" },
             ],
-            billableExecutionTotal: [
+            billableExecutions: [
               { kind: "cumulative", value: 900000, batchId: "b1", receivedAt: "2026-03-25T02:00:00.000Z" },
               { kind: "cumulative", value: 900110, batchId: "b2", receivedAt: "2026-03-26T02:00:00.000Z" },
             ],
@@ -144,13 +144,13 @@ test("keeps conflicting cumulative values from two batchIds on one instance, ins
   await insertRow(app, {
     instanceId: "shared",
     batchId: "from-a",
-    dataPoints: [{ kind: "cumulative", name: "billableExecutionTotal", value: 900000 }],
+    dataPoints: [{ kind: "cumulative", name: "billableExecutions", value: 900000 }],
     receivedAt: "2026-03-25T02:00:00.000Z",
   });
   await insertRow(app, {
     instanceId: "shared",
     batchId: "from-b",
-    dataPoints: [{ kind: "cumulative", name: "billableExecutionTotal", value: 300000 }],
+    dataPoints: [{ kind: "cumulative", name: "billableExecutions", value: 300000 }],
     receivedAt: "2026-03-25T02:05:00.000Z",
   });
 
@@ -159,7 +159,7 @@ test("keeps conflicting cumulative values from two batchIds on one instance, ins
   const { instances } = res.json<UsageReport>().data;
   expect(instances).toHaveLength(1);
   expect(instances[0].dataPoints).toEqual({
-    billableExecutionTotal: [
+    billableExecutions: [
       { kind: "cumulative", value: 900000, batchId: "from-a", receivedAt: "2026-03-25T02:00:00.000Z" },
       { kind: "cumulative", value: 300000, batchId: "from-b", receivedAt: "2026-03-25T02:05:00.000Z" },
     ],
@@ -211,8 +211,8 @@ test("streams a body that parses as valid JSON across multiple instances", async
       instanceId,
       batchId: `${instanceId}-b1`,
       dataPoints: [
-        { kind: "daily", name: "billableExecutionPerDay", value: 10, date: "2026-03-24" },
-        { kind: "cumulative", name: "billableExecutionTotal", value: 100 },
+        { kind: "daily", name: "billableExecutions", value: 10, date: "2026-03-24" },
+        { kind: "cumulative", name: "billableExecutions", value: 100 },
       ],
       receivedAt: "2026-03-25T02:00:00.000Z",
     });

@@ -46,7 +46,7 @@ if (values.label !== undefined && (values.label.length < 1 || values.label.lengt
 const yesterday = Date.now() - DAY_MS;
 const dailyPoints = Array.from({ length: days }, (_, offset) => ({
   kind: "daily",
-  name: "billableExecutionPerDay",
+  name: "billableExecutions",
   value: 1000 + Math.floor(Math.random() * 1000),
   date: new Date(yesterday - offset * DAY_MS).toISOString().slice(0, 10),
 })).reverse();
@@ -59,7 +59,7 @@ const report = {
   batchId: randomUUID(),
   ...(values.label ? { label: values.label } : {}),
   n8nVersion: "0.0.0-mock",
-  dataPoints: [{ kind: "cumulative", name: "billableExecutionTotal", value: 10_000 + days * 1500 }, ...dailyPoints],
+  dataPoints: [{ kind: "cumulative", name: "billableExecutions", value: 10_000 + days * 1500 }, ...dailyPoints],
   ...(licenseCert ? { licenseCert } : {}),
 };
 
