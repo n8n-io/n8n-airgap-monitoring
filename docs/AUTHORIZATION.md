@@ -232,9 +232,7 @@ and nothing about the presented value. There are no users, scopes or expiry.
 License certificates are not a credential in this mode.
 
 An n8n instance sends the token when `N8N_INSTANCE_REPORTING_AUTH_TOKEN` is set
-on it, and then leaves `licenseCert` out of the body. This is the way to report
-from an instance that has no license certificate, and the credential the local
-tooling in this repository uses.
+on it, and then leaves `licenseCert` out of the body.
 
 Unlike the certificate, the token is a secret shared between the operator and
 their own instances, so it proves "belongs to this operator" rather than

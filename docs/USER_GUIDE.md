@@ -126,14 +126,12 @@ N8N_INSTANCE_REPORTING_LABEL=<optional label that will be included in reports>
 
 Notes:
 
-- The instance authenticates with its license certificate, the value of
-  `N8N_LICENSE_CERT`. It must be a certificate issued by n8n. An expired
-  certificate is still accepted. An instance without a license certificate
-  (community edition) does not report; n8n logs a warning instead.
-- If you set `N8N_MONITORING_WRITE_TOKEN` on the service, every instance must
-  send that value as `N8N_INSTANCE_REPORTING_AUTH_TOKEN`; the service then
-  does not accept license certificates. This is also how an instance without
-  a license certificate can report.
+- How the instance authenticates depends on whether you set a write token on
+  the service:
+  - **With a write token**, set `N8N_INSTANCE_REPORTING_AUTH_TOKEN` to the
+    same value on every instance. n8n sends it as a bearer token.
+  - **Without a write token**, n8n sends its license certificate, the value of
+    `N8N_LICENSE_CERT`, which a licensed instance already has.
 - `N8N_INSTANCE_REPORTING_BASE_URL` is the origin only. The n8n instance will append
   the path of the reporting endpoint itself.
 - If `N8N_ENABLED_MODULES` already lists other modules, add
