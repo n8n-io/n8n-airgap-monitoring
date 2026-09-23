@@ -1,0 +1,14 @@
+turbo.json
+  h_c63dce324dfc7b 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c1c8fb9e4e2e480cd0a69e0887e1779c457c8689",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
