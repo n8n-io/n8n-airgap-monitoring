@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { build } from "../testing/build-app";
+import { build } from "../test-utils/build-app";
 import { DuplicateBatchError, type InstanceReport, InstanceReportRepository } from "./instance-report.repository";
 
 const event: InstanceReport = {

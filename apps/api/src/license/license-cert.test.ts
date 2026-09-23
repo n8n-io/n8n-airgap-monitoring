@@ -7,7 +7,7 @@ import {
   generateMockLicenseWithForgedIssuer,
   generateMockLicenseWithTamperedPayload,
   TEST_CA,
-} from "../testing/mock-license";
+} from "../test-utils/mock-license";
 import { N8N_LICENSE_ISSUER_CERT_PEM } from "./issuer-cert";
 import { LicenseCertError, verifyLicenseCert } from "./license-cert";
 

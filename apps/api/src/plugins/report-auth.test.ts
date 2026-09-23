@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { build } from "../testing/build-app";
-import { generateMockLicense } from "../testing/mock-license";
+import { build } from "../test-utils/build-app";
+import { generateMockLicense } from "../test-utils/mock-license";
 
 const URL = "/api/v1/instance-reports";
 

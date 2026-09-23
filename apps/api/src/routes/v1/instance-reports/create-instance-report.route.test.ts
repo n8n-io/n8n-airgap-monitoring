@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { build } from "../../../testing/build-app";
+import { build } from "../../../test-utils/build-app";
 import {
   generateMockLicense,
   generateMockLicenseWithForgedIssuer,
   generateMockLicenseWithTamperedPayload,
-} from "../../../testing/mock-license";
+} from "../../../test-utils/mock-license";
 
 const URL = "/api/v1/instance-reports";
 

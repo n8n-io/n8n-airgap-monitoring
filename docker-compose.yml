@@ -16,7 +16,7 @@ services:
     volumes:
       # A named volume, not a bind mount: the container runs as `node` and a
       # bind-mounted host directory hits uid mismatches.
-      - cmfae-data:/data
+      - airgap-monitoring-data:/data
 
 volumes:
-  cmfae-data:
+  airgap-monitoring-data:

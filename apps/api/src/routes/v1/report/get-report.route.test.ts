@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest";
 import type { Metric, UsageReport } from "../../../instance-report/instance-report.service";
-import { build } from "../../../testing/build-app";
+import { build } from "../../../test-utils/build-app";
 
 const URL = "/api/v1/report";
 const READ = { authorization: "Bearer test-read-token" };

@@ -2,7 +2,7 @@ import Fastify from "fastify";
 import fp from "fastify-plugin";
 import { expect, onTestFinished, test } from "vitest";
 import app from "../app";
-import { build } from "../testing/build-app";
+import { build } from "../test-utils/build-app";
 
 test("opens the database in WAL mode with synchronous left at FULL", async () => {
   const { dataSource } = await build();
