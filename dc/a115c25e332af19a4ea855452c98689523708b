@@ -1,0 +1,48 @@
+apps/api/src/plugins/db.test.ts
+  s_fbe8b71500f482::t_3c216877fc9cf3 5
+apps/api/src/instance-report/instance-report.repository.test.ts
+  s_fbe8b71500f482::t_3c216877fc9cf3 2
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  s_fbe8b71500f482::t_3c216877fc9cf3 3
+docs/adr/2026-08-18-colocate-tests-with-implementation.md
+  s_fbe8b71500f482::t_3c216877fc9cf3 15,21-22
+apps/api/src/license/license-cert.test.ts
+  s_fbe8b71500f482::t_3c216877fc9cf3 10
+apps/api/src/test/integration/license-cert-auth.test.ts
+  s_fbe8b71500f482::t_3c216877fc9cf3 1-47
+apps/api/package.json
+  s_fbe8b71500f482::t_3c216877fc9cf3 18
+docs/adr/2026-08-26-sqlite-with-synchronous-writes.md
+  s_fbe8b71500f482::t_3c216877fc9cf3 70
+vitest.config.mts
+  s_fbe8b71500f482::t_3c216877fc9cf3 17
+apps/api/tsconfig.build.json
+  s_fbe8b71500f482::t_3c216877fc9cf3 5
+docker-compose.yml
+  s_fbe8b71500f482::t_e1e4d8cf9b91f3 19,22
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_fbe8b71500f482::t_3c216877fc9cf3 2,7
+apps/api/src/plugins/report-auth.test.ts
+  s_fbe8b71500f482::t_3c216877fc9cf3 2-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dca115c25e332af19a4ea855452c98689523708b",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_fbe8b71500f482": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96522817-414e-4d03-9bd9-3834f35ca04d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
