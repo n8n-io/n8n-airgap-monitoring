@@ -26,7 +26,7 @@ is shared with n8n, which supports us in providing a smooth experience for airga
 The n8n-airgap-monitoring service is hosted as one container with one volume.
 It is deliberately simple in order to make it easy to use.
 
-Reporting instances authenticate in one of two ways, and you choose which when
+Reporting n8n instances authenticate in one of two ways, and you choose which when
 you deploy the service. Either they present a write token that you generate
 and distribute to them, or they present their n8n license certificate. The
 certificate proves "licensed by n8n", not "belongs to you", so if you choose
@@ -113,7 +113,7 @@ at the end covers what else to watch.
 
 ## 2. Configure your self-hosted n8n instances to report to n8n-airgap-monitoring
 
-In order to enable the `instance-reporting` module, your n8n instance needs to be on a version whose instance-reporting module sends the license certificate. Check the n8n release notes for the exact version.
+In order to enable the `instance-reporting` module, your n8n instance needs to be on version `2.39.6` or higher.
 
 The airgapped instance reporting is an opt-in n8n module. On **every** n8n instance that should report, set:
 
