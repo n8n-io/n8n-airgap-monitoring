@@ -1,0 +1,19 @@
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  s_2e76ef356aaa43::t_9506a352c65adf 129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a313c54459f71e4e4c9099d4fea7e4ab0703d0cc",
+  "prompts": {},
+  "sessions": {
+    "s_2e76ef356aaa43": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a8f08b65-8f89-4ed1-b2b9-ad265944d44e",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
