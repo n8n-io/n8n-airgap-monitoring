@@ -125,10 +125,8 @@ test("reports each instance's id, first-seen day and full metric history", async
           dataPoints: {
             billableExecutions: [
               { kind: "daily", date: "2026-03-24", value: 100, batchId: "b1", receivedAt: "2026-03-25T02:00:00.000Z" },
-              { kind: "daily", date: "2026-03-25", value: 110, batchId: "b2", receivedAt: "2026-03-26T02:00:00.000Z" },
-            ],
-            billableExecutions: [
               { kind: "cumulative", value: 900000, batchId: "b1", receivedAt: "2026-03-25T02:00:00.000Z" },
+              { kind: "daily", date: "2026-03-25", value: 110, batchId: "b2", receivedAt: "2026-03-26T02:00:00.000Z" },
               { kind: "cumulative", value: 900110, batchId: "b2", receivedAt: "2026-03-26T02:00:00.000Z" },
             ],
           },

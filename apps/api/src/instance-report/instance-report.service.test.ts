@@ -136,9 +136,6 @@ test("streamInstanceReports groups points by name and tags each with its batchId
   expect(instance.dataPoints).toEqual({
     billableExecutions: [
       { kind: "daily", date: "2026-03-24", value: 100, batchId: "b1", receivedAt: "2026-03-25T02:00:00.000Z" },
-    ],
-    // Both cumulative readings survive — no "latest only".
-    billableExecutions: [
       { kind: "cumulative", value: 900000, batchId: "b1", receivedAt: "2026-03-25T02:00:00.000Z" },
       { kind: "cumulative", value: 900110, batchId: "b2", receivedAt: "2026-03-26T02:00:00.000Z" },
     ],
