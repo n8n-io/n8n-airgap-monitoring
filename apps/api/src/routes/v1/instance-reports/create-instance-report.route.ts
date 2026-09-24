@@ -55,11 +55,12 @@ export const instanceReportSchema = {
 // A test pins it, so a larger schema limit also needs a larger body limit.
 const MAX_SCHEMA_VALID_REPORT_BYTES = 180 * 1024;
 
-// See ADR 11.
-export const REPORT_BODY_LIMIT_BYTES = 256 * 1024;
+// A real license certificate is 7,334 bytes. This is approx. 10 times that,
+// so that the body limit is a round 256 KiB.
+export const LICENSE_CERT_BUDGET_BYTES = 76 * 1024;
 
-// The rest is for the license certificate: 76 KiB, approx. 10 times the real 7,334 bytes.
-export const LICENSE_CERT_BUDGET_BYTES = REPORT_BODY_LIMIT_BYTES - MAX_SCHEMA_VALID_REPORT_BYTES;
+// See ADR 11.
+export const REPORT_BODY_LIMIT_BYTES = MAX_SCHEMA_VALID_REPORT_BYTES + LICENSE_CERT_BUDGET_BYTES;
 
 const successResponseSchema = {
   type: "object",

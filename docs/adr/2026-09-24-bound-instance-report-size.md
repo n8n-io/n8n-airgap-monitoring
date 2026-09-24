@@ -18,12 +18,13 @@ Today a report has 1 metric. After 30 days offline, it has 30 daily points and 1
 
 ## Decision
 
-We bound each field in the schema and set a route `bodyLimit` of 256 KiB (262,144 bytes). The two follow one rule:
+We bound each field in the schema and derive the route `bodyLimit` from two sizes:
 
 **`bodyLimit` = the largest report that passes the schema, serialized with `JSON.stringify` + a budget for the license certificate.**
 
 - The largest schema-valid report is 183,960 bytes, with keys and JSON syntax. We round it up to 180 KiB.
-- The rest, 76 KiB, is the certificate budget: approx. 10 times the real size of 7,334 bytes.
+- The certificate budget is 76 KiB: approx. 10 times the real size of 7,334 bytes, so that the sum is a round number.
+- Thus `bodyLimit` is 256 KiB (262,144 bytes).
 
 The budget is a limit only when a report is at every schema limit at once. A real report after 30 days offline is approx. 2.6 KB, so with a real report the certificate can grow to approx. 250 KB before the report gets 413.
 
