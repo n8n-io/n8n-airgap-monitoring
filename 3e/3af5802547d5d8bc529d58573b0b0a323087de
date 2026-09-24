@@ -1,0 +1,34 @@
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_affe36b19d7a90::t_09326349e81d2b 265-278
+  s_affe36b19d7a90::t_267cd89095e27a 294-309,377,379-390,392-397,401-417,419-423
+  s_affe36b19d7a90::t_56554b2896c87c 8-12,378,391,398-400,418
+docs/USER_GUIDE.md
+  s_affe36b19d7a90::t_c9b1e338d9646d 64,242
+  s_affe36b19d7a90::t_f909b792aa5c2f 65,243
+docs/charts/airgap-monitoring/README.md
+  s_affe36b19d7a90::t_c9b1e338d9646d 126-128
+docs/adr/2026-09-24-bound-instance-report-size.md
+  s_affe36b19d7a90::t_f909b792aa5c2f 21,23-30,33,46,52-53,63,65
+  s_affe36b19d7a90::t_945d276f962949 1-20,22,31-32,34-45,47-51,54-62,64,66
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.ts
+  s_affe36b19d7a90::t_7a37c4804d4161 43-44
+  s_affe36b19d7a90::t_77d32e75514aca 17,34,39-40,42,48,63,86,90-96
+  s_affe36b19d7a90::t_415336ef73cbe8 18
+  s_affe36b19d7a90::t_56554b2896c87c 54-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "3e3af5802547d5d8bc529d58573b0b0a323087de",
+  "prompts": {},
+  "sessions": {
+    "s_affe36b19d7a90": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e1a9349b-8b95-4638-8c97-0001273d21ad",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
