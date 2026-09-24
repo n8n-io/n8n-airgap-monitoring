@@ -1,0 +1,21 @@
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.ts
+  s_affe36b19d7a90::t_8521b9ba1c43c7 58-60,62-63
+docs/adr/2026-09-24-bound-instance-report-size.md
+  s_affe36b19d7a90::t_e50d9cb398c390 21,26-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "3ddc0c2445352646f9959fa8c0bdb04803898df0",
+  "prompts": {},
+  "sessions": {
+    "s_affe36b19d7a90": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e1a9349b-8b95-4638-8c97-0001273d21ad",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
