@@ -1,0 +1,38 @@
+docs/adr/2026-09-24-bound-instance-report-size.md
+  s_affe36b19d7a90::t_4350b25e88a0e2 28
+  s_affe36b19d7a90::t_f909b792aa5c2f 23-25,27,29,45,52,64
+  s_affe36b19d7a90::t_945d276f962949 1-20,22,30-31,33-44,46-50,53-61,63,65
+  s_affe36b19d7a90::t_5f1d782e879ca2 21,26,32,51,62
+docs/USER_GUIDE.md
+  s_affe36b19d7a90::t_5f1d782e879ca2 65,243
+  s_affe36b19d7a90::t_c9b1e338d9646d 64,242
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_affe36b19d7a90::t_56554b2896c87c 8-12,378,391,398-400,418
+  s_affe36b19d7a90::t_267cd89095e27a 294-309,377,379-390,392-397,401-417,419-423
+  s_affe36b19d7a90::t_09326349e81d2b 265-278
+docs/charts/airgap-monitoring/README.md
+  s_affe36b19d7a90::t_5f1d782e879ca2 125
+  s_affe36b19d7a90::t_c9b1e338d9646d 126-128
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.ts
+  s_affe36b19d7a90::t_7a37c4804d4161 43-44
+  s_affe36b19d7a90::t_56554b2896c87c 54-58
+  s_affe36b19d7a90::t_415336ef73cbe8 18
+  s_affe36b19d7a90::t_77d32e75514aca 17,34,39-40,42,48,63,86,90-96
+  s_affe36b19d7a90::t_5f1d782e879ca2 59-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "25d07e793fb6313e185337de3283dc93a3aad66e",
+  "prompts": {},
+  "sessions": {
+    "s_affe36b19d7a90": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e1a9349b-8b95-4638-8c97-0001273d21ad",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": null
+    }
+  }
+}
