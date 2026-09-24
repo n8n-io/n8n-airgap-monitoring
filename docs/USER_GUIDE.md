@@ -61,8 +61,7 @@ In order to run, the service needs:
   the report. If that path leaves a trusted network, terminate TLS in front of
   the service: the tokens travel as bearer headers and, without a write token,
   each report carries the instance's license certificate. Make sure any proxy
-  in front of the service does not log request bodies and accepts request
-  bodies of at least 256 KiB. If you run without a
+  in front of the service does not log request bodies. If you run without a
   write token, the path must also be private; see
   [Network exposure](#network-exposure).
 
