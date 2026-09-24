@@ -238,7 +238,8 @@ for these status codes:
 | --- | --- |
 | `201` | Report stored. |
 | `401` | Missing or invalid credential. With a write token set on the service, every instance must set `N8N_INSTANCE_REPORTING_AUTH_TOKEN` to the same value; `Missing write token` means the instance sent none, `BAD_TOKEN` in the log means it differs. Without a write token, check `N8N_LICENSE_CERT` on the instance: it must be a certificate issued by n8n. The service log carries a reason code (`PARSE_FAILED`, `INVALID_ISSUER`, `DECRYPTION_FAILED`, `SIGNATURE_INVALID`) and nothing else about the certificate. |
-| `400` | Malformed report. Should not happen with a supported n8n version. Report it to n8n. |
+| `400` | Malformed report, or a field is over its limit, for example more than 1000 data points. The message names the field. Should not happen with a supported n8n version. Report it to n8n. |
+| `413` | The request body is larger than 256 KiB. Should not happen with a supported n8n version. If the service log does not show the request at all, a proxy in front of the service rejected it: its body size limit must be at least 256 KiB. The limits are explained in [ADR 11](adr/2026-09-24-bound-instance-report-size.md). |
 | `409` | The exact same report (same instance id and `batchId`) was sent twice. n8n instances never do this on their own, so it points to a replayed request or a cloned instance database. Nothing is stored. |
 
 **Is the storage healthy?** Watch free space on the volume. Usage grows by about

@@ -14,7 +14,8 @@ const metricSchema = {
   additionalProperties: false,
   properties: {
     kind: { enum: ["cumulative", "daily"] },
-    name: { type: "string", minLength: 1 },
+    // ASCII only, so maxLength in characters is also a bound in bytes.
+    name: { type: "string", minLength: 1, maxLength: 100, pattern: "^[A-Za-z0-9_.-]+$" },
     value: { type: "number" },
     // The UTC calendar day this value covers. `format: date` rejects
     // non-calendar days (e.g. 2026-02-30) as well as malformed strings.
@@ -30,24 +31,36 @@ const metricSchema = {
 // purpose: the reportAuth preValidation hook verifies it and removes it from
 // the body before this schema runs, so it is a credential and never part of
 // the envelope that gets stored.
-const instanceReportSchema = {
+export const instanceReportSchema = {
   type: "object",
   required: ["instanceId", "batchId", "n8nVersion", "dataPoints"],
   additionalProperties: false,
   properties: {
-    instanceId: { type: "string", minLength: 1 },
-    batchId: { type: "string", minLength: 1 },
+    instanceId: { type: "string", minLength: 1, maxLength: 256 },
+    batchId: { type: "string", minLength: 1, maxLength: 128 },
     label: { type: "string", minLength: 1, maxLength: 200 },
-    n8nVersion: { type: "string", minLength: 1 },
-    // Metric names are chosen by the reporting instance, so only the
-    // envelope (cumulative vs daily) is pinned down.
+    n8nVersion: { type: "string", minLength: 1, maxLength: 64 },
+    // Metric names are chosen by the reporting instance, so only their
+    // format and the envelope (cumulative vs daily) are pinned down.
     dataPoints: {
       type: "array",
       minItems: 1,
+      maxItems: 1000,
       items: metricSchema,
     },
   },
 };
+
+// The largest report the schema accepts is 183,960 bytes, rounded up to KiB.
+// A test pins it, so a larger schema limit also needs a larger body limit.
+const MAX_SCHEMA_VALID_REPORT_BYTES = 180 * 1024;
+
+// A real license certificate is 7,334 bytes. This is approx. 10 times that,
+// so that the body limit is a round 256 KiB.
+export const LICENSE_CERT_BUDGET_BYTES = 76 * 1024;
+
+// See ADR 11.
+export const REPORT_BODY_LIMIT_BYTES = MAX_SCHEMA_VALID_REPORT_BYTES + LICENSE_CERT_BUDGET_BYTES;
 
 const successResponseSchema = {
   type: "object",
@@ -71,10 +84,17 @@ const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> 
   fastify.post<{ Body: CreateInstanceReport }>(
     "/",
     {
+      bodyLimit: REPORT_BODY_LIMIT_BYTES,
       preValidation: fastify.authenticateReport,
       schema: {
         body: instanceReportSchema,
-        response: { 201: successResponseSchema, 401: errorResponseSchema, 409: errorResponseSchema },
+        response: {
+          201: successResponseSchema,
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          409: errorResponseSchema,
+          413: errorResponseSchema,
+        },
       },
     },
     async (request, reply) => {

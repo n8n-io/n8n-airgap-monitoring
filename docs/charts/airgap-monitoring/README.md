@@ -122,6 +122,10 @@ nothing else. How you achieve that is up to your environment, for example
 with a private network or a source allowlist on the proxy, but any mechanism
 that gives the same guarantee is fine. The chart takes no position on it.
 
+The ingress controller must accept request bodies of at least 256 KiB, the
+limit of the service itself. The default of the Kubernetes nginx ingress is
+1 MiB, so it needs no change.
+
 The read endpoint, `GET /api/v1/report`, is a different case. Its token over
 TLS is enough protection, so it could be reachable from outside. But it runs
 on the same service as the write endpoint. Opening the service to the internet

@@ -5,6 +5,11 @@ import {
   generateMockLicenseWithForgedIssuer,
   generateMockLicenseWithTamperedPayload,
 } from "../../../test-utils/mock-license";
+import {
+  instanceReportSchema,
+  LICENSE_CERT_BUDGET_BYTES,
+  REPORT_BODY_LIMIT_BYTES,
+} from "./create-instance-report.route";
 
 const URL = "/api/v1/instance-reports";
 
@@ -257,6 +262,20 @@ test("rejects malformed instance reports", async () => {
     "empty label": { ...validReport, label: "" },
     "non-string label": { ...validReport, label: 42 },
     "oversized label": { ...validReport, label: "x".repeat(201) },
+    "oversized instanceId": { ...validReport, instanceId: "x".repeat(257) },
+    "oversized batchId": { ...validReport, batchId: "x".repeat(129) },
+    "oversized n8nVersion": { ...validReport, n8nVersion: "x".repeat(65) },
+    "more than 1000 data points": {
+      ...validReport,
+      dataPoints: Array.from({ length: 1001 }, () => ({ kind: "cumulative", name: "x", value: 1 })),
+    },
+    "oversized metric name": { ...validReport, dataPoints: [{ kind: "cumulative", name: "x".repeat(101), value: 1 }] },
+    // The pattern keeps a name at one byte per character, which the body limit relies on.
+    "metric name with a space": { ...validReport, dataPoints: [{ kind: "cumulative", name: "a b", value: 1 }] },
+    "metric name with a non-ASCII character": {
+      ...validReport,
+      dataPoints: [{ kind: "cumulative", name: "ausführungen", value: 1 }],
+    },
   };
 
   for (const [description, payload] of Object.entries(invalidPayloads)) {
@@ -269,6 +288,22 @@ test("rejects malformed instance reports", async () => {
     expect(res.statusCode, `expected 400 for ${description}`).toBe(400);
   }
 
+  expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
+});
+
+// Fastify checks the size while it reads the body, so an oversized body is
+// never parsed and gets 413 before it can get 401 or 400.
+test("rejects a body over the size limit before authentication and validation", async () => {
+  const app = await build();
+
+  const res = await app.inject({
+    method: "POST",
+    url: URL,
+    payload: { instanceId: "x".repeat(REPORT_BODY_LIMIT_BYTES) },
+  });
+
+  expect(res.statusCode).toBe(413);
+  expect(res.json()).toMatchObject({ statusCode: 413, error: "Payload Too Large", message: expect.any(String) });
   expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
 });
 
@@ -338,6 +373,54 @@ describe("in token mode", () => {
     const [row] = (await app.dataSource.query("SELECT * FROM instance_reports")) as Record<string, unknown>[];
     expect(JSON.stringify(row)).not.toContain(licenseCert);
     expect(Object.keys(row)).not.toContain("licenseCert");
+  });
+
+  test("accepts 30 metrics with 30 daily and 1 cumulative point each and a certificate at its budget", async () => {
+    const app = await buildInTokenMode();
+
+    const days = Array.from({ length: 30 }, (_, day) => `2026-03-${String(day + 1).padStart(2, "0")}`);
+    const dataPoints = Array.from({ length: 30 }, (_, index) => `metric${index}`.padEnd(100, "x")).flatMap((name) => [
+      { kind: "cumulative", name, value: 123456789 },
+      ...days.map((date) => ({ kind: "daily", name, value: 123456789, date })),
+    ]);
+
+    const res = await app.inject({
+      method: "POST",
+      url: URL,
+      headers: bearer("test-write-token"),
+      payload: { ...validReport, dataPoints, licenseCert: "x".repeat(LICENSE_CERT_BUDGET_BYTES) },
+    });
+
+    expect(res.statusCode).toBe(201);
+  });
+
+  // The rule behind REPORT_BODY_LIMIT_BYTES: a report at every schema limit at
+  // once still fits together with a certificate at its budget. The limits come
+  // from the schema, so a larger schema limit without a larger body limit fails here.
+  test("accepts a report at every schema limit together with a certificate at its budget", async () => {
+    const app = await buildInTokenMode();
+
+    const { properties } = instanceReportSchema;
+    // JSON.stringify writes a control character as a 6-byte escape, the most any character takes.
+    const widest = (length: number) => "\u0001".repeat(length);
+    const report = {
+      instanceId: widest(properties.instanceId.maxLength),
+      batchId: widest(properties.batchId.maxLength),
+      label: widest(properties.label.maxLength),
+      n8nVersion: widest(properties.n8nVersion.maxLength),
+      // A daily point is the longer kind, and -Number.MAX_VALUE is the longest number JSON.stringify writes.
+      dataPoints: Array.from({ length: properties.dataPoints.maxItems }, () => ({
+        kind: "daily",
+        name: "x".repeat(properties.dataPoints.items.properties.name.maxLength),
+        value: -Number.MAX_VALUE,
+        date: "2026-03-25",
+      })),
+      licenseCert: "x".repeat(LICENSE_CERT_BUDGET_BYTES),
+    };
+
+    const res = await app.inject({ method: "POST", url: URL, headers: bearer("test-write-token"), payload: report });
+
+    expect(res.statusCode).toBe(201);
   });
 });
 
