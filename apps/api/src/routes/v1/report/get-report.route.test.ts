@@ -68,7 +68,7 @@ test("serves an empty report stamped with the generation time when nothing has b
 
     expect(res.statusCode).toBe(200);
     expect(res.json<UsageReport>()).toEqual({
-      data: { generatedAt: "2026-09-03T14:30:00.000Z", filters: "", instances: [] },
+      data: { generatedAt: "2026-09-03T14:30:00.000Z", instances: [] },
     });
   } finally {
     vi.useRealTimers();
@@ -254,33 +254,32 @@ describe("filtering by instanceId", () => {
     expect(data?.filters).toBe("instanceId=b");
   });
 
-  test("narrows to a repeated instanceId, listed sorted in filters", async () => {
+  test("narrows to comma-separated ids, listed sorted in filters", async () => {
     const app = await build();
     await seedInstances(app, ["a", "b", "c"]);
 
-    const { data } = await getReport(app, "?instanceId=c&instanceId=a");
+    const { data } = await getReport(app, "?instanceId=c,a");
 
     expect(data?.instances.map((i) => i.instanceId)).toEqual(["a", "c"]);
-    expect(data?.filters).toBe("instanceId=a&instanceId=c");
+    expect(data?.filters).toBe("instanceId=a,c");
   });
 
-  test("lists a duplicated value once", async () => {
+  test("trims ids and drops empty and duplicated ones", async () => {
     const app = await build();
-    await seedInstances(app, ["a", "b"]);
+    await seedInstances(app, ["a", "b", "c"]);
 
-    const { data } = await getReport(app, "?instanceId=a&instanceId=a");
+    const { data } = await getReport(app, `?instanceId=${encodeURIComponent(" b ,, a,b,")}`);
 
-    expect(data?.instances.map((i) => i.instanceId)).toEqual(["a"]);
-    expect(data?.filters).toBe("instanceId=a");
+    expect(data?.instances.map((i) => i.instanceId)).toEqual(["a", "b"]);
+    expect(data?.filters).toBe("instanceId=a,b");
   });
 
-  test("does not split a value on commas", async () => {
+  test("rejects a repeated instanceId parameter", async () => {
     const app = await build();
-    await seedInstances(app, ["a", "b", "a,b"]);
 
-    const { data } = await getReport(app, "?instanceId=a,b");
+    const { res } = await getReport(app, "?instanceId=a&instanceId=b");
 
-    expect(data?.instances.map((i) => i.instanceId)).toEqual(["a,b"]);
+    expect(res.statusCode).toBe(400);
   });
 
   test("serves an empty report for an unknown instanceId", async () => {
@@ -297,50 +296,86 @@ describe("filtering by instanceId", () => {
   test("encodes filters so they can be replayed as the query string", async () => {
     const app = await build();
     const awkward = "prod a&b=c/ü";
-    await seedInstances(app, [awkward, "other"]);
+    await seedInstances(app, [awkward, "other", "third"]);
 
-    const first = await getReport(app, `?instanceId=${encodeURIComponent(awkward)}`);
+    const first = await getReport(app, `?instanceId=${encodeURIComponent(awkward)},third`);
     const replayed = await getReport(app, `?${first.data?.filters}`);
 
-    expect(first.data?.instances.map((i) => i.instanceId)).toEqual([awkward]);
-    expect(replayed.data?.instances.map((i) => i.instanceId)).toEqual([awkward]);
+    expect(first.data?.instances.map((i) => i.instanceId)).toEqual([awkward, "third"]);
+    expect(replayed.data?.instances.map((i) => i.instanceId)).toEqual([awkward, "third"]);
     expect(replayed.data?.filters).toBe(first.data?.filters);
+  });
+
+  test("omits filters when none were applied", async () => {
+    const app = await build();
+    await seedInstances(app, ["a", "b"]);
+
+    const { data } = await getReport(app, "");
+
+    expect(data).not.toHaveProperty("filters");
   });
 
   test("ignores an unknown query parameter and reports no filters", async () => {
     const app = await build();
     await seedInstances(app, ["a", "b"]);
 
-    // A typo'd parameter name: the empty filters is how a reader notices nothing was applied.
+    // A typo'd parameter name: the missing filters is how a reader notices nothing was applied.
     const { res, data } = await getReport(app, "?instanceid=a");
 
     expect(res.statusCode).toBe(200);
     expect(data?.instances.map((i) => i.instanceId)).toEqual(["a", "b"]);
-    expect(data?.filters).toBe("");
+    expect(data).not.toHaveProperty("filters");
   });
 
-  test("rejects an empty instanceId", async () => {
+  test.each(["", ",", " , "])("rejects instanceId=%j, which holds no id", async (value) => {
     const app = await build();
 
-    const { res } = await getReport(app, "?instanceId=");
+    const { res } = await getReport(app, `?instanceId=${encodeURIComponent(value)}`);
 
     expect(res.statusCode).toBe(400);
   });
 
-  test("rejects an instanceId longer than an instance can report", async () => {
+  test("accepts a 256-character instanceId and rejects 257, also inside a list", async () => {
     const app = await build();
 
-    const { res } = await getReport(app, `?instanceId=${"x".repeat(257)}`);
-
-    expect(res.statusCode).toBe(400);
+    expect((await getReport(app, `?instanceId=${"x".repeat(256)}`)).res.statusCode).toBe(200);
+    expect((await getReport(app, `?instanceId=${"x".repeat(257)}`)).res.statusCode).toBe(400);
+    expect((await getReport(app, `?instanceId=a,${"x".repeat(257)}`)).res.statusCode).toBe(400);
   });
 
   test("accepts 100 instanceIds and rejects 101", async () => {
     const app = await build();
-    const query = (n: number) => `?${Array.from({ length: n }, (_, i) => `instanceId=i${i}`).join("&")}`;
+    const query = (n: number) => `?instanceId=${Array.from({ length: n }, (_, i) => `i${i}`).join(",")}`;
 
     expect((await getReport(app, query(100))).res.statusCode).toBe(200);
     expect((await getReport(app, query(101))).res.statusCode).toBe(400);
+  });
+
+  test("answers its own 400 in the same shape as a schema 400", async () => {
+    const app = await build();
+
+    const own = (await getReport(app, "?instanceId=,")).res.json();
+    const schema = (await getReport(app, "?instanceId=a&instanceId=b")).res.json();
+
+    expect(own).toEqual({
+      statusCode: 400,
+      error: "Bad Request",
+      message: "querystring/instanceId must not be empty",
+    });
+    expect(schema).toEqual({
+      statusCode: 400,
+      error: "Bad Request",
+      message: "querystring/instanceId must be string",
+    });
+  });
+
+  test("does not send the download headers with a 400", async () => {
+    const app = await build();
+
+    const { res } = await getReport(app, "?instanceId=,");
+
+    expect(res.statusCode).toBe(400);
+    expect(res.headers["content-disposition"]).toBeUndefined();
   });
 
   test("still requires the read token", async () => {

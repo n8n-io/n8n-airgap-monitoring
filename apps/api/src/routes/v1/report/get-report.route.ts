@@ -1,24 +1,36 @@
 import { Readable } from "node:stream";
 import bearerAuth from "@fastify/bearer-auth";
+import { httpErrors } from "@fastify/sensible";
 import type { FastifyPluginAsync } from "fastify";
 import type { InstanceReportEntry, ReportFilter } from "../../../instance-report/instance-report.service";
+import { errorResponseSchema } from "../error-response.schema";
 
-// A single ?instanceId= arrives as a string, a repeated one as an array, and types are not coerced (see app.ts).
-const instanceIdSchema = { type: "string", minLength: 1, maxLength: 256 };
-
+// Several ids are comma-separated, so the limits are checked in toFilter, after splitting. A repeated
+// ?instanceId= arrives as an array and is rejected, because types are not coerced (see app.ts).
 const schema = {
   querystring: {
     type: "object",
     properties: {
-      instanceId: {
-        anyOf: [instanceIdSchema, { type: "array", minItems: 1, maxItems: 100, items: instanceIdSchema }],
-      },
+      instanceId: { type: "string" },
     },
+  },
+  // Only 400: the 200 body is a stream and has no schema.
+  response: {
+    400: errorResponseSchema,
   },
 };
 
+const MAX_INSTANCE_IDS = 100;
+// Same limit as on ingest.
+const MAX_INSTANCE_ID_LENGTH = 256;
+
 interface ReportQuery {
-  instanceId?: string | string[];
+  instanceId?: string;
+}
+
+/** Worded like the schema's own errors, e.g. "querystring/instanceId must be string". */
+function invalidInstanceId(reason: string): Error {
+  return httpErrors.badRequest(`querystring/instanceId ${reason}`);
 }
 
 function toFilter(query: ReportQuery): ReportFilter {
@@ -26,11 +38,34 @@ function toFilter(query: ReportQuery): ReportFilter {
     return {};
   }
 
-  return { instanceIds: [...new Set([query.instanceId].flat())].sort() };
+  const instanceIds = [
+    ...new Set(
+      query.instanceId
+        .split(",")
+        .map((id) => id.trim())
+        .filter((id) => id !== ""),
+    ),
+  ].sort();
+
+  if (instanceIds.length === 0) {
+    throw invalidInstanceId("must not be empty");
+  }
+  if (instanceIds.length > MAX_INSTANCE_IDS) {
+    throw invalidInstanceId(`must not have more than ${MAX_INSTANCE_IDS} values`);
+  }
+  if (instanceIds.some((id) => [...id].length > MAX_INSTANCE_ID_LENGTH)) {
+    throw invalidInstanceId(`must not be longer than ${MAX_INSTANCE_ID_LENGTH} characters`);
+  }
+
+  return { instanceIds };
 }
 
-function toFiltersString(filter: ReportFilter): string {
-  return new URLSearchParams((filter.instanceIds ?? []).map((id) => ["instanceId", id])).toString();
+function toFiltersString(filter: ReportFilter): string | undefined {
+  if (filter.instanceIds === undefined) {
+    return undefined;
+  }
+
+  return `instanceId=${filter.instanceIds.map(encodeURIComponent).join(",")}`;
 }
 
 /**
@@ -42,10 +77,11 @@ function toFiltersString(filter: ReportFilter): string {
  */
 async function* renderReport(
   generatedAt: string,
-  filters: string,
+  filters: string | undefined,
   entries: AsyncIterable<InstanceReportEntry>,
 ): AsyncGenerator<string> {
-  yield `{"data":{"generatedAt":${JSON.stringify(generatedAt)},"filters":${JSON.stringify(filters)},"instances":[`;
+  const filtersField = filters === undefined ? "" : `"filters":${JSON.stringify(filters)},`;
+  yield `{"data":{"generatedAt":${JSON.stringify(generatedAt)},${filtersField}"instances":[`;
 
   let first = true;
   for await (const entry of entries) {

@@ -116,12 +116,12 @@ sequenceDiagram
 
     C->>API: GET /api/v1/report[?instanceId=…]<br/>Authorization: Bearer N8N_MONITORING_READ_TOKEN
     API->>API: bearer-auth: token equals N8N_MONITORING_READ_TOKEN
-    API->>API: filter = instanceIds deduplicated and sorted<br/>filters = filter as a query string ("" for none)
+    API->>API: filter = instanceIds split on ",", trimmed, deduplicated and sorted<br/>filters = filter as a query string, omitted for none
     API->>API: generatedAt = now (ISO 8601)<br/>stamp = generatedAt with ":" and "." replaced by "-"
     API-->>C: 200 OK<br/>Content-Type: application/json<br/>Cache-Control: no-store<br/>Content-Disposition: attachment#59; filename="n8n-instance-report-{stamp}.json"
     Note right of API: Headers go out first. The body is a Readable<br/>wrapping the renderReport async generator, so<br/>Fastify pipes chunks as they are produced.<br/>No response schema: the data was validated on<br/>upload and re-validating would undo the streaming.
 
-    API-->>C: chunk: {"data":{"generatedAt":"...","filters":"...","instances":[
+    API-->>C: chunk: {"data":{"generatedAt":"...",["filters":"...",]"instances":[
 
     API->>SVC: for await entry of streamInstanceReports(filter)
     SVC->>DB: SELECT DISTINCT instanceId<br/>[WHERE instanceId IN (…)]<br/>ORDER BY instanceId ASC
@@ -132,7 +132,7 @@ sequenceDiagram
         SVC->>DB: SELECT * WHERE instanceId = ?<br/>ORDER BY receivedAt ASC, id ASC
         DB-->>SVC: rows, oldest-first, JSON data column parsed
         SVC->>SVC: toEntry(rows)
-        Note right of SVC: instanceId - from any row<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>dataPoints - every point of every row, tagged with<br/>its row's batchId and receivedAt, then grouped by<br/>metric name. Nothing is summed or deduplicated:<br/>the collector is a dumb pipe, reconciliation is<br/>the receiver's job.
+        Note right of SVC: instanceId - from any row<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>dataPoints - every point of every row, tagged with<br/>its row's batchId and receivedAt, then grouped by<br/>metric name. Nothing is summed or deduplicated:<br/>reconciliation is the receiver's job.
         SVC-->>API: yield InstanceReportEntry
         API-->>C: chunk: JSON.stringify(entry)<br/>prefixed with "," for every entry but the first
     end
@@ -161,7 +161,6 @@ Content-Disposition: attachment; filename="n8n-instance-report-2026-03-28T08-00-
 {
   "data": {
     "generatedAt": "2026-03-28T08:00:00.000Z",
-    "filters": "",
     "instances": [
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",

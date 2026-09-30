@@ -97,9 +97,8 @@ export interface InstanceReportEntry {
   lastReportAt: string;
   /**
    * Every value the instance ever reported, keyed by metric name. Nothing is folded or
-   * deduplicated: this collector is a dumb pipe, so reconciliation (summing daily values,
-   * detecting DB rollbacks or duplicated instances from conflicting values) is the
-   * receiver's job — see the ADRs. One name can carry both kinds and repeated points.
+   * deduplicated: reconciliation (summing daily values, detecting DB rollbacks or
+   * duplicated instances from conflicting values) is the receiver's job — see the ADRs. One name can carry both kinds and repeated points.
    */
   dataPoints: Record<string, ReportedMetric[]>;
 }
@@ -109,8 +108,8 @@ export interface UsageReport {
   data: {
     /** When this report was generated, so a downloaded file is self-dating. */
     generatedAt: string;
-    /** Filters applied to this report as a query string (e.g. `instanceId=a&instanceId=b`), or "" for none. */
-    filters: string;
+    /** Filters applied to this report as a query string (e.g. `instanceId=a,b`). Absent when none. */
+    filters?: string;
     instances: InstanceReportEntry[];
   };
 }
@@ -172,7 +171,7 @@ function toNamedMetrics(row: InstanceReportRow): NamedMetric[] {
   }));
 }
 
-/** Files each point under its name. Nothing is folded or deduplicated — dumb pipe. */
+/** Files each point under its name. Nothing is folded or deduplicated. */
 function byName(points: NamedMetric[]): Record<string, ReportedMetric[]> {
   const grouped: Record<string, ReportedMetric[]> = Object.create(null);
 
