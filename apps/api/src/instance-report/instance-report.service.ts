@@ -98,7 +98,8 @@ export interface InstanceReportEntry {
   /**
    * Every value the instance ever reported, keyed by metric name. Nothing is folded or
    * deduplicated: reconciliation (summing daily values, detecting DB rollbacks or
-   * duplicated instances from conflicting values) is the receiver's job — see the ADRs. One name can carry both kinds and repeated points.
+   * duplicated instances from conflicting values) is the receiver's job — see the ADRs.
+   * One name can carry both kinds and repeated points.
    */
   dataPoints: Record<string, ReportedMetric[]>;
 }
