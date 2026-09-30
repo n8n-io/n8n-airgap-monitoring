@@ -351,7 +351,7 @@ describe("filtering by instanceId", () => {
     expect((await getReport(app, query(101))).res.statusCode).toBe(400);
   });
 
-  test("answers its own 400 in the same shape as a schema 400", async () => {
+  test("returns own validation errors in the same shape as schema errors", async () => {
     const app = await build();
 
     const own = (await getReport(app, "?instanceId=,")).res.json();
