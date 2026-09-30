@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import { DuplicateBatchError } from "../../../instance-report/instance-report.repository";
 import type { CreateInstanceReport } from "../../../instance-report/instance-report.service";
+import { errorResponseSchema } from "../error-response.schema";
 
 // A running total (kind: cumulative, can regress after a customer DB rollback)
 // or a value covering one UTC calendar day (kind: daily, e.g. billable
@@ -67,16 +68,6 @@ const successResponseSchema = {
   required: ["id"],
   properties: {
     id: { type: "integer" },
-  },
-};
-
-const errorResponseSchema = {
-  type: "object",
-  required: ["statusCode", "error", "message"],
-  properties: {
-    statusCode: { type: "integer" },
-    error: { type: "string" },
-    message: { type: "string" },
   },
 };
 

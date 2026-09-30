@@ -84,13 +84,18 @@ export class InstanceReportRepository {
     }
   }
 
-  async findInstanceIds(): Promise<string[]> {
-    const rows = await this.#reports
+  async findInstanceIds(instanceIds?: string[]): Promise<string[]> {
+    const query = this.#reports
       .createQueryBuilder("report")
       .select("report.instanceId", "instanceId")
       .distinct(true)
-      .orderBy("report.instanceId", "ASC")
-      .getRawMany<{ instanceId: string }>();
+      .orderBy("report.instanceId", "ASC");
+
+    if (instanceIds !== undefined) {
+      query.where("report.instanceId IN (:...instanceIds)", { instanceIds });
+    }
+
+    const rows = await query.getRawMany<{ instanceId: string }>();
 
     return rows.map((row) => row.instanceId);
   }

@@ -37,11 +37,11 @@ sequenceDiagram
 
     N8N->>API: POST /api/v1/instance-reports<br/>Content-Type: application/json
 
-    Note over N8N,API: Body<br/>instanceId - instanceSettings.instanceId, the reporting identity<br/>batchId - id of the pending report row on the n8n side<br/>label - optional, N8N_INSTANCE_REPORTING_LABEL, omitted when unset<br/>n8nVersion - N8N_VERSION<br/>dataPoints - non-empty array, each entry either<br/>kind cumulative: name, value<br/>kind daily: name, value, date as YYYY-MM-DD<br/>licenseCert - License.loadCertStr(), the credential; not part of the stored envelope
+    Note over N8N,API: Body<br/>instanceId - instanceSettings.instanceId, the reporting identity<br/>batchId - id of the pending report row on the n8n side<br/>label - optional, N8N_INSTANCE_REPORTING_LABEL, omitted when unset<br/>n8nVersion - N8N_VERSION<br/>dataPoints - non-empty array, each entry either<br/>kind cumulative: name, value<br/>kind daily: name, value, date as YYYY-MM-DD<br/>licenseCert - License.loadCertStr(), the credential, not part of the stored envelope
 
     Note over N8N,API: Example data - what an n8n instance sends today<br/>"dataPoints": [<br/>{<br/>"kind": "cumulative",<br/>"name": "billableExecutions",<br/>"value": 402931<br/>},<br/>{<br/>"kind": "daily",<br/>"name": "billableExecutions",<br/>"value": 15234,<br/>"date": "2026-03-25"<br/>}<br/>]<br/>The cumulative point is the lifetime total, the daily point covers the previous completed UTC day.
 
-    API->>API: preValidation (certificate mode): licenseCert chains to the n8n license CA<br/>and its payload signature verifies; then licenseCert is deleted from the body
+    API->>API: preValidation (certificate mode): licenseCert chains to the n8n license CA<br/>and its payload signature verifies, then licenseCert is deleted from the body
     API->>API: schema validation of the remaining body
     API->>DB: INSERT INTO instance_reports<br/>(instanceId, batchId, label, n8nVersion, data, receivedAt)
     Note over DB: Append-only event store.<br/>dataPoints stored as a JSON blob.<br/>UNIQUE (instanceId, batchId).
@@ -114,16 +114,17 @@ sequenceDiagram
     participant SVC as InstanceReportService<br/>streamInstanceReports()
     participant DB as SQLite<br/>instance_reports
 
-    C->>API: GET /api/v1/report<br/>Authorization: Bearer N8N_MONITORING_READ_TOKEN
+    C->>API: GET /api/v1/report[?instanceId=…]<br/>Authorization: Bearer N8N_MONITORING_READ_TOKEN
     API->>API: bearer-auth: token equals N8N_MONITORING_READ_TOKEN
+    API->>API: filter = instanceIds split on ",", trimmed, deduplicated and sorted<br/>filters = filter as a query string, omitted for none
     API->>API: generatedAt = now (ISO 8601)<br/>stamp = generatedAt with ":" and "." replaced by "-"
     API-->>C: 200 OK<br/>Content-Type: application/json<br/>Cache-Control: no-store<br/>Content-Disposition: attachment#59; filename="n8n-instance-report-{stamp}.json"
     Note right of API: Headers go out first. The body is a Readable<br/>wrapping the renderReport async generator, so<br/>Fastify pipes chunks as they are produced.<br/>No response schema: the data was validated on<br/>upload and re-validating would undo the streaming.
 
-    API-->>C: chunk: {"data":{"generatedAt":"...","instances":[
+    API-->>C: chunk: {"data":{"generatedAt":"...",["filters":"...",]"instances":[
 
-    API->>SVC: for await entry of streamInstanceReports()
-    SVC->>DB: SELECT DISTINCT instanceId<br/>ORDER BY instanceId ASC
+    API->>SVC: for await entry of streamInstanceReports(filter)
+    SVC->>DB: SELECT DISTINCT instanceId<br/>[WHERE instanceId IN (…)]<br/>ORDER BY instanceId ASC
     Note over DB: Served by the leading column of the<br/>UNIQUE (instanceId, batchId) index.
     DB-->>SVC: instanceId[]
 
@@ -131,7 +132,7 @@ sequenceDiagram
         SVC->>DB: SELECT * WHERE instanceId = ?<br/>ORDER BY receivedAt ASC, id ASC
         DB-->>SVC: rows, oldest-first, JSON data column parsed
         SVC->>SVC: toEntry(rows)
-        Note right of SVC: instanceId - from any row<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>dataPoints - every point of every row, tagged with<br/>its row's batchId and receivedAt, then grouped by<br/>metric name. Nothing is summed or deduplicated:<br/>the collector is a dumb pipe, reconciliation is<br/>the receiver's job.
+        Note right of SVC: instanceId - from any row<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>dataPoints - every point of every row, tagged with<br/>its row's batchId and receivedAt, then grouped by<br/>metric name. Nothing is summed or deduplicated:<br/>reconciliation is the receiver's job.
         SVC-->>API: yield InstanceReportEntry
         API-->>C: chunk: JSON.stringify(entry)<br/>prefixed with "," for every entry but the first
     end

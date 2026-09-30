@@ -103,3 +103,17 @@ test("findInstanceIds returns each distinct instanceId once, ascending", async (
 
   expect(await repository.findInstanceIds()).toEqual(["instance-a", "instance-b"]);
 });
+
+test("findInstanceIds narrows to the given instanceIds that are stored, ascending", async () => {
+  const app = await build();
+  const repository = new InstanceReportRepository(app.dataSource);
+
+  for (const instanceId of ["instance-c", "instance-a", "instance-b"]) {
+    await repository.insert({ ...event, instanceId, batchId: `${instanceId}-1` });
+  }
+
+  expect(await repository.findInstanceIds(["instance-c", "missing", "instance-a"])).toEqual([
+    "instance-a",
+    "instance-c",
+  ]);
+});

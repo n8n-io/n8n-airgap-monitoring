@@ -143,6 +143,10 @@ Its shape is:
 value that instance reported for that metric, oldest-first, tagged with the
 `batchId` and `receivedAt` of the report that carried it.
 
+`?instanceId=` (comma-separated) narrows the report to those
+instances; a filtered report lists the applied filters in `filters`, as a query
+string.
+
 ## Deployment
 
 [`docs/charts/airgap-monitoring/`](docs/charts/airgap-monitoring/) is the

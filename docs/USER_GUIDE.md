@@ -187,6 +187,17 @@ seen and every value it ever reported for each metric:
 }
 ```
 
+To download the report for some instances only, pass their ids as the
+`instanceId` query parameter, comma-separated (up to 100 ids, each at most 256
+characters):
+
+```
+GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?instanceId=450b5c85…,9f1e2d3c…
+```
+
+A filtered report has a `filters` field that lists the applied filters as a
+query string (e.g. `instanceId=450b5c85…,9f1e2d3c…`).
+
 As of today the report always contains the complete history. In a future update we're adding a default threshold for the "time to look back" as well as a query parameter to specify the time window to include in the report.
 
 ## Environment variable reference

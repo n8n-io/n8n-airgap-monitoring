@@ -1,4 +1,4 @@
-import { expect, test, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import type { Metric, UsageReport } from "../../../instance-report/instance-report.service";
 import { build } from "../../../test-utils/build-app";
 
@@ -223,4 +223,166 @@ test("streams a body that parses as valid JSON across multiple instances", async
   // the stream itself is well-formed JSON rather than trusting a helper to cope.
   const parsed = JSON.parse(res.body) as UsageReport;
   expect(parsed.data.instances.map((i) => i.instanceId)).toEqual(["a", "b", "c"]);
+});
+
+/** One minimal event per instance, so a filter test can tell which instances came back. */
+async function seedInstances(app: App, instanceIds: string[]): Promise<void> {
+  for (const instanceId of instanceIds) {
+    await insertRow(app, {
+      instanceId,
+      batchId: `${instanceId}-b1`,
+      dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 5 }],
+      receivedAt: "2026-03-25T02:00:00.000Z",
+    });
+  }
+}
+
+async function getReport(app: App, query: string) {
+  const res = await app.inject({ method: "GET", url: `${URL}${query}`, headers: READ });
+  return { res, data: res.statusCode === 200 ? (JSON.parse(res.body) as UsageReport).data : undefined };
+}
+
+describe("filtering by instanceId", () => {
+  test("narrows to a single instanceId and lists it in filters", async () => {
+    const app = await build();
+    await seedInstances(app, ["a", "b", "c"]);
+
+    const { res, data } = await getReport(app, "?instanceId=b");
+
+    expect(res.statusCode).toBe(200);
+    expect(data?.instances.map((i) => i.instanceId)).toEqual(["b"]);
+    expect(data?.filters).toBe("instanceId=b");
+  });
+
+  test("narrows to comma-separated ids, listed sorted in filters", async () => {
+    const app = await build();
+    await seedInstances(app, ["a", "b", "c"]);
+
+    const { data } = await getReport(app, "?instanceId=c,a");
+
+    expect(data?.instances.map((i) => i.instanceId)).toEqual(["a", "c"]);
+    expect(data?.filters).toBe("instanceId=a,c");
+  });
+
+  test("trims ids and drops empty and duplicated ones", async () => {
+    const app = await build();
+    await seedInstances(app, ["a", "b", "c"]);
+
+    const { data } = await getReport(app, `?instanceId=${encodeURIComponent(" b ,, a,b,")}`);
+
+    expect(data?.instances.map((i) => i.instanceId)).toEqual(["a", "b"]);
+    expect(data?.filters).toBe("instanceId=a,b");
+  });
+
+  test("rejects a repeated instanceId parameter", async () => {
+    const app = await build();
+
+    const { res } = await getReport(app, "?instanceId=a&instanceId=b");
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test("serves an empty report for an unknown instanceId", async () => {
+    const app = await build();
+    await seedInstances(app, ["a"]);
+
+    const { res, data } = await getReport(app, "?instanceId=nope");
+
+    expect(res.statusCode).toBe(200);
+    expect(data?.instances).toEqual([]);
+    expect(data?.filters).toBe("instanceId=nope");
+  });
+
+  test("encodes filters so they can be replayed as the query string", async () => {
+    const app = await build();
+    const awkward = "prod a&b=c/ü";
+    await seedInstances(app, [awkward, "other", "third"]);
+
+    const first = await getReport(app, `?instanceId=${encodeURIComponent(awkward)},third`);
+    const replayed = await getReport(app, `?${first.data?.filters}`);
+
+    expect(first.data?.instances.map((i) => i.instanceId)).toEqual([awkward, "third"]);
+    expect(replayed.data?.instances.map((i) => i.instanceId)).toEqual([awkward, "third"]);
+    expect(replayed.data?.filters).toBe(first.data?.filters);
+  });
+
+  test("omits filters when none were applied", async () => {
+    const app = await build();
+    await seedInstances(app, ["a", "b"]);
+
+    const { data } = await getReport(app, "");
+
+    expect(data).not.toHaveProperty("filters");
+  });
+
+  test("ignores an unknown query parameter and reports no filters", async () => {
+    const app = await build();
+    await seedInstances(app, ["a", "b"]);
+
+    // A typo'd parameter name: the missing filters is how a reader notices nothing was applied.
+    const { res, data } = await getReport(app, "?instanceid=a");
+
+    expect(res.statusCode).toBe(200);
+    expect(data?.instances.map((i) => i.instanceId)).toEqual(["a", "b"]);
+    expect(data).not.toHaveProperty("filters");
+  });
+
+  test.each(["", ",", " , "])("rejects instanceId=%j, which holds no id", async (value) => {
+    const app = await build();
+
+    const { res } = await getReport(app, `?instanceId=${encodeURIComponent(value)}`);
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test("accepts a 256-character instanceId and rejects 257, also inside a list", async () => {
+    const app = await build();
+
+    expect((await getReport(app, `?instanceId=${"x".repeat(256)}`)).res.statusCode).toBe(200);
+    expect((await getReport(app, `?instanceId=${"x".repeat(257)}`)).res.statusCode).toBe(400);
+    expect((await getReport(app, `?instanceId=a,${"x".repeat(257)}`)).res.statusCode).toBe(400);
+  });
+
+  test("accepts 100 instanceIds and rejects 101", async () => {
+    const app = await build();
+    const query = (n: number) => `?instanceId=${Array.from({ length: n }, (_, i) => `i${i}`).join(",")}`;
+
+    expect((await getReport(app, query(100))).res.statusCode).toBe(200);
+    expect((await getReport(app, query(101))).res.statusCode).toBe(400);
+  });
+
+  test("returns own validation errors in the same shape as schema errors", async () => {
+    const app = await build();
+
+    const own = (await getReport(app, "?instanceId=,")).res.json();
+    const schema = (await getReport(app, "?instanceId=a&instanceId=b")).res.json();
+
+    expect(own).toEqual({
+      statusCode: 400,
+      error: "Bad Request",
+      message: "querystring/instanceId must not be empty",
+    });
+    expect(schema).toEqual({
+      statusCode: 400,
+      error: "Bad Request",
+      message: "querystring/instanceId must be string",
+    });
+  });
+
+  test("does not send the download headers with a 400", async () => {
+    const app = await build();
+
+    const { res } = await getReport(app, "?instanceId=,");
+
+    expect(res.statusCode).toBe(400);
+    expect(res.headers["content-disposition"]).toBeUndefined();
+  });
+
+  test("still requires the read token", async () => {
+    const app = await build();
+
+    const res = await app.inject({ method: "GET", url: `${URL}?instanceId=a` });
+
+    expect(res.statusCode).toBe(401);
+  });
 });
