@@ -27,7 +27,7 @@ We filter the report with query parameters and record the applied filters in the
 ## Alternatives Considered
 
 - **Comma-separated values (`?instanceId=a,b`).** Rejected: an id that contains a comma is ambiguous.
-- **400 for an unknown parameter.** Rejected: a typo would give no file at all. Ignoring also keeps an older collector usable: a caller can send a filter that the running collector version does not know yet and still gets a report, and `filters` shows what was applied. It is also more work: with `additionalProperties: false`, Ajv's `removeAdditional` strips unknown keys instead of rejecting them.
+- **400 for an unknown parameter.** Rejected: a typo would give no file at all. Ignoring also keeps an older collector usable: a caller can send a filter that the running collector version does not know yet and still gets a report. It is also more work: with `additionalProperties: false`, Ajv's `removeAdditional` strips unknown keys instead of rejecting them.
 - **404 for an unknown `instanceId`.** Rejected: a filter narrows a list, and an empty list is a valid result. With several ids, one unknown id would fail the whole request.
 
 ## Consequences
@@ -35,5 +35,5 @@ We filter the report with query parameters and record the applied filters in the
 - New filters follow the same rules: a query parameter, repeated for several values, listed in `filters`, and only narrowing.
 - A file with a non-empty `filters` is not the full report. The receiver must check it before it bills from the file.
 - A typo in a parameter name returns the full report. The only sign is the empty `filters`.
-- A newer caller that sends a filter to an older service gets the full report, with the filter missing from `filters`.
+- A filter that the running collector version does not know yet is ignored and is missing from `filters`. A collector older than this ADR has no `filters` field and always returns the full report.
 - More than 100 instances need several downloads or the full report.
