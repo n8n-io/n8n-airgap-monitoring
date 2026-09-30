@@ -12,3 +12,8 @@ allowBuilds:
 # Only resolve package versions published at least 3 days ago, so a compromised
 # or broken release has time to be pulled before it can enter the lockfile.
 minimumReleaseAge: 4320
+
+# sqlite3 5.x and its node-gyp 8 pin tar 6, which has unpatched CVEs. Both only
+# call tar.extract, which tar 7 keeps, and only when building from source.
+overrides:
+  tar: ^7.5.21

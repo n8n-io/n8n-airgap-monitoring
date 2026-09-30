@@ -25,6 +25,9 @@ RUN pnpm deploy --legacy --filter api --prod /out
 
 FROM node:26-slim AS runtime
 
+# The app never runs npm, and its bundled dependencies carry CVEs of their own.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
 
