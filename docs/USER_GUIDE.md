@@ -162,6 +162,13 @@ GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report
 The request must carry the **read token** as a bearer token in the
 `Authorization` header.
 
+To download the report for some instances only, pass their ids as the
+`instanceId` query parameter, repeated once per instance (up to 100):
+
+```
+GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?instanceId=450b5c85…&instanceId=9f1e2d3c…
+```
+
 The file contains one entry per instance, with when it was first and last
 seen and every value it ever reported for each metric:
 
@@ -169,6 +176,7 @@ seen and every value it ever reported for each metric:
 {
   "data": {
     "generatedAt": "2026-09-03T14:30:00.000Z",
+    "filters": "",
     "instances": [
       {
         "instanceId": "450b5c85…",
@@ -186,6 +194,9 @@ seen and every value it ever reported for each metric:
   }
 }
 ```
+
+`filters` lists the filters applied to the report as a query string (e.g.
+`instanceId=450b5c85…`), or is empty when none were applied.
 
 As of today the report always contains the complete history. In a future update we're adding a default threshold for the "time to look back" as well as a query parameter to specify the time window to include in the report.
 

@@ -64,7 +64,7 @@ test("returns the id assigned by the repository", async () => {
 function fakeReportService(rows: InstanceReportRow[]): InstanceReportService {
   const instanceIds = [...new Set(rows.map((r) => r.instanceId))];
   return new InstanceReportService({
-    findInstanceIds: async () => instanceIds,
+    findInstanceIds: async (only?: string[]) => instanceIds.filter((id) => only === undefined || only.includes(id)),
     findByInstanceId: async (instanceId: string) => rows.filter((r) => r.instanceId === instanceId),
   } as unknown as InstanceReportRepository);
 }
@@ -153,4 +153,19 @@ test("streamInstanceReports yields one entry per instance and nothing for an emp
   );
 
   expect(instances.map((i) => i.instanceId)).toEqual(["instance-1", "instance-2"]);
+});
+
+test("streamInstanceReports yields only the instances the filter asks for", async () => {
+  const service = fakeReportService([
+    row({ instanceId: "instance-1", batchId: "a" }),
+    row({ instanceId: "instance-2", batchId: "b" }),
+    row({ instanceId: "instance-3", batchId: "c" }),
+  ]);
+
+  const instances: InstanceReportEntry[] = [];
+  for await (const entry of service.streamInstanceReports({ instanceIds: ["instance-1", "instance-3"] })) {
+    instances.push(entry);
+  }
+
+  expect(instances.map((i) => i.instanceId)).toEqual(["instance-1", "instance-3"]);
 });

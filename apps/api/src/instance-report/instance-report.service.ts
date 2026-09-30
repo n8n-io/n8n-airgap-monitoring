@@ -109,8 +109,14 @@ export interface UsageReport {
   data: {
     /** When this report was generated, so a downloaded file is self-dating. */
     generatedAt: string;
+    /** Filters applied to this report as a query string (e.g. `instanceId=a&instanceId=b`), or "" for none. */
+    filters: string;
     instances: InstanceReportEntry[];
   };
+}
+
+export interface ReportFilter {
+  instanceIds?: string[];
 }
 
 export class InstanceReportService {
@@ -134,8 +140,8 @@ export class InstanceReportService {
    * the first row is the earliest and the last carries the latest state — see
    * {@link toEntry}.
    */
-  async *streamInstanceReports(): AsyncGenerator<InstanceReportEntry> {
-    for (const instanceId of await this.repository.findInstanceIds()) {
+  async *streamInstanceReports(filter: ReportFilter = {}): AsyncGenerator<InstanceReportEntry> {
+    for (const instanceId of await this.repository.findInstanceIds(filter.instanceIds)) {
       yield toEntry(await this.repository.findByInstanceId(instanceId));
     }
   }
