@@ -189,7 +189,8 @@ seen and every value it ever reported for each metric:
 ```
 
 To download the report for some instances only, pass their ids as the
-`instanceId` query parameter, repeated once per instance (up to 100):
+`instanceId` query parameter, repeated once per instance (up to 100 non-empty
+values, each at most 256 characters):
 
 ```
 GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?instanceId=450b5c85…&instanceId=9f1e2d3c…
