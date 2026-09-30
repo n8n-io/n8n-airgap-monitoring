@@ -1,0 +1,25 @@
+apps/api/package.json
+  s_df21b979ff6c6f::t_d35ebe9883d9d7 26
+pnpm-workspace.yaml
+  s_df21b979ff6c6f::t_d35ebe9883d9d7 15-19
+Dockerfile
+  s_df21b979ff6c6f::t_6d155d7152cf3a 28-30
+pnpm-lock.yaml
+  ai_agent 108-110,143-144,459-462,962-965,1169-1170,1572-1575,1961-1963,2181-2184,2379-2382,2778,2814-2817,3014,3031,3085,3458,3466-3470,3474-3475,3506,3816,3885,3887-3891,4128-4131
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "e3a046c34fc34b12bcada261a49fc4f813898c70",
+  "prompts": {},
+  "sessions": {
+    "s_df21b979ff6c6f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "07f0ef47-8325-4462-a798-4870302a1f7d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
