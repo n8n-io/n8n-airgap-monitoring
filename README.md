@@ -118,6 +118,7 @@ Its shape is:
 {
   "data": {
     "generatedAt": "2026-09-16T14:30:00.000Z",
+    "filters": "",
     "instances": [
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
@@ -142,6 +143,9 @@ Its shape is:
 `dataPoints` here is a map keyed by metric name. Each key holds every
 value that instance reported for that metric, oldest-first, tagged with the
 `batchId` and `receivedAt` of the report that carried it.
+
+`?instanceId=` (repeatable) narrows the report to those instances; `filters`
+lists the filters applied, as a query string.
 
 ## Deployment
 

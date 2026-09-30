@@ -114,16 +114,17 @@ sequenceDiagram
     participant SVC as InstanceReportService<br/>streamInstanceReports()
     participant DB as SQLite<br/>instance_reports
 
-    C->>API: GET /api/v1/report<br/>Authorization: Bearer N8N_MONITORING_READ_TOKEN
+    C->>API: GET /api/v1/report[?instanceId=…]<br/>Authorization: Bearer N8N_MONITORING_READ_TOKEN
     API->>API: bearer-auth: token equals N8N_MONITORING_READ_TOKEN
+    API->>API: filter = instanceIds deduplicated and sorted<br/>filters = filter as a query string ("" for none)
     API->>API: generatedAt = now (ISO 8601)<br/>stamp = generatedAt with ":" and "." replaced by "-"
     API-->>C: 200 OK<br/>Content-Type: application/json<br/>Cache-Control: no-store<br/>Content-Disposition: attachment#59; filename="n8n-instance-report-{stamp}.json"
     Note right of API: Headers go out first. The body is a Readable<br/>wrapping the renderReport async generator, so<br/>Fastify pipes chunks as they are produced.<br/>No response schema: the data was validated on<br/>upload and re-validating would undo the streaming.
 
-    API-->>C: chunk: {"data":{"generatedAt":"...","instances":[
+    API-->>C: chunk: {"data":{"generatedAt":"...","filters":"...","instances":[
 
-    API->>SVC: for await entry of streamInstanceReports()
-    SVC->>DB: SELECT DISTINCT instanceId<br/>ORDER BY instanceId ASC
+    API->>SVC: for await entry of streamInstanceReports(filter)
+    SVC->>DB: SELECT DISTINCT instanceId<br/>[WHERE instanceId IN (…)]<br/>ORDER BY instanceId ASC
     Note over DB: Served by the leading column of the<br/>UNIQUE (instanceId, batchId) index.
     DB-->>SVC: instanceId[]
 
@@ -160,6 +161,7 @@ Content-Disposition: attachment; filename="n8n-instance-report-2026-03-28T08-00-
 {
   "data": {
     "generatedAt": "2026-03-28T08:00:00.000Z",
+    "filters": "",
     "instances": [
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",

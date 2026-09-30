@@ -162,13 +162,6 @@ GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report
 The request must carry the **read token** as a bearer token in the
 `Authorization` header.
 
-To download the report for some instances only, pass their ids as the
-`instanceId` query parameter, repeated once per instance (up to 100):
-
-```
-GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?instanceId=450b5c85…&instanceId=9f1e2d3c…
-```
-
 The file contains one entry per instance, with when it was first and last
 seen and every value it ever reported for each metric:
 
@@ -193,6 +186,13 @@ seen and every value it ever reported for each metric:
     ]
   }
 }
+```
+
+To download the report for some instances only, pass their ids as the
+`instanceId` query parameter, repeated once per instance (up to 100):
+
+```
+GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?instanceId=450b5c85…&instanceId=9f1e2d3c…
 ```
 
 `filters` lists the filters applied to the report as a query string (e.g.
