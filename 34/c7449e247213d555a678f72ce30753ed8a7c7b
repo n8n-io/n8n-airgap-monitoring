@@ -1,0 +1,13 @@
+.github/workflows/benchmark-ingest.yml
+  ai_agent 21
+scripts/bench/ingest/README.md
+  ai_agent 6
+scripts/bench/ingest/ingest.k6.js
+  ai_agent 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "34c7449e247213d555a678f72ce30753ed8a7c7b",
+  "prompts": {}
+}
