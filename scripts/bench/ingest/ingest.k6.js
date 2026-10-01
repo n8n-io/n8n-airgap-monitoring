@@ -41,9 +41,9 @@ export const options = {
         duration: `${STEP_SECONDS}s`,
         startTime: `${i * (STEP_SECONDS + PAUSE_SECONDS)}s`,
         gracefulStop: `${PAUSE_SECONDS}s`,
-        // Enough for a latency spike at the top step: VUs started mid-step are
-        // slow to come up and drop iterations the server never saw.
-        preAllocatedVUs: 300,
+        // All up front: VUs started mid-step are slow to come up and drop
+        // iterations the server never saw.
+        preAllocatedVUs: 1000,
         maxVUs: 1000,
       },
     ]),
@@ -92,14 +92,17 @@ export function handleSummary(data) {
     const non201 = values("checks", rps).fails ?? 0;
     const dropped = values("dropped_iterations", rps).count ?? 0;
     const p99 = duration["p(99)"] ?? Number.POSITIVE_INFINITY;
+    const sent = values("http_reqs", rps).count ?? 0;
     return {
       rps,
-      sent: values("http_reqs", rps).count ?? 0,
+      sent,
       non201,
       dropped,
       p50: duration.med,
       p99,
-      held: non201 === 0 && dropped === 0 && p99 <= SLO_P99_MS,
+      // A request still running when gracefulStop cuts the step leaves no
+      // sample at all, so a short count is the only trace of it.
+      held: non201 === 0 && dropped === 0 && sent >= 0.99 * rps * STEP_SECONDS && p99 <= SLO_P99_MS,
     };
   });
 
@@ -111,7 +114,7 @@ export function handleSummary(data) {
     "### Ingest benchmark: `POST /api/v1/instance-reports`",
     "",
     `${INSTANCES} instances, certificate auth, 1 CPU / 512 MiB, ${STEP_SECONDS} s per step. ` +
-      `A step is held with 0 non-201, 0 dropped and p99 ≤ ${SLO_P99_MS} ms.`,
+      `A step is held when every request finished with 201, none was dropped and p99 ≤ ${SLO_P99_MS} ms.`,
     "",
     `- Required ${REQUIRED_RPS} req/s: ${required ? (required.held ? "✅ held" : "❌ not held") : "not run"}`,
     `- Highest held: ${highest ? `${highest.rps} req/s${firstMiss === -1 ? " (top step, the limit is above)" : ""}` : "none"}`,

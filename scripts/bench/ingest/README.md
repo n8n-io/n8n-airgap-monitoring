@@ -16,13 +16,14 @@ for, is the level that must always hold.
 - Each step is a k6 `constant-arrival-rate` scenario: requests start at the
   step's rate whether or not earlier ones have finished. When the server falls
   behind, k6 drops iterations, which the report counts.
-- A step is held if there is no non-201 response, nothing is dropped and p99
-  stays at or below 500 ms. The report names the highest step held before the
-  first miss.
+- A step is held if every request finished with a 201, none was dropped and
+  p99 stays at or below 500 ms. The report names the highest step held before
+  the first miss.
 
-Known gaps against production: k6 reuses keep-alive connections where real
-instances open one each, and the database starts empty instead of holding years
-of reports. Both make the numbers somewhat optimistic.
+Known gaps against production: requests arrive evenly spaced rather than at
+random moments, k6 reuses keep-alive connections where real instances open one
+each, and the database starts empty instead of holding years of reports. All
+three make the numbers somewhat optimistic.
 
 ## Run it locally
 
