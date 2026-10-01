@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Writes the release version into the root package.json, the single source of
-# truth the release workflows read, and into the Helm chart's appVersion, so the
-# chart deploys the image of the release it ships with. Idempotent.
+# truth the release workflows read, into the API's package.json, the only one
+# that ships in the image and so the one the service reports its version from,
+# and into the Helm chart's appVersion, so the chart deploys the image of the
+# release it ships with. Idempotent.
 set -euo pipefail
 
 VERSION="${1:?usage: set-release-version.sh <version>}"
@@ -14,6 +16,7 @@ fi
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 npm pkg set version="$VERSION" --prefix "$ROOT"
+npm pkg set version="$VERSION" --prefix "$ROOT/apps/api"
 
 # The chart's appVersion is the default image tag. Its own `version` field is
 # left alone: that tracks changes to the chart, not to the app inside it.

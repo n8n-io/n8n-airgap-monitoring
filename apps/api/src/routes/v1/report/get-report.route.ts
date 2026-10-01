@@ -3,6 +3,7 @@ import bearerAuth from "@fastify/bearer-auth";
 import { httpErrors } from "@fastify/sensible";
 import type { FastifyPluginAsync } from "fastify";
 import type { InstanceReportEntry, ReportFilter } from "../../../instance-report/instance-report.service";
+import { airgapMonitoringVersion } from "../../../version";
 import { errorResponseSchema } from "../error-response.schema";
 
 // Several ids are comma-separated, so the limits are checked in toFilter, after splitting. A repeated
@@ -81,7 +82,8 @@ async function* renderReport(
   entries: AsyncIterable<InstanceReportEntry>,
 ): AsyncGenerator<string> {
   const filtersField = filters === undefined ? "" : `"filters":${JSON.stringify(filters)},`;
-  yield `{"data":{"generatedAt":${JSON.stringify(generatedAt)},${filtersField}"instances":[`;
+  const versionField = `"airgapMonitoringVersion":${JSON.stringify(airgapMonitoringVersion)},`;
+  yield `{"data":{"generatedAt":${JSON.stringify(generatedAt)},${versionField}${filtersField}"instances":[`;
 
   let first = true;
   for await (const entry of entries) {

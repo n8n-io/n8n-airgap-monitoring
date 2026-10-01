@@ -109,6 +109,8 @@ export interface UsageReport {
   data: {
     /** When this report was generated, so a downloaded file is self-dating. */
     generatedAt: string;
+    /** Version of the n8n-airgap-monitoring service that generated this report. */
+    airgapMonitoringVersion: string;
     /** Filters applied to this report as a query string (e.g. `instanceId=a,b`). Absent when none. */
     filters?: string;
     instances: InstanceReportEntry[];
