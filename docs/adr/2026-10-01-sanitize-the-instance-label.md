@@ -1,0 +1,51 @@
+# 13. Sanitize the instance label
+
+> _This ADR was written by AI and reviewed by a human._
+
+Date: 2026-10-01
+
+Status: Active
+
+Source: [API-410](https://linear.app/n8n/issue/API-410/sanitize-the-provided-instance-report-label)
+
+## Context
+
+`label` in `POST /api/v1/instance-reports` is free text from `N8N_INSTANCE_REPORTING_LABEL`, 1 to 200 characters. Consumers of the report want to use it in URLs without cleaning it up first. ADR 12 also notes that a future filter on `label` needs a restricted format, or commas in it are ambiguous.
+
+A rejected report is more dangerous than a bad label. The n8n client retries a rejected report and then skips it, and a retry sends the same payload (ADR 11). A pattern on `label` in the schema would therefore reject every report of that instance until the operator changes the variable.
+
+## Decision
+
+The service sanitizes the label before it stores it, and never rejects a report because of the characters in it or its length.
+
+1. Decompose with NFKD and drop the combining marks, so `é` becomes `e` and `ﬁ` becomes `fi`.
+2. Lowercase.
+3. Replace each run of characters other than `a-z` and `0-9` with a single `-`.
+4. Trim hyphens at the start and end.
+5. Cut to 200 characters and trim the trailing hyphens again.
+6. If nothing is left, store `null`, as for an absent label.
+
+The schema only requires a string, with no length limits: a too long label is cut, and an empty one is stored as `null`. A non-string label is a broken client, not a bad label, so it is still 400.
+
+## Alternatives Considered
+
+- **A pattern in the schema, so that the request is rejected.** Rejected: see Context.
+- **Keep `maxLength: 200` in the schema.** Rejected: a too long label would be rejected the same way as a bad character.
+- **Keep the case.** Rejected: parts of a URL are compared case-insensitively, so `Prod` and `prod` could end up in the same URL.
+- **Transliterate letters without an accent-free form, for example `ß` to `ss` or `ł` to `l`.** Rejected: it needs a hand-kept table or a dependency, for a display name.
+- **Sanitize when the report is read, or migrate the stored rows.** Rejected: the report shows the last-received label, so an instance's label is sanitized with its next daily report.
+
+## Consequences
+
+- Every label stored from now on matches `^[a-z0-9]+(-[a-z0-9]+)*$` and has at most 200 characters.
+- Only `bodyLimit` bounds the raw label (ADR 11). The test of the body limit sizes the label at the 200 characters that are stored. A real report leaves approx. 245 KB for the label, so only an absurd label gets 413.
+- A report can still show an unsanitized label for an instance that has not reported since the upgrade.
+- Letters without an accent-free form are dropped: `Straße` becomes `stra-e` and `Łódź` becomes `odz`. Labels in other scripts, for example `日本`, are dropped completely.
+- Two different labels can become the same, for example `Acme Prod` and `acme_prod`. The label is not the identity, `instanceId` is.
+- A future filter on `label` can split on commas, because a stored label contains none.
+
+## Links
+
+Documentation: [USER_GUIDE.md](../USER_GUIDE.md)
+
+Related ADRs: [ADR 11](2026-09-24-bound-instance-report-size.md), [ADR 12](2026-09-30-filter-report-by-query-parameters.md)

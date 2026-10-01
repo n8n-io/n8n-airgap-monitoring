@@ -137,9 +137,14 @@ Notes:
 - If `N8N_ENABLED_MODULES` already lists other modules, add
   `instance-reporting` to the comma-separated list rather than replacing it.
 - The `insights` module must stay enabled (it is enabled by default). The daily figure comes from its data.
-- The label is free text shown in the report to help you tell instances apart.
-  It is cosmetic. The instance id stays the identity, so relabeling an instance
+- The label is shown in the report to help you tell instances apart. It is
+  cosmetic. The instance id stays the identity, so relabeling an instance
   never splits or merges its history.
+- The label is stored URL-compliant: lowercase letters, digits and hyphens, at
+  most 200 characters. Other characters are replaced and a longer label is cut,
+  the report is never rejected for them. For example, `Acme Prod / EU` is stored as `acme-prod-eu`
+  and `Café Zürich` as `cafe-zurich`. A label with no letters or digits that
+  can be kept, for example `!!!`, is stored as no label.
 - In a multi-main (queue mode) setup, set the variables on all main instances.
 
 ### What to expect
@@ -172,7 +177,7 @@ seen and every value it ever reported for each metric:
     "instances": [
       {
         "instanceId": "450b5c85…",
-        "label": "acme prod",
+        "label": "acme-prod",
         "firstSeen": "2026-03-20T02:00:00.000Z",
         "lastReportAt": "2026-03-26T02:00:00.000Z",
         "dataPoints": {

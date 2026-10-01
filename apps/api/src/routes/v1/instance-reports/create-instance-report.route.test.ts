@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { LABEL_MAX_LENGTH } from "../../../instance-report/label";
 import { build } from "../../../test-utils/build-app";
 import {
   generateMockLicense,
@@ -84,7 +85,7 @@ test("never stores the license certificate", async () => {
   expect(report.body).not.toContain("licenseCert");
 });
 
-test("stores the optional label when provided", async () => {
+test("stores the optional label, sanitized, when provided", async () => {
   const app = await build();
 
   const res = await app.inject({
@@ -100,7 +101,45 @@ test("stores the optional label when provided", async () => {
     label: string;
   }[];
 
-  expect(row.label).toBe("Kiwi prod");
+  expect(row.label).toBe("kiwi-prod");
+});
+
+test.each(["!!!", ""])("stores the label %j as no label instead of rejecting the report", async (label) => {
+  const app = await build();
+
+  const res = await app.inject({
+    method: "POST",
+    url: URL,
+    payload: authorized({ ...validReport, label }),
+  });
+
+  expect(res.statusCode).toBe(201);
+
+  const { id } = res.json() as { id: number };
+  const [row] = (await app.dataSource.query("SELECT label FROM instance_reports WHERE id = ?", [id])) as {
+    label: string | null;
+  }[];
+
+  expect(row.label).toBe(null);
+});
+
+test("cuts a long label instead of rejecting the report", async () => {
+  const app = await build();
+
+  const res = await app.inject({
+    method: "POST",
+    url: URL,
+    payload: authorized({ ...validReport, label: "x".repeat(LABEL_MAX_LENGTH + 1) }),
+  });
+
+  expect(res.statusCode).toBe(201);
+
+  const { id } = res.json() as { id: number };
+  const [row] = (await app.dataSource.query("SELECT label FROM instance_reports WHERE id = ?", [id])) as {
+    label: string;
+  }[];
+
+  expect(row.label).toBe("x".repeat(LABEL_MAX_LENGTH));
 });
 
 test("appends every report instead of overwriting the instance", async () => {
@@ -259,9 +298,7 @@ test("rejects malformed instance reports", async () => {
       ...validReport,
       dataPoints: [{ kind: "daily", name: "x", value: 1, date: "2026-03-25T00:00:00.000Z" }],
     },
-    "empty label": { ...validReport, label: "" },
     "non-string label": { ...validReport, label: 42 },
-    "oversized label": { ...validReport, label: "x".repeat(201) },
     "oversized instanceId": { ...validReport, instanceId: "x".repeat(257) },
     "oversized batchId": { ...validReport, batchId: "x".repeat(129) },
     "oversized n8nVersion": { ...validReport, n8nVersion: "x".repeat(65) },
@@ -397,6 +434,8 @@ describe("in token mode", () => {
   // The rule behind REPORT_BODY_LIMIT_BYTES: a report at every schema limit at
   // once still fits together with a certificate at its budget. The limits come
   // from the schema, so a larger schema limit without a larger body limit fails here.
+  // The label has no schema limit, as it is cut instead, so it is sized at the
+  // length that is stored.
   test("accepts a report at every schema limit together with a certificate at its budget", async () => {
     const app = await buildInTokenMode();
 
@@ -406,7 +445,7 @@ describe("in token mode", () => {
     const report = {
       instanceId: widest(properties.instanceId.maxLength),
       batchId: widest(properties.batchId.maxLength),
-      label: widest(properties.label.maxLength),
+      label: widest(LABEL_MAX_LENGTH),
       n8nVersion: widest(properties.n8nVersion.maxLength),
       // A daily point is the longer kind, and -Number.MAX_VALUE is the longest number JSON.stringify writes.
       dataPoints: Array.from({ length: properties.dataPoints.maxItems }, () => ({
