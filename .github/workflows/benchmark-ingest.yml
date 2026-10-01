@@ -18,7 +18,7 @@ on:
       steps:
         description: 'Rates to send, in req/s'
         required: true
-        default: '100,170,200,350,600,800'
+        default: '100,170,300,400,500,600'
         type: string
       step_seconds:
         description: 'Seconds per step'

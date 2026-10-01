@@ -9,7 +9,7 @@ import exec from "k6/execution";
 import http from "k6/http";
 
 const BASE_URL = __ENV.BASE_URL || "http://127.0.0.1:3999";
-const STEPS = [...new Set((__ENV.STEPS || "100,170,200,350,600,800").split(",").map(Number))].sort((a, b) => a - b);
+const STEPS = [...new Set((__ENV.STEPS || "100,170,300,400,500,600").split(",").map(Number))].sort((a, b) => a - b);
 const STEP_SECONDS = Number(__ENV.STEP_SECONDS || 20);
 // The retry burst after an outage the chart is sized for,
 // docs/charts/airgap-monitoring/README.md#sizing.

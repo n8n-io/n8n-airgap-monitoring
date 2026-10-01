@@ -3,7 +3,7 @@
 Sends `POST /api/v1/instance-reports` to one replica under the resources of
 the [reference chart](../../../docs/charts/airgap-monitoring/README.md#sizing)
 (1 CPU, 512 MiB without swap, `--max-old-space-size=384`) at a ladder of rates,
-by default 100, 170, 200, 350, 600 and 800 req/s for 20 s each, and reports for
+by default 100, 170, 300, 400, 500 and 600 req/s for 20 s each, and reports for
 every step whether it kept up. 170 req/s, the retry burst the chart is sized
 for, is the level that must always hold.
 
