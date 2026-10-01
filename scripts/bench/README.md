@@ -1,5 +1,7 @@
 # Report download memory benchmark (API-269)
 
+For the ingest throughput benchmark, see [ingest/](ingest/README.md).
+
 Shows that `GET /api/v1/report` streams instead of buffering the whole report in
 memory: it seeds a big store and downloads the report under a heap cap.
 
