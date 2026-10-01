@@ -2,7 +2,8 @@ name: Benchmark Ingest
 
 # Sends POST /api/v1/instance-reports to one replica under the reference
 # chart's limits at a ladder of rates and reports, per step, whether it kept up.
-# Reports only; it never fails on the numbers. See scripts/bench/ingest/README.md.
+# Fails only when the required 170 req/s step is not held; rerun once to rule
+# out a slow runner. See scripts/bench/ingest/README.md.
 on:
   # TEMP: one run on PR #34 to check the workflow; remove before merging.
   pull_request:
