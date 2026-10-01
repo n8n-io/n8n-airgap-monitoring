@@ -4,6 +4,11 @@ name: Benchmark Ingest
 # chart's limits at a ladder of rates and reports, per step, whether it kept up.
 # Reports only; it never fails on the numbers. See scripts/bench/ingest/README.md.
 on:
+  # TEMP: one run on PR #34 to check the workflow; remove before merging.
+  pull_request:
+    paths:
+      - '.github/workflows/benchmark-ingest.yml'
+      - 'scripts/bench/ingest/**'
   workflow_dispatch:
     inputs:
       ref:
