@@ -1,0 +1,43 @@
+scripts/bench/ingest/license-cert.txt
+  s_1302673f1ba41d::t_5e28227f9bb796 1
+scripts/bench/ingest/README.md
+  s_1302673f1ba41d::t_b05f6876cb8e88 3-8,16-21,33,42-43
+  s_1302673f1ba41d::t_5ccc448689128f 49-51
+  s_1302673f1ba41d::t_30a3164acb8e4a 1,22-25,30,41
+  s_1302673f1ba41d::t_0a83ee034dca29 37
+  s_1302673f1ba41d::t_a1641b35a3250d 2,9-15,26-28,31-32,34-36,38-40,44-46
+  s_1302673f1ba41d::t_f17d256fe7df23 29,47-48
+scripts/bench/README.md
+  s_1302673f1ba41d::t_e4972cd3e13bea 3-4
+scripts/bench/ingest/ingest.k6.js
+  s_1302673f1ba41d::t_a8252de4c716e1 44-46
+  s_1302673f1ba41d::t_bb5a559a884daa 3,6-11,17-18,21,25-27,30,60-70,72-86,88-89,105,111-112,115,118,127,130
+  s_1302673f1ba41d::t_730528fbe14647 12
+  s_1302673f1ba41d::t_4ba36a8871ac80 1-2,4-5,13-16,19-20,28-29,31-43,47-59,71,87,90-104,106-110,113-114,116-117,119-126,128-129
+  s_1302673f1ba41d::t_5e28227f9bb796 22-24
+scripts/bench/ingest/compose.yml
+  s_1302673f1ba41d::t_5e28227f9bb796 20-22,24-44
+  s_1302673f1ba41d::t_e37d2c2967745b 2,4-7,9-19,23
+  s_1302673f1ba41d::t_c26a1b2e42dbeb 1,3,8
+.github/workflows/benchmark-ingest.yml
+  s_1302673f1ba41d::t_cdaf50fe8d3a7c 5,15,17,20,22,33,35,39,41,43,49
+  s_1302673f1ba41d::t_b05f6876cb8e88 3-4,13-14,16,18-19,21,50-52
+  s_1302673f1ba41d::t_7ad3cc74bc1c48 1-2,6-12,23-32,34,36-38,40,42,44-48,53-56
+  s_1302673f1ba41d::t_b2517f7632a850 57-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "7bd43433a37132a1d18c15db355049f94bd485f3",
+  "prompts": {},
+  "sessions": {
+    "s_1302673f1ba41d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "583b57c3-7f7f-48ce-9f55-70c1824d7262",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
