@@ -54,11 +54,12 @@ export const options = {
         duration: `${STEP_SECONDS}s`,
         startTime: `${i * (STEP_SECONDS + GRACEFUL_STOP_SECONDS)}s`,
         gracefulStop: `${GRACEFUL_STOP_SECONDS}s`,
-        // About a second of arrivals: the jitter holds a VU for 0.5 s on
-        // average, plus the response. k6 adds VUs up to maxVUs when that falls
-        // short, dropping iterations meanwhile. Steps never overlap, so the run
-        // never holds more than maxVUs, each with its own connection.
-        preAllocatedVUs: Math.min(rps, 1000),
+        // Two seconds of arrivals: the jitter holds a VU for 0.5 s on average,
+        // the response for up to about the p99 limit. Short of that, k6 adds
+        // VUs mid-step and drops iterations the server never saw. Steps never
+        // overlap, so the run never holds more than maxVUs, each with its own
+        // connection.
+        preAllocatedVUs: Math.min(rps * 2, 1000),
         maxVUs: 1000,
       },
     ]),
