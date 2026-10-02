@@ -1,0 +1,28 @@
+scripts/bench/ingest/compose.yml
+  s_1302673f1ba41d::t_370768b15492cb 20-21,23-24
+scripts/bench/ingest/README.md
+  s_1302673f1ba41d::t_53a275849996cb 44-45,48,67-70
+scripts/bench/ingest/generate-license.ts
+  s_1302673f1ba41d::t_954e5f0d8711a1 1-31
+scripts/bench/ingest/ingest.k6.js
+  s_1302673f1ba41d::t_370768b15492cb 35-37
+.github/workflows/benchmark-ingest.yml
+  ai_agent 8-12
+  s_1302673f1ba41d::t_53a275849996cb 51-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "0f454ef27faf98fd76e9f7246c01ab381026e023",
+  "prompts": {},
+  "sessions": {
+    "s_1302673f1ba41d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "583b57c3-7f7f-48ce-9f55-70c1824d7262",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
