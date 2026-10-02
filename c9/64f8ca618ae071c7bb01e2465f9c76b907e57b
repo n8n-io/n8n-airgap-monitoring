@@ -1,0 +1,25 @@
+.github/workflows/benchmark-ingest.yml
+  s_1302673f1ba41d::t_b867173e83d9a8 25
+scripts/bench/ingest/README.md
+  s_1302673f1ba41d::t_b867173e83d9a8 55
+  s_1302673f1ba41d::t_906c941dbd80be 19-21,35-37
+scripts/bench/ingest/ingest.k6.js
+  s_1302673f1ba41d::t_b867173e83d9a8 31-32,55
+  s_1302673f1ba41d::t_761e7c3c896666 23,27-30,33,56,73,83,100,122,134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "c964f8ca618ae071c7bb01e2465f9c76b907e57b",
+  "prompts": {},
+  "sessions": {
+    "s_1302673f1ba41d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "583b57c3-7f7f-48ce-9f55-70c1824d7262",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
