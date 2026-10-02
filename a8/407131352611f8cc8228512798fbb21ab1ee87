@@ -1,0 +1,15 @@
+docs/adr/2026-10-01-sanitize-the-instance-label.md
+  h_c63dce324dfc7b 23
+  h_c63dce324dfc7b 21-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a8407131352611f8cc8228512798fbb21ab1ee87",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
