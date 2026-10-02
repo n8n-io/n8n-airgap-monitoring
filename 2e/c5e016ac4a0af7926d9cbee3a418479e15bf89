@@ -1,0 +1,9 @@
+.github/workflows/benchmark-ingest.yml
+  ai_agent 8-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "2ec5e016ac4a0af7926d9cbee3a418479e15bf89",
+  "prompts": {}
+}
