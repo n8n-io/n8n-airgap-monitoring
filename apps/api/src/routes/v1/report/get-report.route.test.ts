@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import type { Metric, UsageReport } from "../../../instance-report/instance-report.service";
 import { build } from "../../../test-utils/build-app";
+import { airgapMonitoringVersion } from "../../../version";
 
 const URL = "/api/v1/report";
 const READ = { authorization: "Bearer test-read-token" };
@@ -57,7 +58,7 @@ test("validates against the read token, not the write token", async () => {
   expect(res.statusCode).toBe(401);
 });
 
-test("serves an empty report stamped with the generation time when nothing has been recorded", async () => {
+test("serves an empty report stamped with the generation time and service version when nothing has been recorded", async () => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date("2026-09-03T14:30:00.000Z"));
 
@@ -68,7 +69,7 @@ test("serves an empty report stamped with the generation time when nothing has b
 
     expect(res.statusCode).toBe(200);
     expect(res.json<UsageReport>()).toEqual({
-      data: { generatedAt: "2026-09-03T14:30:00.000Z", instances: [] },
+      data: { generatedAt: "2026-09-03T14:30:00.000Z", airgapMonitoringVersion, instances: [] },
     });
   } finally {
     vi.useRealTimers();

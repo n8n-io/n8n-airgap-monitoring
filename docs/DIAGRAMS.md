@@ -121,7 +121,7 @@ sequenceDiagram
     API-->>C: 200 OK<br/>Content-Type: application/json<br/>Cache-Control: no-store<br/>Content-Disposition: attachment#59; filename="n8n-instance-report-{stamp}.json"
     Note right of API: Headers go out first. The body is a Readable<br/>wrapping the renderReport async generator, so<br/>Fastify pipes chunks as they are produced.<br/>No response schema: the data was validated on<br/>upload and re-validating would undo the streaming.
 
-    API-->>C: chunk: {"data":{"generatedAt":"...",["filters":"...",]"instances":[
+    API-->>C: chunk: {"data":{"generatedAt":"...","airgapMonitoringVersion":"...",["filters":"...",]"instances":[
 
     API->>SVC: for await entry of streamInstanceReports(filter)
     SVC->>DB: SELECT DISTINCT instanceId<br/>[WHERE instanceId IN (…)]<br/>ORDER BY instanceId ASC
@@ -161,6 +161,7 @@ Content-Disposition: attachment; filename="n8n-instance-report-2026-03-28T08-00-
 {
   "data": {
     "generatedAt": "2026-03-28T08:00:00.000Z",
+    "airgapMonitoringVersion": "0.2.1",
     "instances": [
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",

@@ -169,6 +169,7 @@ seen and every value it ever reported for each metric:
 {
   "data": {
     "generatedAt": "2026-09-03T14:30:00.000Z",
+    "airgapMonitoringVersion": "0.2.1",
     "instances": [
       {
         "instanceId": "450b5c85…",

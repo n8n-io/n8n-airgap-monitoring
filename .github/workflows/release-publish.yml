@@ -151,4 +151,4 @@ jobs:
             --body "Automated post-release PR to update the package.json version and the Helm chart's appVersion on main after publishing v${VERSION}. Close and reopen this PR to trigger CI." \
             --label "release" \
             --message "chore: Bump version to v${VERSION}" \
-            -- package.json docs/charts/airgap-monitoring/Chart.yaml
+            -- package.json apps/api/package.json docs/charts/airgap-monitoring/Chart.yaml
