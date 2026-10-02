@@ -111,11 +111,7 @@ export default function () {
         // Grows with the wall clock, which every VU shares, so an instance's
         // running totals never go down between its reports and always exceed
         // a day's value.
-        ...CUMULATIVE_METRICS.map((name) => ({
-          kind: "cumulative",
-          name,
-          value: i * 100 + Math.floor(Date.now() / 1000),
-        })),
+        ...CUMULATIVE_METRICS.map((name) => ({ kind: "cumulative", name, value: Math.floor(Date.now() / 1000) })),
         ...(backfill ? days : days.slice(-1)).map((date) => ({
           kind: "daily",
           name: "billableExecutions",

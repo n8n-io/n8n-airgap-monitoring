@@ -154,6 +154,13 @@ The defaults come from the service's measured behaviour and this load model:
 | Memory limit | `512Mi` | Peak memory tracks the largest single instance's history, not the fleet size, because the report is streamed. |
 | `NODE_OPTIONS` | `--max-old-space-size=384` | Caps the V8 heap at 75% of the limit so garbage collection runs before the kernel OOM-kills the pod. Keep the ratio if you change the limit. |
 
+A CPU limit of `1` is one core of the node, whatever that core is. Accepting
+reports is CPU-bound, so throughput follows the speed of that one core: a
+GitHub-hosted runner's vCPU holds 400–500 reports/second, 2.4–2.9 times the
+worst case above, and a slow or heavily shared core holds proportionally less.
+A higher limit barely helps, because Node runs one event loop; a faster core
+does. See [the ingest benchmark](../../../scripts/bench/ingest/README.md).
+
 ### Storage
 
 | Setting | Default | Why |
