@@ -69,7 +69,8 @@ If the run fails, run it again: a real regression fails twice in a row.
 
 `snapshot.json` holds the highest step held and each step's p99 from one
 runner run. The report shows them next to the current numbers; a deviation
-never fails the run. When a change moves the numbers on purpose, copy them from
+never fails the run, and a missing or broken file only leaves the comparison
+out. When a change moves the numbers on purpose, copy them from
 a runner run's job summary into `snapshot.json`, with that run's link and date.
 
 ## The mock license

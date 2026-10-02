@@ -35,8 +35,9 @@ const GRACEFUL_STOP_SECONDS = JITTER_SECONDS + CLIENT_TIMEOUT_SECONDS + 4;
 // From generate-license.ts. The server caches nothing between requests, so
 // one certificate costs it the same as 10k distinct ones.
 const licenseCert = open("./.work/license-cert.txt").trim();
-// The tracked run this one is compared with, see README.md.
-const snapshot = JSON.parse(open("./snapshot.json"));
+// The tracked run this one is compared with, see README.md. Optional: a
+// missing or broken file only drops the comparison from the report.
+const snapshot = loadSnapshot();
 // Newest last, ending yesterday.
 const days = Array.from({ length: 30 }, (_, d) =>
   new Date(Date.now() - (30 - d) * 86_400_000).toISOString().slice(0, 10),
@@ -127,6 +128,14 @@ export default function () {
   check(res, { "status is 201": (r) => r.status === 201 });
 }
 
+function loadSnapshot() {
+  try {
+    return JSON.parse(open("./snapshot.json"));
+  } catch {
+    return null;
+  }
+}
+
 function randomInt(max) {
   return Math.floor(Math.random() * max);
 }
@@ -166,11 +175,13 @@ export function handleSummary(data) {
       `and a ~7.3 KB license certificate, sent with 0–${JITTER_SECONDS} s jitter for ${STEP_SECONDS} s per step.`,
     "",
     `A step is held when every request got a 201 within ${CLIENT_TIMEOUT_SECONDS} s, none was dropped and p99 ≤ ${SLO_P99_MS} ms. ` +
-      `Compared with the [snapshot](${snapshot.run}) of ${snapshot.date}.`,
+      (snapshot
+        ? `Compared with the [snapshot](${snapshot.run}) of ${snapshot.date}.`
+        : "No snapshot to compare with."),
     "",
     `- Required ${REQUIRED_RPS} req/s: ${required.held ? "✅ held" : "❌ not held, the run fails"}`,
     `- Highest held: ${highest ? `${highest.rps} req/s${firstMiss === -1 ? " (top step, the limit is above)" : ""}` : "none"}` +
-      ` (snapshot: ${snapshot.highestHeld} req/s)`,
+      (snapshot ? ` (snapshot: ${snapshot.highestHeld} req/s)` : ""),
     `- Headroom over ${REQUIRED_RPS} req/s: ${highest ? `${(highest.rps / REQUIRED_RPS).toFixed(1)}×` : "none"}`,
     "",
     "| req/s | sent | non-201 | dropped | p50 | p99 | p99 snapshot | |",
@@ -178,7 +189,7 @@ export function handleSummary(data) {
     ...steps.map(
       (s) =>
         `| ${s.rps} | ${s.sent} | ${s.non201} | ${s.dropped} | ${ms(s.p50)} | ${ms(s.p99)} | ` +
-        `${s.rps in snapshot.p99Ms ? ms(snapshot.p99Ms[s.rps]) : "–"} | ${s.held ? "✅" : "❌"} |`,
+        `${snapshot?.p99Ms?.[s.rps] !== undefined ? ms(snapshot.p99Ms[s.rps]) : "–"} | ${s.held ? "✅" : "❌"} |`,
     ),
     "",
   ];

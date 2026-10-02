@@ -10,7 +10,8 @@ scripts/bench/download/run.sh 500 90 128      # instances, days, mem_mb
 
 It builds `apps/api`, seeds a throwaway temp DB (auto-removed), downloads the
 report under `--max-old-space-size`, and prints peak RSS, size and time.
-Needs `python3` (stdlib only).
+Needs Node and pnpm (it builds and starts `apps/api`), `curl`, `ps`, and
+`python3` (stdlib only) for `seed.py`.
 
 Run it on the pre-streaming build and a large store OOM-crashes; run it on the
 streaming build and the same store downloads fine under the same cap — one
