@@ -152,3 +152,13 @@ jobs:
             --label "release" \
             --message "chore: Bump version to v${VERSION}" \
             -- package.json apps/api/package.json docs/charts/airgap-monitoring/Chart.yaml
+
+  release-sbom:
+    needs: [publish-image, release-metadata]
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/release-sbom.yml
+    with:
+      version: ${{ needs.publish-image.outputs.version }}
