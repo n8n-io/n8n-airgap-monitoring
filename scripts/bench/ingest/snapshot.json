@@ -1,0 +1,6 @@
+{
+  "date": "2026-10-02",
+  "run": "https://github.com/n8n-io/n8n-airgap-monitoring/actions/runs/36996002047",
+  "highestHeld": 500,
+  "p99Ms": { "100": 9, "170": 13, "300": 57, "400": 377, "500": 201, "600": 1592 }
+}

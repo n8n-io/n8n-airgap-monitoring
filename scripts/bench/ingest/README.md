@@ -10,10 +10,10 @@ not held; the rest of the ladder is a report.
 ## What the load looks like
 
 - Every request is one report as n8n sends it: a random instance out of 10,000,
-  a fresh `batchId`, five cumulative data points (`billableExecutions` and four
-  borrowed from license metrics) and a daily `billableExecutions` one, and a
-  license certificate the size of a real one (~7.3 KB). Certificate auth is
-  what n8n uses in production, and the server verifies it on every request.
+  a fresh `batchId`, five cumulative data points and a daily
+  `billableExecutions` one, and a license certificate the size of a real one
+  (~7.3 KB). Certificate auth is what n8n uses in production, and the server
+  verifies it on every request.
 - Every fifth report carries 30 days of daily `billableExecutions` instead of
   one, like an instance catching up after it could not reach the receiver.
 - Each step is a k6 `constant-arrival-rate` scenario: requests start at the
@@ -64,6 +64,13 @@ takes about five and a half minutes.
 
 A hosted runner is now and then slow on its own, enough to miss even 100 req/s.
 If the run fails, run it again: a real regression fails twice in a row.
+
+## The snapshot
+
+`snapshot.json` holds the highest step held and each step's p99 from one
+runner run. The report shows them next to the current numbers; a deviation
+never fails the run. When a change moves the numbers on purpose, copy them from
+a runner run's job summary into `snapshot.json`, with that run's link and date.
 
 ## The mock license
 
