@@ -35,7 +35,22 @@ const GRACEFUL_STOP_SECONDS = JITTER_SECONDS + CLIENT_TIMEOUT_SECONDS + 4;
 // From generate-license.ts. The server caches nothing between requests, so
 // one certificate costs it the same as 10k distinct ones.
 const licenseCert = open("./.work/license-cert.txt").trim();
-const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+// Newest last, ending yesterday.
+const days = Array.from({ length: 30 }, (_, d) =>
+  new Date(Date.now() - (30 - d) * 86_400_000).toISOString().slice(0, 10),
+);
+// Borrowed from license metrics, to give each report as many running totals
+// as a real one carries.
+const CUMULATIVE_METRICS = [
+  "billableExecutions",
+  "enabledUsers",
+  "amountOfWorkflows",
+  "totalCredentialsCount",
+  "evaluationsCount",
+];
+// One report in this many catches up on 30 days, like an instance that could
+// not reach the receiver for a while.
+const BACKFILL_EVERY = 5;
 const run = Date.now().toString(36);
 
 const scenario = (rps) => `rps_${rps}`;
@@ -83,7 +98,7 @@ export const options = {
 export default function () {
   sleep(Math.random() * JITTER_SECONDS);
   const i = Math.floor(Math.random() * INSTANCES);
-  const volume = 4_000 + Math.floor(Math.random() * 7_000);
+  const backfill = exec.scenario.iterationInTest % BACKFILL_EVERY === 0;
   const res = http.post(
     `${BASE_URL}/api/v1/instance-reports`,
     JSON.stringify({
@@ -93,14 +108,23 @@ export default function () {
       label: `instance-${i}`,
       n8nVersion: "1.99.0",
       dataPoints: [
-        { kind: "cumulative", name: "billableExecutions", value: 1_000_000 + volume },
-        { kind: "daily", name: "billableExecutions", value: volume, date: yesterday },
+        ...CUMULATIVE_METRICS.map((name) => ({ kind: "cumulative", name, value: randomInt(1_000_000) })),
+        ...(backfill ? days : days.slice(-1)).map((date) => ({
+          kind: "daily",
+          name: "billableExecutions",
+          value: 4_000 + randomInt(7_000),
+          date,
+        })),
       ],
       licenseCert,
     }),
     { headers: { "content-type": "application/json" }, timeout: `${CLIENT_TIMEOUT_SECONDS}s` },
   );
   check(res, { "status is 201": (r) => r.status === 201 });
+}
+
+function randomInt(max) {
+  return Math.floor(Math.random() * max);
 }
 
 export function handleSummary(data) {

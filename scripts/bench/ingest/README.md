@@ -10,9 +10,12 @@ not held; the rest of the ladder is a report.
 ## What the load looks like
 
 - Every request is one report as n8n sends it: a random instance out of 10,000,
-  a fresh `batchId`, a cumulative and a daily `billableExecutions` data point,
-  and a license certificate the size of a real one (~7.3 KB). Certificate auth
-  is what n8n uses in production, and the server verifies it on every request.
+  a fresh `batchId`, five cumulative data points (`billableExecutions` and four
+  borrowed from license metrics) and a daily `billableExecutions` one, and a
+  license certificate the size of a real one (~7.3 KB). Certificate auth is
+  what n8n uses in production, and the server verifies it on every request.
+- Every fifth report carries 30 days of daily `billableExecutions` instead of
+  one, like an instance catching up after it could not reach the receiver.
 - Each step is a k6 `constant-arrival-rate` scenario: requests start at the
   step's rate whether or not earlier ones have finished. When the server falls
   behind, k6 drops iterations, which the report counts.
