@@ -1,4 +1,5 @@
 import type { InstanceReportRepository, InstanceReportRow } from "./instance-report.repository";
+import { sanitizeLabel } from "./label";
 
 interface BaseMetric {
   name: string;
@@ -43,7 +44,8 @@ export interface CreateInstanceReport {
   batchId: string;
   /**
    * Display name only: instanceId stays the identity, so a relabel never
-   * splits or merges an instance's history.
+   * splits or merges an instance's history. Sanitized to a URL-compliant
+   * label before it is stored, see {@link sanitizeLabel}.
    */
   label?: string;
   n8nVersion: string;
@@ -89,7 +91,10 @@ interface NamedMetric {
 /** The report's view of one instance: identity, when we first heard from it, and its full metric history. */
 export interface InstanceReportEntry {
   instanceId: string;
-  /** Last-received display label, or null. Untrusted, customer-chosen free text. */
+  /**
+   * Last-received display label, or null. Customer-chosen and URL-compliant,
+   * except from rows stored before labels were sanitized.
+   */
   label: string | null;
   /** Timestamp the collector received the earliest event we stored for this instance. */
   firstSeen: string;
@@ -125,8 +130,11 @@ export class InstanceReportService {
   constructor(private readonly repository: InstanceReportRepository) {}
 
   async recordReport(report: CreateInstanceReport): Promise<{ id: number }> {
+    const label = report.label ? sanitizeLabel(report.label) : undefined;
+
     const id = await this.repository.insert({
       ...report,
+      label,
       receivedAt: new Date().toISOString(),
     });
 

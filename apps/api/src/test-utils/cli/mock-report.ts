@@ -12,7 +12,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { parseArgs } from "node:util";
 
 const USAGE = `usage: mock-report [--instance-id ID] [--label LABEL] [--days N]
-  --label LABEL  1-200 characters
+  --label LABEL  stored sanitized and cut to 200 characters
   --days N       add N daily data points ending yesterday (default 0)
   N8N_LICENSE_CERT, when set, is embedded as licenseCert`;
 
@@ -39,9 +39,6 @@ if (values.help) {
 
 const days = Number(values.days);
 if (!Number.isInteger(days) || days < 0) fail(`--days must be a non-negative integer\n${USAGE}`);
-if (values.label !== undefined && (values.label.length < 1 || values.label.length > 200)) {
-  fail(`--label must be 1-200 characters\n${USAGE}`);
-}
 
 const yesterday = Date.now() - DAY_MS;
 const dailyPoints = Array.from({ length: days }, (_, offset) => ({

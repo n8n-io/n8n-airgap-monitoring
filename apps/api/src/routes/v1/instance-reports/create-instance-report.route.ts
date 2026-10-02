@@ -39,7 +39,9 @@ export const instanceReportSchema = {
   properties: {
     instanceId: { type: "string", minLength: 1, maxLength: 256 },
     batchId: { type: "string", minLength: 1, maxLength: 128 },
-    label: { type: "string", minLength: 1, maxLength: 200 },
+    // Any string, we sanitize the label and cut it to
+    // a max length of 200 chars instead of rejecting it
+    label: { type: "string" },
     n8nVersion: { type: "string", minLength: 1, maxLength: 64 },
     // Metric names are chosen by the reporting instance, so only their
     // format and the envelope (cumulative vs daily) are pinned down.
