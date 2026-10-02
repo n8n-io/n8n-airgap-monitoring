@@ -1,0 +1,111 @@
+name: Release SBOM
+
+# Attaches an SBOM and a third-party license manifest to an existing GitHub
+# release. release-publish.yml calls it once the release exists; dispatch it to
+# backfill a release or retry a failed run.
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      upload:
+        type: boolean
+        default: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Released version (x.y.z) to generate the files for'
+        required: true
+        type: string
+      upload:
+        description: 'Attest and attach the files to the release (disable to only keep them as run artifacts)'
+        type: boolean
+        default: true
+  # TEMP: one run on the PR to check the workflow; remove before merging.
+  pull_request:
+    paths:
+      - '.github/workflows/release-sbom.yml'
+
+permissions: {}
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      # TEMP: the fallback is for the pull_request run; remove it with the trigger.
+      VERSION: ${{ inputs.version || '0.2.1' }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: v${{ env.VERSION }}
+
+      # n8n's SBOM license tooling, at the commit that built n8n@2.40.6.
+      - name: Check out n8n license tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          repository: n8n-io/n8n
+          ref: 024ee46bdc6d57e5c47ef2c26bcac2b3a9efd827 # n8n@2.40.6
+          path: n8n-license-tooling
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/licenses
+            packages/@n8n/typeorm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: '.nvmrc'
+
+      # Hoisted so render-licenses-md finds LICENSE files; cdxgen reads the deploy's lockfile.
+      - name: Generate SBOM and license manifest
+        run: |
+          DEPLOY="${RUNNER_TEMP}/sbom-deploy"
+          PNPM_CONFIG_SHAMEFULLY_HOIST=true pnpm deploy --legacy --filter api --prod "$DEPLOY"
+          cp "$DEPLOY/node_modules/.pnpm/lock.yaml" "$DEPLOY/pnpm-lock.yaml"
+          # Named after the product rather than the `api` workspace package.
+          jq --arg version "$VERSION" '.name = "airgap-monitoring" | .version = $version' \
+            "$DEPLOY/package.json" > "$DEPLOY/package.json.tmp"
+          mv "$DEPLOY/package.json.tmp" "$DEPLOY/package.json"
+          FETCH_LICENSE=true npx -y @cyclonedx/cdxgen@12.4.0 \
+            -t pnpm --no-install-deps --profile license-compliance --spec-version 1.6 \
+            -o sbom-source.cdx.json "$DEPLOY"
+
+          LICENSES=n8n-license-tooling/scripts/licenses
+          # n8n's overrides are pinned to n8n's dependency tree. Against ours every
+          # pin is stale, which enrich-sbom and render-licenses-md both fail on.
+          echo '{}' > "$LICENSES/license-overrides.json"
+          node "$LICENSES/enrich-sbom.mjs" sbom-source.cdx.json
+          node "$LICENSES/render-licenses-md.mjs" sbom-source.cdx.json THIRD_PARTY_LICENSES.md "$DEPLOY/node_modules"
+          node "$LICENSES/check-sbom-licenses.mjs" sbom-source.cdx.json \
+            --allow-ref=LicenseRef-n8n-sustainable-use --allow-ref=LicenseRef-n8n-enterprise
+
+      # Gated with the upload: an attestation is public and permanent.
+      - name: Attest SBOM
+        if: inputs.upload
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: './package.json'
+          sbom-path: 'sbom-source.cdx.json'
+
+      - name: Attach to release
+        if: inputs.upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "v${VERSION}" sbom-source.cdx.json THIRD_PARTY_LICENSES.md --clobber
+
+      - name: Keep as run artifacts
+        if: ${{ !inputs.upload }}
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: sbom-v${{ env.VERSION }}
+          path: |
+            sbom-source.cdx.json
+            THIRD_PARTY_LICENSES.md
