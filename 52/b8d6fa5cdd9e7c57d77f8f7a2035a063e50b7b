@@ -1,0 +1,21 @@
+scripts/bench/ingest/ingest.k6.js
+  s_1302673f1ba41d::t_8b97f2641a21f9 38-53,101,111-117,126-127
+scripts/bench/ingest/README.md
+  s_1302673f1ba41d::t_8b97f2641a21f9 13-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "52b8d6fa5cdd9e7c57d77f8f7a2035a063e50b7b",
+  "prompts": {},
+  "sessions": {
+    "s_1302673f1ba41d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "583b57c3-7f7f-48ce-9f55-70c1824d7262",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
