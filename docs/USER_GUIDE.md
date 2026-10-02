@@ -141,9 +141,10 @@ Notes:
   cosmetic. The instance id stays the identity, so relabeling an instance
   never splits or merges its history.
 - The label is stored URL-compliant: lowercase letters, digits and hyphens, at
-  most 200 characters. Other characters are replaced and a longer label is cut,
-  the report is never rejected for them. For example, `Acme Prod / EU` is stored as `acme-prod-eu`
-  and `Café Zürich` as `cafe-zurich`. A label with no letters or digits that
+  most 200 characters. The report is never rejected because of the label: other
+  characters are replaced and a longer label is cut. For example,
+  `Acme Prod / EU` is stored as `acme-prod-eu` and `Café Zürich` as
+  `cafe-zurich`. A label with no letters or digits that
   can be kept, for example `!!!`, is stored as no label.
 - In a multi-main (queue mode) setup, set the variables on all main instances.
 
