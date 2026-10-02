@@ -18,22 +18,9 @@ A rejected report is more dangerous than a bad label. The n8n client retries a r
 
 The service sanitizes the label before it stores it, and never rejects a report because of the characters in it or its length.
 
-1. Decompose with NFKD and drop the combining marks, so `é` becomes `e` and `ﬁ` becomes `fi`.
-2. Lowercase.
-3. Replace each run of characters other than `a-z` and `0-9` with a single `-`.
-4. Trim hyphens at the start and end.
-5. Cut to 200 characters and trim the trailing hyphens again.
-6. If nothing is left, store `null`, as for an absent label.
+The schema only requires a string, with no length limits: a too long label is cut, and an empty one is stored as `null`.
 
-The schema only requires a string, with no length limits: a too long label is cut, and an empty one is stored as `null`. A non-string label is a broken client, not a bad label, so it is still 400.
-
-## Alternatives Considered
-
-- **A pattern in the schema, so that the request is rejected.** Rejected: see Context.
-- **Keep `maxLength: 200` in the schema.** Rejected: a too long label would be rejected the same way as a bad character.
-- **Keep the case.** Rejected: parts of a URL are compared case-insensitively, so `Prod` and `prod` could end up in the same URL.
-- **Transliterate letters without an accent-free form, for example `ß` to `ss` or `ł` to `l`.** Rejected: it needs a hand-kept table or a dependency, for a display name.
-- **Sanitize when the report is read, or migrate the stored rows.** Rejected: the report shows the last-received label, so an instance's label is sanitized with its next daily report.
+Since the label is user-provided, we don't want to expose this as a surface to break the integration.
 
 ## Consequences
 
