@@ -16,6 +16,9 @@ not held; the rest of the ladder is a report.
 - Each step is a k6 `constant-arrival-rate` scenario: requests start at the
   step's rate whether or not earlier ones have finished. When the server falls
   behind, k6 drops iterations, which the report counts.
+- Steps are 35 s apart, so every request of a step has finished or timed out
+  before the next one starts. k6 keeps two seconds of arrivals in VUs, at most
+  1,000, so a drop means the server fell behind, not k6.
 - Each request waits a random 0–1 s after its scheduled start, so requests land
   at random moments, like reports from 10,000 instances, instead of evenly
   spaced. The wait is not part of the measured latency.
