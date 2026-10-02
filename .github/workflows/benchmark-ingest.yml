@@ -22,7 +22,7 @@ on:
         default: '100,170,300,400,500,600'
         type: string
       step_seconds:
-        description: 'Seconds per step'
+        description: 'Seconds per step. Steps × (seconds + 35) must fit in the 15 min job timeout'
         required: true
         default: '20'
         type: string

@@ -16,6 +16,9 @@ not held; the rest of the ladder is a report.
 - Each step is a k6 `constant-arrival-rate` scenario: requests start at the
   step's rate whether or not earlier ones have finished. When the server falls
   behind, k6 drops iterations, which the report counts.
+- Each request waits a random 0–1 s after its scheduled start, so requests land
+  at random moments, like reports from 10,000 instances, instead of evenly
+  spaced. The wait is not part of the measured latency.
 - A step is held if every request got a 201 within 30 s, none was dropped and
   p99 stays at or below 1 s. The report names the highest step held before the
   first miss and its headroom over 170 req/s.
@@ -29,10 +32,9 @@ not held; the rest of the ladder is a report.
 | p99 | ≤ 1 s | Keeps the slowest 1% of requests 30 times inside that timeout. |
 | Steps | 100–600 req/s | 100 warms the server up; 300–600 bracket the limit on the `ubuntu-24.04` runner, about 400–500 req/s. |
 
-Known gaps against production: requests arrive evenly spaced rather than at
-random moments, k6 reuses keep-alive connections where real instances open one
-each, and the database starts empty instead of holding years of reports. All
-three make the numbers somewhat optimistic.
+Known gaps against production: k6 reuses keep-alive connections where real
+instances open one each, and the database starts empty instead of holding years
+of reports. Both make the numbers somewhat optimistic.
 
 ## Run it locally
 
@@ -50,7 +52,7 @@ Other rates and step lengths: `k6 run -e STEPS=170,1000,1500 -e STEP_SECONDS=30 
 
 Run the **Benchmark Ingest** workflow with `ref` set to the PR branch (or
 `refs/pull/<n>/head`). The job summary has the per-step table. A full ladder
-takes about three minutes.
+takes about five and a half minutes.
 
 A hosted runner is now and then slow on its own, enough to miss even 100 req/s.
 If the run fails, run it again: a real regression fails twice in a row.

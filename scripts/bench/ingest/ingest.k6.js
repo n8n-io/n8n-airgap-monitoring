@@ -4,7 +4,7 @@
 //   k6 run scripts/bench/ingest/ingest.k6.js
 //   k6 run -e STEPS=170,600 -e STEP_SECONDS=60 scripts/bench/ingest/ingest.k6.js
 
-import { check } from "k6";
+import { check, sleep } from "k6";
 import exec from "k6/execution";
 import http from "k6/http";
 
@@ -20,15 +20,17 @@ const STEP_SECONDS = Number(__ENV.STEP_SECONDS || 20);
 // n8n gives up on a request after 30 s and retries it 5 min later, 3 attempts
 // in all (REQUEST_TIMEOUT_MS in packages/cli/src/modules/instance-reporting.ee/
 // instance-reporting.service.ts). A slower request counts as failed here too.
-const CLIENT_TIMEOUT = "30s";
+const CLIENT_TIMEOUT_SECONDS = 30;
 // Keeps the slowest 1% 30 times inside that timeout.
 const SLO_P99_MS = 1000;
-// A request still running when gracefulStop cuts a step leaves no sample at
-// all, so a short count is the only trace of it.
-const MIN_SENT_RATIO = 0.99;
 const INSTANCES = 10_000;
-// Lets a step's slow requests finish before the next one starts.
-const PAUSE_SECONDS = 10;
+// Each request waits up to this long after its scheduled start, so requests
+// land at random moments, like reports from 10k instances, not evenly spaced.
+const JITTER_SECONDS = 1;
+// Longer than the jitter plus the timeout, so no request is cut off unfinished:
+// each one ends as a 201 or as a failure the report counts. Also the pause
+// between steps, so a step never shares load or VUs with the one before.
+const GRACEFUL_STOP_SECONDS = JITTER_SECONDS + CLIENT_TIMEOUT_SECONDS + 4;
 
 // Signed by the mock CA in compose.yml. The server caches nothing between
 // requests, so one certificate costs it the same as 10k distinct ones.
@@ -50,11 +52,13 @@ export const options = {
         rate: rps,
         timeUnit: "1s",
         duration: `${STEP_SECONDS}s`,
-        startTime: `${i * (STEP_SECONDS + PAUSE_SECONDS)}s`,
-        gracefulStop: `${PAUSE_SECONDS}s`,
-        // All up front: VUs started mid-step are slow to come up and drop
-        // iterations the server never saw.
-        preAllocatedVUs: 1000,
+        startTime: `${i * (STEP_SECONDS + GRACEFUL_STOP_SECONDS)}s`,
+        gracefulStop: `${GRACEFUL_STOP_SECONDS}s`,
+        // About a second of arrivals: the jitter holds a VU for 0.5 s on
+        // average, plus the response. k6 adds VUs up to maxVUs when that falls
+        // short, dropping iterations meanwhile. Steps never overlap, so the run
+        // never holds more than maxVUs, each with its own connection.
+        preAllocatedVUs: Math.min(rps, 1000),
         maxVUs: 1000,
       },
     ]),
@@ -66,10 +70,7 @@ export const options = {
       const real = rps === REQUIRED_RPS;
       return [
         [`http_req_duration{scenario:${scenario(rps)}}`, [real ? `p(99)<=${SLO_P99_MS}` : "max>=0"]],
-        [
-          `http_reqs{scenario:${scenario(rps)}}`,
-          [`count>=${real ? Math.floor(MIN_SENT_RATIO * rps * STEP_SECONDS) : 0}`],
-        ],
+        [`http_reqs{scenario:${scenario(rps)}}`, ["count>=0"]],
         [`checks{scenario:${scenario(rps)}}`, [real ? "rate==1" : "rate>=0"]],
         [`dropped_iterations{scenario:${scenario(rps)}}`, [real ? "count==0" : "count>=0"]],
       ];
@@ -79,6 +80,7 @@ export const options = {
 };
 
 export default function () {
+  sleep(Math.random() * JITTER_SECONDS);
   const i = Math.floor(Math.random() * INSTANCES);
   const volume = 4_000 + Math.floor(Math.random() * 7_000);
   const res = http.post(
@@ -95,7 +97,7 @@ export default function () {
       ],
       licenseCert,
     }),
-    { headers: { "content-type": "application/json" }, timeout: CLIENT_TIMEOUT },
+    { headers: { "content-type": "application/json" }, timeout: `${CLIENT_TIMEOUT_SECONDS}s` },
   );
   check(res, { "status is 201": (r) => r.status === 201 });
 }
@@ -117,7 +119,7 @@ export function handleSummary(data) {
       dropped,
       p50: duration.med,
       p99,
-      held: non201 === 0 && dropped === 0 && sent >= MIN_SENT_RATIO * rps * STEP_SECONDS && p99 <= SLO_P99_MS,
+      held: non201 === 0 && dropped === 0 && p99 <= SLO_P99_MS,
     };
   });
 
@@ -129,7 +131,7 @@ export function handleSummary(data) {
     "### Ingest benchmark: `POST /api/v1/instance-reports`",
     "",
     `${INSTANCES} instances, certificate auth, 1 CPU / 512 MiB, ${STEP_SECONDS} s per step. ` +
-      `A step is held when every request got a 201 within ${CLIENT_TIMEOUT}, none was dropped and p99 ≤ ${SLO_P99_MS} ms.`,
+      `A step is held when every request got a 201 within ${CLIENT_TIMEOUT_SECONDS} s, none was dropped and p99 ≤ ${SLO_P99_MS} ms.`,
     "",
     `- Required ${REQUIRED_RPS} req/s: ${required.held ? "✅ held" : "❌ not held, the run fails"}`,
     `- Highest held: ${highest ? `${highest.rps} req/s${firstMiss === -1 ? " (top step, the limit is above)" : ""}` : "none"}`,
