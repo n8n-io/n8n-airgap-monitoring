@@ -76,9 +76,3 @@ jobs:
       - name: Server logs
         if: failure()
         run: docker compose -f scripts/bench/ingest/compose.yml logs --tail 200
-
-      # A hosted runner is thrown away after the job anyway; this keeps a
-      # self-hosted one clean.
-      - name: Stop server
-        if: always()
-        run: docker compose -f scripts/bench/ingest/compose.yml down -v
