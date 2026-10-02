@@ -22,10 +22,6 @@ on:
         description: 'Attest and attach the files to the release (disable to only keep them as run artifacts)'
         type: boolean
         default: true
-  # TEMP: one run on the PR to check the workflow; remove before merging.
-  pull_request:
-    paths:
-      - '.github/workflows/release-sbom.yml'
 
 permissions: {}
 
@@ -38,8 +34,7 @@ jobs:
       id-token: write
       attestations: write
     env:
-      # TEMP: the fallback is for the pull_request run; remove it with the trigger.
-      VERSION: ${{ inputs.version || '0.2.1' }}
+      VERSION: ${{ inputs.version }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
