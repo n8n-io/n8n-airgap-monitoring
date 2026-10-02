@@ -32,9 +32,9 @@ const JITTER_SECONDS = 1;
 // between steps, so a step never shares load or VUs with the one before.
 const GRACEFUL_STOP_SECONDS = JITTER_SECONDS + CLIENT_TIMEOUT_SECONDS + 4;
 
-// Signed by the mock CA in compose.yml. The server caches nothing between
-// requests, so one certificate costs it the same as 10k distinct ones.
-const licenseCert = open("./license-cert.txt").trim();
+// From generate-license.ts. The server caches nothing between requests, so
+// one certificate costs it the same as 10k distinct ones.
+const licenseCert = open("./.work/license-cert.txt").trim();
 const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
 const run = Date.now().toString(36);
 

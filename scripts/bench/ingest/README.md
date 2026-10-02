@@ -41,9 +41,11 @@ of reports. Both make the numbers somewhat optimistic.
 
 ## Run it locally
 
-Needs Docker with Compose and [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/).
+Needs Docker with Compose, [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/)
+and `pnpm install` (for the mock license helpers in `apps/api`).
 
 ```sh
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/bench/ingest/generate-license.ts
 docker compose -f scripts/bench/ingest/compose.yml up -d --build --wait --renew-anon-volumes
 k6 run scripts/bench/ingest/ingest.k6.js
 docker compose -f scripts/bench/ingest/compose.yml down -v
@@ -62,8 +64,7 @@ If the run fails, run it again: a real regression fails twice in a row.
 
 ## The mock license
 
-`license-cert.txt` is signed by the mock CA in `compose.yml`, whose private key
-was thrown away. The image trusts that CA only under `NODE_ENV=test`, so the
-certificate is worthless anywhere else. If every request gets a `401`, replace
-both with a new pair from `generateMockCa` and `buildContainer` in
-`apps/api/src/test-utils/mock-license.ts`.
+`generate-license.ts` makes a throwaway CA and one license certificate signed
+by it, padded to a real one's size, with the same helpers the tests use, and
+writes both to `.work/`. The image trusts that CA only under `NODE_ENV=test`,
+which `compose.yml` sets.

@@ -17,28 +17,8 @@ services:
     environment:
       N8N_MONITORING_READ_TOKEN: bench-read-token
       NODE_OPTIONS: --max-old-space-size=384
-      # The only way to make the image trust the mock CA that signed
-      # license-cert.txt, see plugins/report-auth.ts. Its private key was
-      # thrown away, and a production image ignores this.
+      # The only way to make the image trust the mock CA, see
+      # plugins/report-auth.ts. A production image ignores it.
       NODE_ENV: test
-      TEST_LICENSE_ISSUER_CERT: |
-        -----BEGIN CERTIFICATE-----
-        MIIDOzCCAiOgAwIBAgIIr/P3iIX9mjYwDQYJKoZIhvcNAQELBQAwTjEdMBsGA1UE
-        AxMUYmVuY2gubGljZW5zZS5uOG4uaW8xCzAJBgNVBAYTAkRFMQ8wDQYDVQQIEwZC
-        ZXJsaW4xDzANBgNVBAcTBkJlcmxpbjAeFw0yNjEwMDExMTI1MDBaFw0zNjEwMDEx
-        MTI1MDBaME4xHTAbBgNVBAMTFGJlbmNoLmxpY2Vuc2UubjhuLmlvMQswCQYDVQQG
-        EwJERTEPMA0GA1UECBMGQmVybGluMQ8wDQYDVQQHEwZCZXJsaW4wggEiMA0GCSqG
-        SIb3DQEBAQUAA4IBDwAwggEKAoIBAQCafJIwJhNerxsiaY4pPe8kqvs1S1JX7va0
-        MHz2bYYKylYzFEaur+25W8jc0phDL0yWe6btP1UOYuyd0pdjZ1tzRsNbNH0pNHj5
-        a0VT293eJLQisRgeTR4G44B/6qABCMkx3WF6CiUegu+3J5L/cTY7Um63qGjIPEOu
-        BBVKE5bXAlbGE8w7eqyJk/+fmwIxYKiTvXEczitfBIih11T/rE8vPKGLICPXpjf0
-        WywMeHB3Obw5iL25CfF7BDUCg58FeeU0qgJg5mLBmb4WwiozoiFqY2vLUvutwxPd
-        tYDVh4Z9LoxJ1kL/iE8v6rxyGGd9hP8g37F9TS6U5HJwb2K8DTLtAgMBAAGjHTAb
-        MAwGA1UdEwQFMAMBAf8wCwYDVR0PBAQDAgLEMA0GCSqGSIb3DQEBCwUAA4IBAQAt
-        BQcvi25GVe/9Q2qQtoGCn28zU1hoF6EiiWliYCSRhnkXwMq6ensOezKqsrCaMRSy
-        ZSz/tLaPb6rZPleMH8UOXuCjE3JAxDx4IVD0HMcoDzXzREFb7KVRSQpLPDZ4gqHu
-        BahQSVwCUOoGo05nQLfPLR+8P1nl8yFeeclUzxXf2YkdRUmuJWvILRGOscu9rScB
-        G3MFJ3JC4o5ZZLcRdShLeqFNCWALXjP1mRxl1IAIYVGFXTK3VptWwJxThWXjIac4
-        Sh+Rx49nt+/ORIpIY72yv/wPoj9ZNoJtMfnm2fb7lBLYZBchjw4XeL0+g13zkn4V
-        vCNNnuRF17Sy0sL0ummB
-        -----END CERTIFICATE-----
+    # TEST_LICENSE_ISSUER_CERT, the mock CA from generate-license.ts.
+    env_file: .work/ca.env
