@@ -5,11 +5,6 @@ name: Benchmark Ingest
 # Fails only when the required 170 req/s step is not held; rerun once to rule
 # out a slow runner. See scripts/bench/ingest/README.md.
 on:
-  # TEMP: one run on PR #34 to check the workflow; remove before merging.
-  pull_request:
-    paths:
-      - '.github/workflows/benchmark-ingest.yml'
-      - 'scripts/bench/ingest/**'
   workflow_dispatch:
     inputs:
       ref:
