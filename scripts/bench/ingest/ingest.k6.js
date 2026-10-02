@@ -158,8 +158,13 @@ export function handleSummary(data) {
   const lines = [
     "### Ingest benchmark: `POST /api/v1/instance-reports`",
     "",
-    `${INSTANCES} instances, certificate auth, 1 CPU / 512 MiB, ${STEP_SECONDS} s per step. ` +
-      `A step is held when every request got a 201 within ${CLIENT_TIMEOUT_SECONDS} s, none was dropped and p99 ≤ ${SLO_P99_MS} ms.`,
+    `Server: 1 CPU core and 512 MiB, the chart's limits; how fast that core is depends on the machine.`,
+    "",
+    `Load: reports from ${INSTANCES} instances, each with ${CUMULATIVE_METRICS.length} cumulative metrics, ` +
+      `a daily \`billableExecutions\` for 1 day (${days.length} days in every ${BACKFILL_EVERY}th report) ` +
+      `and a ~7.3 KB license certificate, sent with 0–${JITTER_SECONDS} s jitter for ${STEP_SECONDS} s per step.`,
+    "",
+    `A step is held when every request got a 201 within ${CLIENT_TIMEOUT_SECONDS} s, none was dropped and p99 ≤ ${SLO_P99_MS} ms.`,
     "",
     `- Required ${REQUIRED_RPS} req/s: ${required.held ? "✅ held" : "❌ not held, the run fails"}`,
     `- Highest held: ${highest ? `${highest.rps} req/s${firstMiss === -1 ? " (top step, the limit is above)" : ""}` : "none"}`,
