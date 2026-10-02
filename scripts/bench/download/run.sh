@@ -10,7 +10,7 @@ MEM_MB="${3:-256}"
 PORT="${PORT:-3999}"
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-API_DIR="$(cd "$HERE/../.." && pwd)/apps/api"
+API_DIR="$(cd "$HERE/../../.." && pwd)/apps/api"
 APP_JS="$API_DIR/dist/app.js"
 FASTIFY_CLI="$(cd "$API_DIR" && node -e 'process.stdout.write(require.resolve("fastify-cli/cli.js"))' 2>/dev/null)"
 

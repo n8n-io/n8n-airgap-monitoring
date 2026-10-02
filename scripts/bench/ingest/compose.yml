@@ -1,0 +1,24 @@
+# The server ingest.k6.js runs against: the image under the reference chart's
+# resource limits (docs/charts/airgap-monitoring/values.yaml), in certificate
+# mode. See README.md for how to start it.
+name: airgap-bench
+
+services:
+  airgap-monitoring:
+    build: ../../..
+    ports:
+      - "127.0.0.1:3999:3000"
+    cpus: 1
+    mem_limit: 512m
+    # Equal to mem_limit: no swap, like a Kubernetes memory limit.
+    memswap_limit: 512m
+    # The image's /data volume is an anonymous one on the host disk, so every
+    # insert pays a real fsync.
+    environment:
+      N8N_MONITORING_READ_TOKEN: bench-read-token
+      NODE_OPTIONS: --max-old-space-size=384
+      # The only way to make the image trust the mock CA, see
+      # plugins/report-auth.ts. A production image ignores it.
+      NODE_ENV: test
+    # TEST_LICENSE_ISSUER_CERT, the mock CA from generate-license.ts.
+    env_file: .work/ca.env
