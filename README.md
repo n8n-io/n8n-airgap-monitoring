@@ -222,12 +222,14 @@ thing you are about to ship actually works. `docker compose down -v` removes the
 container and its data volume.
 
 Compose reuses the cached `apt-get upgrade` layer, so its Debian packages can lag
-behind the published image. To build the image exactly as CI publishes it, e.g.
-to scan it for CVEs:
+behind the published image. To rebuild without cache, e.g. before a CVE scan:
 
 ```sh
 docker compose build --no-cache
 ```
+
+This builds only your machine's platform, while CI publishes both linux/amd64
+and linux/arm64.
 
 The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
