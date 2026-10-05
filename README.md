@@ -225,7 +225,7 @@ Compose reuses the cached `apt-get upgrade` layer, so its Debian packages can la
 behind the published image. To rebuild without cache, e.g. before a CVE scan:
 
 ```sh
-docker compose build --no-cache
+docker compose build --pull --no-cache
 ```
 
 This builds only your machine's platform, while CI publishes both linux/amd64
