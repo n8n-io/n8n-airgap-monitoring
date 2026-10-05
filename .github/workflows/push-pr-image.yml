@@ -91,6 +91,7 @@ jobs:
           push: true
           tags: ${{ env.IMAGE }}:test-pr-${{ inputs.pr }}
           cache-from: type=gha
+          no-cache-filters: runtime
 
       - name: Summary
         env:

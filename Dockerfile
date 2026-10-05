@@ -28,6 +28,12 @@ FROM node:26-slim AS runtime
 # The app never runs npm, and its bundled dependencies carry CVEs of their own.
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
+# The upstream image picks up debian-security fixes with a delay. CI builds this
+# stage with no-cache-filters, or the cached layer would keep stale packages.
+RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
 

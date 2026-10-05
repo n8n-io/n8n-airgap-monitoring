@@ -95,6 +95,7 @@ jobs:
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:stable
           cache-from: type=gha
+          no-cache-filters: runtime
           cache-to: type=gha,mode=max
 
   # Separate job so the image publish is what the bookkeeping below depends on,

@@ -70,4 +70,5 @@ jobs:
             ${{ env.IMAGE }}:alpha
             ${{ env.IMAGE }}:${{ github.sha }}
           cache-from: type=gha
+          no-cache-filters: runtime
           cache-to: type=gha,mode=max
