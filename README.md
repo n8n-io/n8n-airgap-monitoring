@@ -221,6 +221,14 @@ remains the development workflow; use compose when you want to check that the
 thing you are about to ship actually works. `docker compose down -v` removes the
 container and its data volume.
 
+Compose reuses the cached `apt-get upgrade` layer, so its Debian packages can lag
+behind the published image. To build the image exactly as CI publishes it, e.g.
+to scan it for CVEs:
+
+```sh
+docker compose build --no-cache
+```
+
 The compose file uses a named volume rather than a bind mount on purpose: the
 container runs as `node`, and a host directory bind-mounted on macOS or Linux
 generally has the wrong owner, so SQLite fails to create its WAL files.
