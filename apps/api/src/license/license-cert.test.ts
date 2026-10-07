@@ -27,6 +27,12 @@ test("accepts a certificate signed by a trusted issuer", () => {
   expect(() => verifyLicenseCert(generateMockLicense(), trusted)).not.toThrow();
 });
 
+test("returns the signed payload", () => {
+  const payload = verifyLicenseCert(generateMockLicense({ consumerRef: "who@example.com" }), trusted);
+
+  expect(JSON.parse(payload)).toMatchObject({ consumerRef: "who@example.com" });
+});
+
 test("accepts an expired certificate, since expiry is not this check's concern", () => {
   expect(() => verifyLicenseCert(generateMockLicense({ expired: true }), trusted)).not.toThrow();
 });
