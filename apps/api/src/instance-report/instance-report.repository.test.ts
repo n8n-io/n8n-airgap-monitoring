@@ -5,6 +5,7 @@ import { DuplicateBatchError, type InstanceReport, InstanceReportRepository } fr
 const event: InstanceReport = {
   instanceId: "instance-1",
   batchId: "batch-1",
+  consumerId: null,
   n8nVersion: "1.99.0",
   dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 7 }],
   receivedAt: "2026-03-25T00:00:00.000Z",
@@ -48,6 +49,17 @@ test("findByInstanceId parses the stored data column back into metrics", async (
       receivedAt: "2026-03-25T00:00:00.000Z",
     }),
   ]);
+});
+
+test("stores consumerId as given, null included", async () => {
+  const app = await build();
+  const repository = new InstanceReportRepository(app.dataSource);
+
+  await repository.insert({ ...event, batchId: "b1", consumerId: "customer-42" });
+  await repository.insert({ ...event, batchId: "b2", receivedAt: "2026-03-26T00:00:00.000Z" });
+
+  const rows = await repository.findByInstanceId("instance-1");
+  expect(rows.map((row) => row.consumerId)).toEqual(["customer-42", null]);
 });
 
 test("findByInstanceId returns only that instance's events, oldest-first", async () => {

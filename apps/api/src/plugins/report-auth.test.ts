@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { build } from "../test-utils/build-app";
-import { generateMockLicense } from "../test-utils/mock-license";
+import { buildContainer, generateMockLicense } from "../test-utils/mock-license";
 
 const URL = "/api/v1/instance-reports";
 
@@ -80,4 +80,54 @@ test("treats a blank write token as unset and stays in certificate mode", async 
   });
   expect(res.statusCode).toBe(401);
   expect(res.json()).toMatchObject({ message: "Missing license certificate" });
+});
+
+/** The consumerId column of the one stored row. */
+async function storedConsumerId(app: Awaited<ReturnType<typeof build>>): Promise<string | null> {
+  const rows = (await app.dataSource.query("SELECT consumerId FROM instance_reports")) as {
+    consumerId: string | null;
+  }[];
+  expect(rows).toHaveLength(1);
+  return rows[0].consumerId;
+}
+
+test("stores the certificate's consumerId with the report", async () => {
+  const app = await build();
+
+  const res = await app.inject({
+    method: "POST",
+    url: URL,
+    payload: { ...report, licenseCert: generateMockLicense({ consumerId: "customer-42" }) },
+  });
+
+  expect(res.statusCode).toBe(201);
+  expect(await storedConsumerId(app)).toBe("customer-42");
+});
+
+// A certificate n8n signed but without a consumerId cannot be attributed, so
+// it is not accepted, and like every other rejection only the code is logged.
+test("rejects a certificate whose payload has no consumerId", async () => {
+  const app = await build();
+
+  const res = await app.inject({ method: "POST", url: URL, payload: { ...report, licenseCert: buildContainer("{}") } });
+
+  expect(res.statusCode).toBe(401);
+  expect(res.json()).toMatchObject({ message: "Invalid license certificate" });
+  expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
+});
+
+test("stores no consumerId in token mode", async () => {
+  vi.stubEnv("N8N_MONITORING_WRITE_TOKEN", "write-secret");
+  const app = await build();
+
+  const { licenseCert: _omitted, ...bare } = report;
+  const res = await app.inject({
+    method: "POST",
+    url: URL,
+    headers: { authorization: "Bearer write-secret" },
+    payload: bare,
+  });
+
+  expect(res.statusCode).toBe(201);
+  expect(await storedConsumerId(app)).toBe(null);
 });

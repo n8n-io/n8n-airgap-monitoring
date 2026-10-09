@@ -5,6 +5,7 @@ import { type CreateInstanceReport, type InstanceReportEntry, InstanceReportServ
 const report: CreateInstanceReport = {
   instanceId: "instance-1",
   batchId: "batch-1",
+  consumerId: "customer-42",
   n8nVersion: "1.99.0",
   dataPoints: [
     { kind: "cumulative", name: "activeWorkflows", value: 7 },
@@ -30,6 +31,16 @@ function fakeRepository() {
 
   return { inserted, repository: repository as unknown as InstanceReportRepository };
 }
+
+test("hands the consumerId down as given", async () => {
+  const { inserted, repository } = fakeRepository();
+  const service = new InstanceReportService(repository);
+
+  await service.recordReport(report);
+  await service.recordReport({ ...report, batchId: "batch-2", consumerId: null });
+
+  expect(inserted.map((event) => event.consumerId)).toEqual(["customer-42", null]);
+});
 
 test("stamps the arrival time itself", async () => {
   const { inserted, repository } = fakeRepository();
@@ -82,6 +93,7 @@ function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
   return {
     instanceId: "instance-1",
     batchId: "batch-1",
+    consumerId: null,
     label: null,
     n8nVersion: "1.99.0",
     dataPoints: [],
@@ -101,6 +113,26 @@ test("streamInstanceReports takes firstSeen from the earliest row, and label and
   expect(instance.firstSeen).toBe("2026-03-20T02:00:00.000Z");
   expect(instance.label).toBe("latest");
   expect(instance.lastReportAt).toBe("2026-03-25T02:00:00.000Z");
+});
+
+// A consumerId never changes over an instance's life, except from the
+// all-zeros placeholder to a real id, so the latest non-null one is the most
+// informative, and it outlives a switch of the service to token mode.
+test("streamInstanceReports takes consumerId from the latest row that has one", async () => {
+  const zero = "00000000-0000-0000-0000-000000000000";
+  const cases: { rows: (string | null)[]; expected: string | null }[] = [
+    { rows: [null, zero, "customer-42"], expected: "customer-42" },
+    { rows: ["customer-42", null], expected: "customer-42" },
+    { rows: [zero], expected: zero },
+    { rows: [null, null], expected: null },
+  ];
+
+  for (const { rows, expected } of cases) {
+    const [instance] = await collectInstances(
+      fakeReportService(rows.map((consumerId, i) => row({ batchId: `b${i}`, consumerId }))),
+    );
+    expect(instance.consumerId, JSON.stringify(rows)).toBe(expected);
+  }
 });
 
 test("streamInstanceReports files a metric named __proto__ as data instead of crashing", async () => {

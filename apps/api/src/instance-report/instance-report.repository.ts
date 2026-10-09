@@ -6,6 +6,7 @@ import type { Metric } from "./instance-report.service";
 export interface InstanceReport {
   instanceId: string;
   batchId: string;
+  consumerId: string | null;
   label?: string;
   n8nVersion: string;
   dataPoints: Metric[];
@@ -16,6 +17,7 @@ export interface InstanceReport {
 export interface InstanceReportRow {
   instanceId: string;
   batchId: string;
+  consumerId: string | null;
   label: string | null;
   n8nVersion: string;
   dataPoints: Metric[];
@@ -65,6 +67,7 @@ export class InstanceReportRepository {
       const { identifiers } = await this.#reports.insert({
         instanceId: event.instanceId,
         batchId: event.batchId,
+        consumerId: event.consumerId,
         // An absent label is stored as SQL NULL, not as the string "undefined".
         label: event.label ?? null,
         n8nVersion: event.n8nVersion,
