@@ -1,0 +1,35 @@
+apps/api/src/plugins/report-auth.ts
+  s_544af2b4aa0a3f::t_bdee4dd03d88f0 134
+apps/api/src/instance-report/instance-report.service.ts
+  s_544af2b4aa0a3f::t_bdee4dd03d88f0 100-101
+  h_c63dce324dfc7b 180
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_544af2b4aa0a3f::t_bdee4dd03d88f0 118-130
+docs/DIAGRAMS.md
+  s_544af2b4aa0a3f::t_bdee4dd03d88f0 136
+docs/adr/2026-10-08-store-consumer-id-from-license-certificate.md
+  s_544af2b4aa0a3f::t_bdee4dd03d88f0 24,32
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  s_544af2b4aa0a3f::t_7185ceb551cb06 110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3ebd2fe0cdf51793399a742feaae58cc2e93655c",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_544af2b4aa0a3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4cfe62a4-8ece-4914-984f-dc6e2163c6cf",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
