@@ -107,6 +107,7 @@ test("reports each instance's id, first-seen day and full metric history", async
   await insertRow(app, {
     instanceId: "instance-1",
     batchId: "b2",
+    consumerId: "customer-42",
     label: "prod-renamed",
     dataPoints: [
       { kind: "daily", name: "billableExecutions", value: 110, date: "2026-03-25" },

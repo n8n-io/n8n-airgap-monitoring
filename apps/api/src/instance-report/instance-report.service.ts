@@ -97,11 +97,8 @@ interface NamedMetric {
 export interface InstanceReportEntry {
   instanceId: string;
   /**
-   * The n8n customer the instance's license certificate names, or null when
-   * no report has carried one. A consumerId never changes over an instance's
-   * life except from the all-zeros placeholder to a real id, so the latest
-   * non-null value is the most informative one, and it survives a switch to
-   * token mode.
+   * The n8n customer named by the license certificate of the instance's latest
+   * report, or null in token mode and for reports stored before consumerIds were.
    */
   consumerId: string | null;
   /**
@@ -180,7 +177,7 @@ function toEntry(rows: InstanceReportRow[]): InstanceReportEntry {
 
   return {
     instanceId: first.instanceId,
-    consumerId: rows.findLast((row) => row.consumerId !== null)?.consumerId ?? null,
+    consumerId: last.consumerId,
     label: last.label, // last-received label wins
     firstSeen: first.receivedAt,
     lastReportAt: last.receivedAt,

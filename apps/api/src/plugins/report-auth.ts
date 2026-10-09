@@ -131,7 +131,7 @@ declare module "fastify" {
     authenticateReport: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
   export interface FastifyRequest {
-    /** 
+    /**
      * Set by {@link authenticateReport}: the certificate's consumerId, or null in token auth mode.
      */
     consumerId: string | null;

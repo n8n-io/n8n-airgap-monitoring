@@ -115,24 +115,19 @@ test("streamInstanceReports takes firstSeen from the earliest row, and label and
   expect(instance.lastReportAt).toBe("2026-03-25T02:00:00.000Z");
 });
 
-// A consumerId never changes over an instance's life, except from the
-// all-zeros placeholder to a real id, so the latest non-null one is the most
-// informative, and it outlives a switch of the service to token mode.
-test("streamInstanceReports takes consumerId from the latest row that has one", async () => {
-  const zero = "00000000-0000-0000-0000-000000000000";
-  const cases: { rows: (string | null)[]; expected: string | null }[] = [
-    { rows: [null, zero, "customer-42"], expected: "customer-42" },
-    { rows: ["customer-42", null], expected: "customer-42" },
-    { rows: [zero], expected: zero },
-    { rows: [null, null], expected: null },
-  ];
+// A consumerId only ever moves from null (rows stored before the column) to
+// the all-zeros placeholder to a real id, so the latest row carries the most
+// informative one.
+test("streamInstanceReports takes consumerId from the latest row", async () => {
+  const [instance] = await collectInstances(
+    fakeReportService([
+      row({ batchId: "b1", consumerId: null }),
+      row({ batchId: "b2", consumerId: "00000000-0000-0000-0000-000000000000" }),
+      row({ batchId: "b3", consumerId: "customer-42" }),
+    ]),
+  );
 
-  for (const { rows, expected } of cases) {
-    const [instance] = await collectInstances(
-      fakeReportService(rows.map((consumerId, i) => row({ batchId: `b${i}`, consumerId }))),
-    );
-    expect(instance.consumerId, JSON.stringify(rows)).toBe(expected);
-  }
+  expect(instance.consumerId).toBe("customer-42");
 });
 
 test("streamInstanceReports files a metric named __proto__ as data instead of crashing", async () => {

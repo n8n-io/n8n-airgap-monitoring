@@ -21,7 +21,7 @@ In certificate mode the service reads one value from the verified payload, `cons
 - The value is stored verbatim. The all-zeros placeholder is a fact about the certificate and is kept as such; interpreting it is the receiving side's job. A `consumerId` is a UUID, so a value longer than 40 characters is rejected as invalid; the bound lives in code, since SQLite enforces no column width.
 - A certificate whose payload has no string `consumerId` is rejected with the new `PAYLOAD_INVALID` code, logged like every other rejection: the code and nothing else. A report that cannot be attributed is not wanted.
 - The id comes only from the certificate. The body schema does not accept a `consumerId`, so a client cannot supply one in either mode. In token mode no certificate is looked at and the column is null.
-- The export shows, per instance, the latest non-null `consumerId` among its rows. A `consumerId` never changes over an instance's life except from the placeholder to a real id, so the latest non-null value is the most informative one, and it survives a switch of the service to token mode. Every row keeps its own value, so a conflicting id, which would indicate a cloned instance or a swapped license, stays detectable downstream.
+- The export shows, per instance, the `consumerId` of its latest row, as it does for the label. A `consumerId` never changes over an instance's life except from the placeholder to a real id, so the latest row carries the most informative value. Every row keeps its own value, so a conflicting id, which would indicate a cloned instance or a swapped license, stays detectable downstream.
 
 Nothing else from the payload is read, stored, logged or exported.
 
@@ -29,7 +29,7 @@ Nothing else from the payload is read, stored, logged or exported.
 
 - **Accept a certificate without a `consumerId` and store null.** Rejected: it keeps unattributable reports flowing silently. Every certificate the license server issues carries the field, so rejection costs nothing on the happy path and surfaces a broken certificate immediately.
 - **Normalise the all-zeros placeholder to null on ingest.** Rejected: it hides a true fact about the certificate and the rule would outlive the placeholder.
-- **Last row wins, as for the label.** Rejected: a switch to token mode would blank every instance's `consumerId` in the next export. The label is display state, the `consumerId` is identity.
+- **Latest non-null `consumerId` among the rows.** Rejected: it differs from the latest row only when a service switches from certificate mode to token mode, which is not a supported path.
 - **Detect a changed `consumerId` on ingest.** Not done: it needs a read before every write, and the rows keep every value, so reconciliation can detect it later, as it does for data points.
 
 ## Consequences

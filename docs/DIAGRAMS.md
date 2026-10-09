@@ -133,7 +133,7 @@ sequenceDiagram
         SVC->>DB: SELECT * WHERE instanceId = ?<br/>ORDER BY receivedAt ASC, id ASC
         DB-->>SVC: rows, oldest-first, JSON data column parsed
         SVC->>SVC: toEntry(rows)
-        Note right of SVC: instanceId - from any row<br/>consumerId - latest row that has one, else null<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>dataPoints - every point of every row, tagged with<br/>its row's batchId and receivedAt, then grouped by<br/>metric name. Nothing is summed or deduplicated:<br/>reconciliation is the receiver's job.
+        Note right of SVC: instanceId - from any row<br/>consumerId - last row wins<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>dataPoints - every point of every row, tagged with<br/>its row's batchId and receivedAt, then grouped by<br/>metric name. Nothing is summed or deduplicated:<br/>reconciliation is the receiver's job.
         SVC-->>API: yield InstanceReportEntry
         API-->>C: chunk: JSON.stringify(entry)<br/>prefixed with "," for every entry but the first
     end
