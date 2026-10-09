@@ -1,0 +1,512 @@
+/* Colors are the dataviz reference palette: one series hue, and status hues kept apart from it. */
+:root {
+  color-scheme: light;
+  --page: #f4f4f1;
+  --surface: #fcfcfb;
+  --surface-hover: #f1f1ee;
+  --border: rgba(11, 11, 11, 0.1);
+  --grid: #e1e0d9;
+  --text: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --accent: #2a78d6;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --offline: #898781;
+  --critical: #d03b3b;
+  --anomaly-row: #fdf2f6;
+  --shadow: 0 1px 2px rgba(11, 11, 11, 0.04), 0 4px 16px rgba(11, 11, 11, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-hover: #242422;
+    --border: rgba(255, 255, 255, 0.1);
+    --grid: #2c2c2a;
+    --text: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --accent: #3987e5;
+    --anomaly-row: #2e1f26;
+    --shadow: none;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 26px;
+}
+
+h2 {
+  font-size: 17px;
+}
+
+h3 {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+p {
+  margin: 0;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px 64px;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 0;
+}
+
+.title {
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.card {
+  padding: 28px 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+.card > h2 {
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.error {
+  color: var(--critical);
+}
+
+.empty {
+  padding: 24px 0;
+}
+
+.mono {
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 12px;
+}
+
+.truncate {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.back {
+  font-weight: 500;
+}
+
+/* Tiles */
+
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tile {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 14px;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+.tile:hover {
+  background: var(--surface-hover);
+}
+
+.tile.selected {
+  outline: 2px solid var(--accent);
+}
+
+.tile-label {
+  color: var(--text-secondary);
+}
+
+/* Also marks an instance's status in the instances table. */
+.status-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.status-active {
+  background: var(--good);
+}
+
+.status-stale {
+  background: var(--warning);
+}
+
+.status-offline {
+  background: var(--offline);
+}
+
+.status-anomaly {
+  background: var(--critical);
+}
+
+.tile-value {
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 999px;
+}
+
+.badge-active {
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+}
+
+.badge-active .badge-icon {
+  color: var(--good);
+}
+
+.badge-stale {
+  background: color-mix(in srgb, var(--warning) 22%, transparent);
+}
+
+.badge-stale .badge-icon {
+  color: var(--warning);
+}
+
+.badge-offline {
+  background: color-mix(in srgb, var(--offline) 18%, transparent);
+}
+
+.badge-offline .badge-icon {
+  color: var(--offline);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.chip {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.chip:hover {
+  background: var(--surface-hover);
+}
+
+.chip.selected {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: var(--accent);
+}
+
+.link-button {
+  padding: 0;
+  color: var(--accent);
+  background: none;
+  border: none;
+}
+
+/* Charts */
+
+.chart {
+  position: relative;
+  height: 280px;
+}
+
+.charts {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.inline-select {
+  margin: 0 4px;
+  padding: 2px 8px;
+  font-weight: 600;
+}
+
+.raw-note {
+  margin-bottom: 12px;
+}
+
+/* Tables */
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.table-scroll {
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  position: sticky;
+  top: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  background: var(--surface);
+}
+
+th.number {
+  text-align: right;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover td {
+  background: var(--surface-hover);
+}
+
+/* Soft, so a row with an anomaly stands out without shouting. */
+.has-anomaly td {
+  background: var(--anomaly-row);
+}
+
+/* The day just clicked on a chart. */
+tr.selected td {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.json {
+  max-height: 600px;
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 12px;
+  background: var(--page);
+  border-radius: 10px;
+}
+
+/* The value an anomaly is about; hovering it shows what is wrong. */
+tr td.anomaly-cell {
+  background: var(--anomaly-row);
+  cursor: default;
+}
+
+/* Above the hovered cell, right edges aligned; looks like the charts' tooltips. */
+.tooltip {
+  position: fixed;
+  z-index: 10;
+  max-width: 420px;
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: pre-line;
+  color: #fff;
+  background: rgb(0 0 0 / 80%);
+  border-radius: 6px;
+  transform: translate(-100%, calc(-100% - 6px));
+  pointer-events: none;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.day {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.sort {
+  padding: 0;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+}
+
+.sort.sorted {
+  color: var(--text);
+}
+
+.sort.sorted::after {
+  content: ' ↓';
+}
+
+.pager {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.pager button {
+  padding: 6px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.pager button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Instance page */
+
+.instance-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.instance-header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.id-line {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  word-break: break-all;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 0 16px 48px;
+  }
+
+  .card {
+    padding: 20px 16px;
+  }
+
+  .charts {
+    grid-template-columns: 1fr;
+  }
+}
