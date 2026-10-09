@@ -43,6 +43,11 @@ export interface CreateInstanceReport {
    */
   batchId: string;
   /**
+   * The consumerId from the reporting instance's license certificate.
+   * Null in token auth mode, where no certificate is looked at.
+   */
+  consumerId: string | null;
+  /**
    * Display name only: instanceId stays the identity, so a relabel never
    * splits or merges an instance's history. Sanitized to a URL-compliant
    * label before it is stored, see {@link sanitizeLabel}.
@@ -91,6 +96,11 @@ interface NamedMetric {
 /** The report's view of one instance: identity, when we first heard from it, and its full metric history. */
 export interface InstanceReportEntry {
   instanceId: string;
+  /**
+   * The n8n customer named by the license certificate of the instance's latest
+   * report, or null in token mode and for reports stored before consumerIds were.
+   */
+  consumerId: string | null;
   /**
    * Last-received display label, or null. Customer-chosen and URL-compliant,
    * except from rows stored before labels were sanitized.
@@ -167,6 +177,7 @@ function toEntry(rows: InstanceReportRow[]): InstanceReportEntry {
 
   return {
     instanceId: first.instanceId,
+    consumerId: last.consumerId,
     label: last.label, // last-received label wins
     firstSeen: first.receivedAt,
     lastReportAt: last.receivedAt,

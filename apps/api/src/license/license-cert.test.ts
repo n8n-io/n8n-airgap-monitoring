@@ -2,6 +2,7 @@ import { X509Certificate } from "node:crypto";
 import { expect, test } from "vitest";
 import {
   buildContainer,
+  DEFAULT_MOCK_CONSUMER_ID,
   generateMockCa,
   generateMockLicense,
   generateMockLicenseWithForgedIssuer,
@@ -9,7 +10,7 @@ import {
   TEST_CA,
 } from "../test-utils/mock-license";
 import { N8N_LICENSE_ISSUER_CERT_PEM } from "./issuer-cert";
-import { LicenseCertError, verifyLicenseCert } from "./license-cert";
+import { CONSUMER_ID_MAX_LENGTH, consumerIdOf, LicenseCertError, verifyLicenseCert } from "./license-cert";
 
 const trusted = new X509Certificate(TEST_CA.certPem);
 
@@ -25,6 +26,12 @@ function codeOf(fn: () => void): string {
 
 test("accepts a certificate signed by a trusted issuer", () => {
   expect(() => verifyLicenseCert(generateMockLicense(), trusted)).not.toThrow();
+});
+
+test("returns the signed payload", () => {
+  const payload = verifyLicenseCert(generateMockLicense({ consumerRef: "who@example.com" }), trusted);
+
+  expect(JSON.parse(payload)).toMatchObject({ consumerRef: "who@example.com" });
 });
 
 test("accepts an expired certificate, since expiry is not this check's concern", () => {
@@ -68,6 +75,39 @@ test("rejects a license key whose symmetric key was not produced by the leaf's k
   );
 
   expect(codeOf(() => verifyLicenseCert(mixed, trusted))).toBe("DECRYPTION_FAILED");
+});
+
+test("consumerIdOf returns the payload's consumerId", () => {
+  expect(consumerIdOf(verifyLicenseCert(generateMockLicense({ consumerId: "customer-42" }), trusted))).toBe(
+    "customer-42",
+  );
+});
+
+test("consumerIdOf accepts a consumerId at the length limit", () => {
+  const atLimit = "x".repeat(CONSUMER_ID_MAX_LENGTH);
+  expect(consumerIdOf(verifyLicenseCert(generateMockLicense({ consumerId: atLimit }), trusted))).toBe(atLimit);
+});
+
+test("consumerIdOf keeps the all-zeros placeholder as it is", () => {
+  expect(consumerIdOf(verifyLicenseCert(generateMockLicense(), trusted))).toBe(DEFAULT_MOCK_CONSUMER_ID);
+});
+
+test("consumerIdOf rejects a payload without a string consumerId", () => {
+  const cases: Record<string, string> = {
+    "not json": "definitely not json",
+    "no consumerId": "{}",
+    "empty consumerId": JSON.stringify({ consumerId: "" }),
+    "numeric consumerId": JSON.stringify({ consumerId: 42 }),
+    "array payload": "[]",
+    "too long": JSON.stringify({ consumerId: "x".repeat(CONSUMER_ID_MAX_LENGTH + 1) }),
+  };
+
+  for (const [description, payload] of Object.entries(cases)) {
+    expect(
+      codeOf(() => consumerIdOf(verifyLicenseCert(buildContainer(payload), trusted))),
+      description,
+    ).toBe("PAYLOAD_INVALID");
+  }
 });
 
 test("the embedded n8n issuer certificate parses and is a CA valid until 2049", () => {

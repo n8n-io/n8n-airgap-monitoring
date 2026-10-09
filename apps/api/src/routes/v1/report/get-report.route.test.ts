@@ -14,6 +14,7 @@ async function insertRow(
   row: {
     instanceId: string;
     batchId: string;
+    consumerId?: string | null;
     label?: string | null;
     n8nVersion?: string;
     dataPoints: Metric[];
@@ -21,11 +22,12 @@ async function insertRow(
   },
 ): Promise<void> {
   await app.dataSource.query(
-    `INSERT INTO instance_reports (instanceId, batchId, label, n8nVersion, data, receivedAt)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO instance_reports (instanceId, batchId, consumerId, label, n8nVersion, data, receivedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       row.instanceId,
       row.batchId,
+      row.consumerId ?? null,
       row.label ?? null,
       row.n8nVersion ?? "1.99.0",
       JSON.stringify(row.dataPoints),
@@ -94,6 +96,7 @@ test("reports each instance's id, first-seen day and full metric history", async
   await insertRow(app, {
     instanceId: "instance-1",
     batchId: "b1",
+    consumerId: "customer-42",
     label: "prod",
     dataPoints: [
       { kind: "daily", name: "billableExecutions", value: 100, date: "2026-03-24" },
@@ -104,6 +107,7 @@ test("reports each instance's id, first-seen day and full metric history", async
   await insertRow(app, {
     instanceId: "instance-1",
     batchId: "b2",
+    consumerId: "customer-42",
     label: "prod-renamed",
     dataPoints: [
       { kind: "daily", name: "billableExecutions", value: 110, date: "2026-03-25" },
@@ -120,6 +124,7 @@ test("reports each instance's id, first-seen day and full metric history", async
       instances: [
         {
           instanceId: "instance-1",
+          consumerId: "customer-42",
           firstSeen: "2026-03-25T02:00:00.000Z",
           lastReportAt: "2026-03-26T02:00:00.000Z",
           label: "prod-renamed",

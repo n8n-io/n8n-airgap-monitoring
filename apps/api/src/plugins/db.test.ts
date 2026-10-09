@@ -17,7 +17,10 @@ test("runs migrations on startup and records them once", async () => {
 
   const applied = await dataSource.query("SELECT name FROM migrations ORDER BY id");
 
-  expect(applied).toEqual([{ name: "CreateInstanceReports1788912000000" }]);
+  expect(applied).toEqual([
+    { name: "CreateInstanceReports1788912000000" },
+    { name: "AddConsumerIdToInstanceReports1791504000000" },
+  ]);
 });
 
 // Every container restart is a second start against a populated file. The
@@ -38,6 +41,6 @@ test("a second start against the same database file keeps its data and does not 
     await second.close();
   });
 
-  expect(await second.dataSource.query("SELECT COUNT(*) AS count FROM migrations")).toEqual([{ count: 1 }]);
+  expect(await second.dataSource.query("SELECT COUNT(*) AS count FROM migrations")).toEqual([{ count: 2 }]);
   expect(await second.dataSource.query("SELECT batchId FROM instance_reports")).toEqual([{ batchId: "batch-1" }]);
 });

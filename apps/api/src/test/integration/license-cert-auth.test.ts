@@ -17,7 +17,7 @@ test("a license certificate authenticates a report over real HTTP", async () => 
     batchId: "e2e-batch-1",
     n8nVersion: "1.99.0",
     dataPoints: [{ kind: "daily", name: "billableExecutions", value: 12, date: "2026-03-25" }],
-    licenseCert: generateMockLicense(),
+    licenseCert: generateMockLicense({ consumerId: "customer-42" }),
   };
 
   const res = await fetch(`${baseUrl}/api/v1/instance-reports`, {
@@ -28,11 +28,13 @@ test("a license certificate authenticates a report over real HTTP", async () => 
   expect(res.status).toBe(201);
 
   const { id } = (await res.json()) as { id: number };
-  const [row] = (await app.dataSource.query("SELECT instanceId, batchId, data FROM instance_reports WHERE id = ?", [
-    id,
-  ])) as Record<string, string>[];
+  const [row] = (await app.dataSource.query(
+    "SELECT instanceId, batchId, consumerId, data FROM instance_reports WHERE id = ?",
+    [id],
+  )) as Record<string, string>[];
   expect(row.instanceId).toBe("e2e-instance");
   expect(row.batchId).toBe("e2e-batch-1");
+  expect(row.consumerId).toBe("customer-42");
   expect(JSON.parse(row.data)).toEqual(report.dataPoints);
   expect(JSON.stringify(row)).not.toContain(report.licenseCert);
 

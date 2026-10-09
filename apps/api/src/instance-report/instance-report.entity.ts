@@ -13,6 +13,14 @@ export class InstanceReportEntity {
   @Column({ type: "text" })
   batchId!: string;
 
+  /**
+   * From the license certificate; null in token mode and on rows stored before
+   * the column existed. TEXT because SQLite enforces no column width; the
+   * length is bounded where the value is read from the certificate.
+   */
+  @Column({ type: "text", nullable: true })
+  consumerId!: string | null;
+
   @Column({ type: "text", nullable: true })
   label!: string | null;
 

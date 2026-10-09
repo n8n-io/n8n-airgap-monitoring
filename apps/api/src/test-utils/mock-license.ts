@@ -21,8 +21,13 @@ export interface MockLicenseOptions {
   /** Puts expiresAt and terminatesAt in the past. */
   expired?: boolean;
   consumerRef?: string;
+  /** Defaults to {@link DEFAULT_MOCK_CONSUMER_ID}, the placeholder ephemeral certificates carried. */
+  consumerId?: string;
   isEphemeral?: boolean;
 }
+
+/** The all-zeros consumerId that ephemeral certificates carried before the license server assigned real ids. */
+export const DEFAULT_MOCK_CONSUMER_ID = "00000000-0000-0000-0000-000000000000";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -68,13 +73,19 @@ export const TEST_ISSUER_CERT_PEM = TEST_CA.certPem;
  * `N8N_LICENSE_CERT` and send as `licenseCert`.
  */
 export function generateMockLicense(options: MockLicenseOptions = {}): string {
-  const { ca = TEST_CA, expired = false, consumerRef = "test@airgap.dev", isEphemeral = true } = options;
+  const {
+    ca = TEST_CA,
+    expired = false,
+    consumerRef = "test@airgap.dev",
+    consumerId = DEFAULT_MOCK_CONSUMER_ID,
+    isEphemeral = true,
+  } = options;
 
   const now = Date.now();
   const validTo = new Date(now + (expired ? -1 : 365) * DAY_MS);
 
   const payload = JSON.stringify({
-    consumerId: "00000000-0000-0000-0000-000000000000",
+    consumerId,
     consumerRef,
     version: 2,
     tenantId: 1,
