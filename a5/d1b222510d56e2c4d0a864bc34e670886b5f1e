@@ -1,0 +1,75 @@
+apps/api/src/instance-report/instance-report.repository.ts
+  s_544af2b4aa0a3f::t_abb145001865b3 9,20,70
+apps/api/src/instance-report/instance-report.repository.test.ts
+  s_544af2b4aa0a3f::t_108a27466a8337 8,54-62
+  s_544af2b4aa0a3f::t_3534a0c86f2ed5 63-64
+apps/api/src/instance-report/instance-report.service.ts
+  s_544af2b4aa0a3f::t_abb145001865b3 45,48-49,99-106,183
+  h_c63dce324dfc7b 46-47
+apps/api/src/plugins/report-auth.test.ts
+  s_544af2b4aa0a3f::t_108a27466a8337 3,84-133
+apps/api/src/test-utils/mock-license.ts
+  s_544af2b4aa0a3f::t_108a27466a8337 24-25,29-31,76-82,88
+apps/api/src/test/integration/license-cert-auth.test.ts
+  s_544af2b4aa0a3f::t_108a27466a8337 20,31-34,37
+apps/api/src/license/license-cert.test.ts
+  s_544af2b4aa0a3f::t_108a27466a8337 5,80-85,91-101,103-111
+  s_544af2b4aa0a3f::t_8681143d52a5fa 13,86-90,102
+  s_544af2b4aa0a3f::t_b6aac8fe773f8c 112
+docs/adr/2026-10-08-store-consumer-id-from-license-certificate.md
+  s_544af2b4aa0a3f::t_108a27466a8337 1-20,22-43
+  s_544af2b4aa0a3f::t_8681143d52a5fa 21
+apps/api/src/db/migrations/1791504000000-AddConsumerIdToInstanceReports.ts
+  s_544af2b4aa0a3f::t_abb145001865b3 1-17
+apps/api/src/db/migrations/index.ts
+  s_544af2b4aa0a3f::t_abb145001865b3 2,8
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_544af2b4aa0a3f::t_108a27466a8337 8,35-44,96,118-136
+  s_544af2b4aa0a3f::t_ba07e4d02ef0ab 137
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.ts
+  s_544af2b4aa0a3f::t_abb145001865b3 77,97
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  s_544af2b4aa0a3f::t_108a27466a8337 17,25-26,30,99,126
+apps/api/src/plugins/db.test.ts
+  s_544af2b4aa0a3f::t_108a27466a8337 20-23,44
+apps/api/src/license/license-cert.ts
+  s_544af2b4aa0a3f::t_8681143d52a5fa 73-78,84,98-100
+  s_544af2b4aa0a3f::t_abb145001865b3 8-9,11-16,72,79-83,85-97,101-103
+  s_544af2b4aa0a3f::t_7fc5b398d5ec95 104-105
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_544af2b4aa0a3f::t_108a27466a8337 5,61
+apps/api/src/instance-report/instance-report.entity.ts
+  s_544af2b4aa0a3f::t_8681143d52a5fa 16-20
+  s_544af2b4aa0a3f::t_abb145001865b3 21-23
+apps/api/src/plugins/report-auth.ts
+  s_544af2b4aa0a3f::t_abb145001865b3 5,10-11,24-28,51,72,92,104,133-134,137
+  h_c63dce324dfc7b 135-136
+  s_544af2b4aa0a3f::t_378f7c0d01956a 138
+docs/DIAGRAMS.md
+  s_544af2b4aa0a3f::t_108a27466a8337 8-10,45,47,136,169
+docs/adr/2026-09-21-authenticate-with-license-certificate.md
+  s_544af2b4aa0a3f::t_108a27466a8337 9-10
+docs/USER_GUIDE.md
+  s_544af2b4aa0a3f::t_108a27466a8337 171-174,184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a5d1b222510d56e2c4d0a864bc34e670886b5f1e",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_544af2b4aa0a3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4cfe62a4-8ece-4914-984f-dc6e2163c6cf",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
