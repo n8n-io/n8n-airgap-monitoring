@@ -24,7 +24,10 @@ const term = ref('')
 const sortKey = ref<SortKey>('lastReport')
 const page = ref(0)
 
-const columns = computed(() => metricColumns(props.summaries.map(({ instance }) => instance)))
+const metrics = computed(() => metricColumns(props.summaries.map(({ instance }) => instance)))
+const columns = computed(() =>
+  metrics.value.flatMap(({ name, kinds }) => kinds.map((kind) => ({ name, kind }))),
+)
 
 function statusTip({ status, daysSinceReport }: InstanceSummary): string {
   return `${STATUS_TEXT[status]}: last report ${daysSinceReport} days before the report was generated`
@@ -57,8 +60,8 @@ const visible = computed(() =>
   sorted.value.slice(page.value * PAGE_SIZE, (page.value + 1) * PAGE_SIZE).map((summary) => ({
     summary,
     latest: columns.value.map((column) => ({
-      key: columnKey(column),
-      point: latestPoint(pointsOf(summary.instance, column)),
+      key: columnKey(column.name, column.kind),
+      point: latestPoint(pointsOf(summary.instance, column.name, column.kind)),
     })),
   })),
 )
@@ -75,39 +78,45 @@ watch([term, () => props.status, sortKey, () => props.summaries], () => {
         Instances <span class="muted">{{ formatNumber(filtered.length) }}</span>
       </h2>
       <div class="chips">
-        <input v-model="term" type="search" class="filter" placeholder="Filter by label or ID" />
+        <input
+          v-model="term"
+          type="search"
+          class="filter"
+          placeholder="Filter by label or ID"
+          aria-label="Filter instances by label or ID"
+        />
       </div>
     </header>
     <div class="table-wrap">
       <table class="instances">
         <thead>
           <tr>
-            <th>
+            <th rowspan="2">
               <button
                 type="button"
                 class="sort"
                 :class="{ sorted: sortKey === 'lastReport' }"
                 @click="sortKey = 'lastReport'"
               >
-                Last report
+                Last report{{ sortKey === 'lastReport' ? ' ↓' : '' }}
               </button>
             </th>
-            <th>
+            <th rowspan="2">
               <button
                 type="button"
                 class="sort"
                 :class="{ sorted: sortKey === 'name' }"
                 @click="sortKey = 'name'"
               >
-                Instance
+                Instance{{ sortKey === 'name' ? ' ↑' : '' }}
               </button>
             </th>
-            <th
-              v-for="column in columns"
-              :key="columnKey(column)"
-              class="number"
-              :title="column.name"
-            >
+            <th v-for="metric in metrics" :key="metric.name" :colspan="metric.kinds.length">
+              {{ metric.name }}
+            </th>
+          </tr>
+          <tr>
+            <th v-for="column in columns" :key="columnKey(column.name, column.kind)" class="number">
               {{ column.kind === 'daily' ? 'Daily' : 'Total' }}
             </th>
           </tr>
@@ -135,7 +144,12 @@ watch([term, () => props.status, sortKey, () => props.summaries], () => {
                   :aria-label="statusTip(summary)"
                   :title="statusTip(summary)"
                 ></span
-                >{{ displayName(summary.instance) }}
+                ><RouterLink
+                  :to="{ name: 'instance', params: { instanceId: summary.instance.instanceId } }"
+                  class="name-link"
+                  @click.stop
+                  >{{ displayName(summary.instance) }}</RouterLink
+                >
               </div>
               <div class="mono muted truncate" :title="summary.instance.instanceId">
                 {{ summary.instance.instanceId }}

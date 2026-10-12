@@ -17,7 +17,7 @@ export interface CumulativePoint extends PointBase {
 
 export type ReportedMetric = DailyPoint | CumulativePoint
 
-export type MetricKind = ReportedMetric['kind']
+type MetricKind = ReportedMetric['kind']
 
 export interface InstanceReportEntry {
   instanceId: string
@@ -61,8 +61,8 @@ export function utcDaysBetween(from: string, to: string): number {
 export type Status = 'active' | 'stale' | 'offline'
 
 // Loose enough for an instance that reports once a week.
-export const STALE_AFTER_DAYS = 14
-export const OFFLINE_AFTER_DAYS = 30
+const STALE_AFTER_DAYS = 14
+const OFFLINE_AFTER_DAYS = 30
 
 /**
  * Measured against the report's generatedAt, not the viewer's clock: the file is a
@@ -80,37 +80,42 @@ export function statusOf(lastReportAt: string, generatedAt: string): Status {
   return 'active'
 }
 
-/** One table column. A name can be reported as both kinds, which then get a column each. */
-export interface MetricColumn {
+export interface Metric {
   name: string
-  kind: MetricKind
+  kinds: MetricKind[]
 }
 
-export function columnKey(column: MetricColumn): string {
-  return `${column.name}:${column.kind}`
+export function columnKey(name: string, kind: MetricKind): string {
+  return `${name}:${kind}`
 }
 
-export function metricColumns(instances: InstanceReportEntry[]): MetricColumn[] {
-  const columns = new Map<string, MetricColumn>()
-
+/** Every metric the instances report, by name */
+export function metricColumns(instances: InstanceReportEntry[]): Metric[] {
+  const kindsByName = new Map<string, Set<MetricKind>>()
   for (const instance of instances) {
     for (const [name, points] of Object.entries(instance.dataPoints)) {
+      const kinds = kindsByName.get(name) ?? new Set()
       for (const { kind } of points) {
-        const column = { name, kind }
-        columns.set(columnKey(column), column)
+        kinds.add(kind)
       }
+      kindsByName.set(name, kinds)
     }
   }
 
-  // Daily before cumulative: the total is checked against the dailies, not the other way round.
-  const kindOrder = (kind: MetricKind) => (kind === 'daily' ? 0 : 1)
-  return [...columns.values()].sort(
-    (a, b) => a.name.localeCompare(b.name) || kindOrder(a.kind) - kindOrder(b.kind),
-  )
+  return [...kindsByName]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([name, kinds]) => ({
+      name,
+      kinds: (['daily', 'cumulative'] as const).filter((kind) => kinds.has(kind)),
+    }))
 }
 
-export function pointsOf(instance: InstanceReportEntry, column: MetricColumn): ReportedMetric[] {
-  return (instance.dataPoints[column.name] ?? []).filter((point) => point.kind === column.kind)
+export function pointsOf(
+  instance: InstanceReportEntry,
+  name: string,
+  kind: MetricKind,
+): ReportedMetric[] {
+  return (instance.dataPoints[name] ?? []).filter((point) => point.kind === kind)
 }
 
 /**
@@ -133,7 +138,7 @@ export type Anomaly =
    */
   | { type: 'duplicate-day'; name: string; date: string; count: number; batchIds: string[] }
   /** A running total went down. */
-  | { type: 'cumulative-regression'; name: string; from: number; to: number; receivedAt: string }
+  | { type: 'cumulative-regression'; name: string; from: number; receivedAt: string }
   /** The total grew by a different amount than the daily values over the same days add up to. */
   | {
       type: 'cumulative-daily-mismatch'
@@ -187,7 +192,6 @@ function cumulativeRegressions(name: string, cumulatives: CumulativePoint[]): An
             type: 'cumulative-regression',
             name,
             from: previous.value,
-            to: point.value,
             receivedAt: point.receivedAt,
           },
         ]
@@ -208,12 +212,6 @@ export interface BatchGrowth {
    */
   days: string[]
   dailySum: number
-  /**
-   * A total is sampled when the batch is made and counts part of that day, which no daily
-   * covers yet, while the total before it counted part of the batch's first day. So growth
-   * and dailies may differ by up to a day's worth: the largest daily of those days.
-   */
-  tolerance: number
   /**
    * Whether the day the batch was made has a daily yet, from a later batch. Until then that
    * day's share of the growth is unknown, so the batch is not checked: the latest one never is.
@@ -249,6 +247,9 @@ export function growthPerBatch(points: ReportedMetric[]): BatchGrowth[] {
 
     const madeOn = addDays(newest, 1)
     const checked = dailyByDate.has(madeOn)
+    // A total counts part of the day the batch is made, which no daily covers yet, and the total
+    // before it counted part of the batch's first day. So growth and dailies may differ by up to
+    // the largest daily of those days.
     const tolerance = Math.max(...[...days, madeOn].map((day) => dailyByDate.get(day) ?? 0))
     const growth = total.value - previous.total.value
     const dailySum = sum(dailies.map(({ value }) => value))
@@ -258,7 +259,6 @@ export function growthPerBatch(points: ReportedMetric[]): BatchGrowth[] {
         growth,
         days,
         dailySum,
-        tolerance,
         checked,
         mismatch: checked && Math.abs(growth - dailySum) > tolerance,
       },
@@ -302,13 +302,9 @@ export function dailyValues(points: ReportedMetric[]): Map<string, number> {
 }
 
 export function dailyMetricNames(instances: InstanceReportEntry[]): string[] {
-  return [
-    ...new Set(
-      metricColumns(instances)
-        .filter((column) => column.kind === 'daily')
-        .map((column) => column.name),
-    ),
-  ]
+  return metricColumns(instances)
+    .filter(({ kinds }) => kinds.includes('daily'))
+    .map(({ name }) => name)
 }
 
 /** A daily metric summed over instances, per date. */
@@ -323,7 +319,7 @@ export function sumDaily(instances: InstanceReportEntry[], name: string): Map<st
 }
 
 /** A value in the raw data; a total also says how much it grew since the total before it. */
-export interface RawValue {
+interface RawValue {
   value: number
   delta?: number
 }
@@ -362,11 +358,10 @@ export function rawRows(instance: InstanceReportEntry): RawRow[] {
 
     for (const point of points) {
       const values = rowOf(point.kind === 'daily' ? point.date : utcDay(point.receivedAt)).values
-      const key = columnKey({ name, kind: point.kind })
-      const entry =
-        point.kind === 'daily'
-          ? { value: point.value }
-          : { value: point.value, delta: deltas.get(point) }
+      const key = columnKey(name, point.kind)
+      // The first total has nothing to grow from, so no delta.
+      const delta = point.kind === 'cumulative' ? deltas.get(point) : undefined
+      const entry = delta === undefined ? { value: point.value } : { value: point.value, delta }
       values.set(key, [...(values.get(key) ?? []), entry])
 
       const { received } = rowOf(utcDay(point.receivedAt))
@@ -387,7 +382,7 @@ export function anomaliesByCell(anomalies: Anomaly[]): Map<string, Anomaly[]> {
   const cells = new Map<string, Anomaly[]>()
   for (const anomaly of anomalies) {
     const kind = anomaly.type === 'duplicate-day' ? 'daily' : 'cumulative'
-    const key = `${anomalyDay(anomaly)}|${columnKey({ name: anomaly.name, kind })}`
+    const key = `${anomalyDay(anomaly)}|${columnKey(anomaly.name, kind)}`
     cells.set(key, [...(cells.get(key) ?? []), anomaly])
   }
   return cells

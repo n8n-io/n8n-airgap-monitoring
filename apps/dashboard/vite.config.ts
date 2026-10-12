@@ -46,7 +46,13 @@ function serveReport(file: string | undefined): Plugin {
         }
         res.setHeader('content-type', 'application/json')
         res.setHeader('cache-control', 'no-store')
-        createReadStream(file).pipe(res)
+        createReadStream(file)
+          .on('error', (error) => {
+            server.config.logger.error(`Could not read ${file}: ${error.message}`)
+            res.statusCode = 500
+            res.end(error.message)
+          })
+          .pipe(res)
       })
     },
   }

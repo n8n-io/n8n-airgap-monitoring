@@ -17,7 +17,9 @@ const emit = defineEmits<{ selectDay: [day: string] }>()
 
 const days = computed(() => {
   const dates = [...props.values.keys()].sort()
-  return daysFrom(props.from ?? dates[0] ?? '', props.to ?? dates[dates.length - 1] ?? '')
+  const from = props.from ?? dates[0]
+  const to = props.to ?? dates[dates.length - 1]
+  return from === undefined || to === undefined ? [] : daysFrom(from, to)
 })
 
 function dayLabel(index: number): string {
@@ -54,7 +56,7 @@ const options = computed<ChartOptions<'bar'>>(() => ({
     tooltip: {
       callbacks: {
         title: ([item]) => dayLabel(item?.dataIndex ?? -1),
-        label: (item) => formatNumber(item.parsed.y ?? 0),
+        label: (item) => (item.parsed.y === null ? 'No value' : formatNumber(item.parsed.y)),
       },
     },
   },

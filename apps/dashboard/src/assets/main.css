@@ -8,7 +8,7 @@
   --grid: #e1e0d9;
   --text: #0b0b0b;
   --text-secondary: #52514e;
-  --text-muted: #898781;
+  --text-muted: #70706b;
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --accent: #2a78d6;
@@ -206,7 +206,7 @@ button {
   background: var(--surface-hover);
 }
 
-.tile.selected {
+.tile[data-state='on'] {
   outline: 2px solid var(--accent);
 }
 
@@ -299,7 +299,8 @@ button {
   background: var(--surface-hover);
 }
 
-.chip.selected {
+.chip.selected,
+.chip[data-state='on'] {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   border-color: var(--accent);
 }
@@ -360,14 +361,27 @@ td {
   border-bottom: 1px solid var(--border);
 }
 
-th {
+thead {
   position: sticky;
   top: 0;
+  z-index: 1;
+}
+
+th {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   white-space: nowrap;
   background: var(--surface);
+}
+
+th[colspan] {
+  text-align: center;
+  border-bottom: none;
+}
+
+th[rowspan] {
+  vertical-align: bottom;
 }
 
 th.number {
@@ -407,25 +421,19 @@ tr.selected td {
   border-radius: 10px;
 }
 
-/* The value an anomaly is about; hovering it shows what is wrong. */
 tr td.anomaly-cell {
   background: var(--anomaly-row);
   cursor: default;
 }
 
-/* Above the hovered cell, right edges aligned; looks like the charts' tooltips. */
 .tooltip {
-  position: fixed;
   z-index: 10;
   max-width: 420px;
   padding: 6px 10px;
   font-size: 12px;
-  white-space: pre-line;
   color: #fff;
   background: rgb(0 0 0 / 80%);
   border-radius: 6px;
-  transform: translate(-100%, calc(-100% - 6px));
-  pointer-events: none;
 }
 
 .name {
@@ -450,8 +458,8 @@ tr td.anomaly-cell {
   color: var(--text);
 }
 
-.sort.sorted::after {
-  content: ' ↓';
+.name-link {
+  color: inherit;
 }
 
 .pager {
@@ -504,9 +512,5 @@ tr td.anomaly-cell {
 
   .card {
     padding: 20px 16px;
-  }
-
-  .charts {
-    grid-template-columns: 1fr;
   }
 }

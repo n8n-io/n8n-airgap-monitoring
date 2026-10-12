@@ -32,7 +32,7 @@ watch(
 )
 
 const instance = computed(() => props.summary.instance)
-const columns = computed(() => metricColumns([instance.value]))
+const tableMetrics = computed(() => metricColumns([instance.value]))
 
 const metrics = computed(() =>
   Object.entries(instance.value.dataPoints)
@@ -152,7 +152,7 @@ async function copyId(): Promise<void> {
       </p>
       <RawTable
         v-if="!showJson"
-        :columns="columns"
+        :metrics="tableMetrics"
         :rows="rows"
         :anomalies="anomalies"
         :selected-day="selectedDay"

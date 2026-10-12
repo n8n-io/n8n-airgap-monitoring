@@ -8,7 +8,6 @@ export default mergeConfig(
   defineProject({
     test: {
       name: 'dashboard',
-      environment: 'jsdom',
     },
   }),
 )

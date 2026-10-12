@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ToggleGroupItem, ToggleGroupRoot } from 'reka-ui'
 import { computed, ref } from 'vue'
 import DailyChart from '@/components/DailyChart.vue'
 import InstancesTable from '@/components/InstancesTable.vue'
@@ -11,13 +12,14 @@ const { report, summaries } = useReport()
 const generatedAt = computed(() => report.value?.data.generatedAt ?? '')
 
 const RANGES = [
-  { days: 30, label: '30 days' },
-  { days: 90, label: '90 days' },
-  { days: undefined, label: 'All' },
+  { value: '30', days: 30, label: '30 days' },
+  { value: '90', days: 90, label: '90 days' },
+  { value: 'all', days: undefined, label: 'All' },
 ] as const
 
 const statusFilter = ref<StatusFilter>('all')
-const range = ref<number | undefined>(90)
+const rangeValue = ref<(typeof RANGES)[number]['value']>('90')
+const range = computed(() => RANGES.find(({ value }) => value === rangeValue.value)?.days)
 
 const metricNames = computed(() =>
   dailyMetricNames(summaries.value.map(({ instance }) => instance)),
@@ -69,54 +71,60 @@ const tiles = computed(() => [
     value: summaries.value.filter((s) => s.recentAnomalies.length > 0).length,
   },
 ])
-
-// Clicking the selected tile again clears the filter.
-function filterBy(filter: StatusFilter): void {
-  statusFilter.value = statusFilter.value === filter ? 'all' : filter
-}
 </script>
 
 <template>
   <div class="stack">
-    <div class="tiles">
-      <button
+    <ToggleGroupRoot
+      type="single"
+      class="tiles"
+      aria-label="Filter instances"
+      :model-value="statusFilter === 'all' ? undefined : statusFilter"
+      @update:model-value="(value) => (statusFilter = (value as StatusFilter | undefined) ?? 'all')"
+    >
+      <ToggleGroupItem
         v-for="tile in tiles"
         :key="tile.filter"
-        type="button"
-        :class="[
-          'tile',
-          `tile-${tile.filter}`,
-          { selected: statusFilter === tile.filter && tile.filter !== 'all' },
-        ]"
-        @click="filterBy(tile.filter)"
+        :value="tile.filter"
+        :class="['tile', `tile-${tile.filter}`]"
       >
         <span :class="['status-dot', `status-${tile.filter}`]" aria-hidden="true"></span>
         <span class="tile-value">{{ formatNumber(tile.value) }}</span>
         <span class="tile-label">{{ tile.label }}</span>
-      </button>
-    </div>
+      </ToggleGroupItem>
+    </ToggleGroupRoot>
 
     <section v-if="metric" class="card">
       <header class="card-header">
         <h2>
           Daily
-          <select v-if="metricNames.length > 1" v-model="selectedMetric" class="inline-select">
+          <select
+            v-if="metricNames.length > 1"
+            v-model="selectedMetric"
+            class="inline-select"
+            aria-label="Daily metric"
+          >
             <option v-for="name in metricNames" :key="name" :value="name">{{ name }}</option>
           </select>
           <template v-else>{{ metric }}</template>
           <span class="muted"> across all instances</span>
         </h2>
-        <div class="chips">
-          <button
+        <ToggleGroupRoot
+          type="single"
+          class="chips"
+          aria-label="Range"
+          :model-value="rangeValue"
+          @update:model-value="(value) => value && (rangeValue = value as typeof rangeValue)"
+        >
+          <ToggleGroupItem
             v-for="option in RANGES"
-            :key="option.label"
-            type="button"
-            :class="['chip', { selected: range === option.days }]"
-            @click="range = option.days"
+            :key="option.value"
+            :value="option.value"
+            class="chip"
           >
             {{ option.label }}
-          </button>
-        </div>
+          </ToggleGroupItem>
+        </ToggleGroupRoot>
       </header>
       <DailyChart :values="daily" :from="from" :to="to" />
     </section>
