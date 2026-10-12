@@ -59,8 +59,8 @@ describe('statusOf', () => {
 
   it.each([
     [0, 'active'],
-    [14, 'active'],
-    [15, 'stale'],
+    [1, 'active'],
+    [2, 'stale'],
     [30, 'stale'],
     [31, 'offline'],
   ])('when the last report is %i days old, then the status is %s', (days, status) => {

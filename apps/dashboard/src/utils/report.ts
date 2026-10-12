@@ -60,8 +60,7 @@ export function utcDaysBetween(from: string, to: string): number {
 
 export type Status = 'active' | 'stale' | 'offline'
 
-// Loose enough for an instance that reports once a week.
-const STALE_AFTER_DAYS = 14
+const STALE_AFTER_DAYS = 1
 const OFFLINE_AFTER_DAYS = 30
 
 /**

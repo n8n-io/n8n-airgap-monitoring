@@ -38,7 +38,7 @@ const columns = computed(() =>
 
 function anomalyTip({ recentAnomalies }: InstanceSummary): string {
   const count = recentAnomalies.length
-  return `${count} ${count === 1 ? 'anomaly' : 'anomalies'} in the last ${RECENT_ANOMALY_DAYS} days, marked on its page`
+  return `${count} ${count === 1 ? 'anomaly' : 'anomalies'}, none older than ${RECENT_ANOMALY_DAYS} days, marked on its page`
 }
 
 function statusTip({ status, daysSinceReport }: InstanceSummary): string {
