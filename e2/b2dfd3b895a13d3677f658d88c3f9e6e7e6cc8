@@ -1,0 +1,23 @@
+apps/dashboard/vite.config.ts
+  s_b6d47be356e05e::t_953605bff6f889 22,25-27
+apps/dashboard/README.md
+  s_b6d47be356e05e::t_953605bff6f889 19-21
+apps/dashboard/src/assets/main.css
+  s_b6d47be356e05e::t_953605bff6f889 408-412
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "e2b2dfd3b895a13d3677f658d88c3f9e6e7e6cc8",
+  "prompts": {},
+  "sessions": {
+    "s_b6d47be356e05e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "58c114c8-2f3a-4c90-b4d6-9ae5c3ad1666",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
