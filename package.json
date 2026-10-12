@@ -13,7 +13,8 @@
     "test": "turbo run test",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "inspect": "pnpm --filter dashboard inspect"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "4.1.9",

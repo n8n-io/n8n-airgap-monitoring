@@ -183,6 +183,10 @@ Run the test cases.
 Prints a schema-valid report body for posting without an n8n instance. See
 [Local development](#local-development).
 
+### `pnpm inspect --file=<report.json>`
+
+Opens a local dashboard for a downloaded report.
+
 ## Docker
 
 The [`Dockerfile`](Dockerfile) builds a single image containing the API, so a

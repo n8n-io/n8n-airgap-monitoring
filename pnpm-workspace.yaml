@@ -9,6 +9,14 @@ allowBuilds:
   esbuild: true
   sqlite3: true
 
+# The Vue toolchain cannot run TypeScript 7 (the native port) yet: vue-tsc
+# resolves `typescript/lib/tsc.js`, which TS 7 no longer exports, and
+# typescript-eslint caps its peer range below 6.1. The dashboard pins the last
+# 6.x via `"typescript": "catalog:vue"`.
+catalogs:
+  vue:
+    typescript: 6.0.3
+
 # Only resolve package versions published at least 3 days ago, so a compromised
 # or broken release has time to be pulled before it can enter the lockfile.
 minimumReleaseAge: 4320

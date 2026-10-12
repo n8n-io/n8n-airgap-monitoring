@@ -9,9 +9,11 @@ node_modules
 # Local SQLite database
 data
 
-# Not part of the app: the demo harness and the decision records.
+# Not part of the app: the demo harness, the decision records and the
+# local-only report dashboard (`pnpm inspect`).
 scripts
 adr
+apps/dashboard
 
 .git
 .gitignore
