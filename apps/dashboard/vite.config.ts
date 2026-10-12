@@ -19,8 +19,12 @@ function reportFile(): string | undefined {
     options: { file: { type: 'string' } },
     strict: false,
   })
-  if (typeof values.file !== 'string') {
+  if (values.file === undefined) {
     return undefined
+  }
+  // Not strict, so a bare `--file` comes through as `true`.
+  if (typeof values.file !== 'string') {
+    throw new Error('--file expects a path, e.g. --file=./report.json')
   }
 
   const file = path.resolve(process.env.INIT_CWD ?? process.cwd(), values.file)

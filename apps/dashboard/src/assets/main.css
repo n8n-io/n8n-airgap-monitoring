@@ -405,6 +405,11 @@ tbody tr:last-child td {
   background: var(--anomaly-row);
 }
 
+/* Hover darkens the pink instead of replacing it. */
+.clickable.has-anomaly:hover td {
+  background: color-mix(in srgb, var(--anomaly-row), var(--critical) 8%);
+}
+
 /* The day just clicked on a chart. */
 tr.selected td {
   background: color-mix(in srgb, var(--accent) 14%, transparent);

@@ -16,7 +16,9 @@ pnpm inspect --file=./report.json
 pnpm test
 ```
 
-## Lint with [ESLint](https://eslint.org/)
+## Lint with [Oxlint](https://oxc.rs/docs/guide/usage/linter) and [ESLint](https://eslint.org/)
+
+Fixes what it can in place; `pnpm lint:check` only reports.
 
 ```sh
 pnpm lint
