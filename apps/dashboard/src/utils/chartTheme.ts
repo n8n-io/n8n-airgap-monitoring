@@ -43,6 +43,6 @@ function readTheme() {
 
 export const chartTheme = ref(readTheme())
 
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change', () => {
   chartTheme.value = readTheme()
 })

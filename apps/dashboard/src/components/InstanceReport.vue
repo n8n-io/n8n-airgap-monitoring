@@ -21,7 +21,7 @@ const props = defineProps<{ summary: InstanceSummary }>()
 
 const selectedDay = ref<string>()
 const showJson = ref(false)
-const copied = ref(false)
+const copyLabel = ref('Copy')
 
 watch(
   () => props.summary,
@@ -70,10 +70,15 @@ async function selectDay(day: string): Promise<void> {
 }
 
 async function copyId(): Promise<void> {
-  await navigator.clipboard.writeText(instance.value.instanceId)
-  copied.value = true
+  try {
+    await navigator.clipboard.writeText(instance.value.instanceId)
+    copyLabel.value = 'Copied'
+  } catch {
+    // The clipboard needs a secure context: localhost, not a LAN address.
+    copyLabel.value = 'Copy failed'
+  }
   setTimeout(() => {
-    copied.value = false
+    copyLabel.value = 'Copy'
   }, 1500)
 }
 </script>
@@ -86,7 +91,7 @@ async function copyId(): Promise<void> {
         <p class="id-line">
           <span class="mono">{{ instance.instanceId }}</span>
           <button type="button" class="link-button" @click="copyId">
-            {{ copied ? 'Copied' : 'Copy' }}
+            {{ copyLabel }}
           </button>
         </p>
         <p class="muted">

@@ -514,3 +514,20 @@ tr td.anomaly-cell {
     padding: 20px 16px;
   }
 }
+
+/* Marks an instance with recent anomalies in the instances table. */
+.anomaly-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+  color: #fff;
+  background: var(--critical);
+  border: none;
+  border-radius: 50%;
+}
