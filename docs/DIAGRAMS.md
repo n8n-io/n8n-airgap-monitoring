@@ -5,8 +5,9 @@
 The service exposes a single write endpoint, `POST /api/v1/instance-reports`.
 A self-hosted n8n instance posts one report per day to it, carrying its n8n
 license certificate (`N8N_LICENSE_CERT`) in the body as the credential. The
-service verifies that the certificate was issued by the n8n license CA and
-strips it from the body; nothing from it is stored. That is certificate mode.
+service verifies that the certificate was issued by the n8n license CA, keeps
+the id of the n8n customer it names as `consumerId`, and strips the rest from
+the body. That is certificate mode.
 When the operator has set `N8N_MONITORING_WRITE_TOKEN` on the service, it runs
 in token mode instead: the instance sends that token as `Authorization: Bearer`
 (`N8N_INSTANCE_REPORTING_AUTH_TOKEN` on n8n), omits the certificate, and the
@@ -41,9 +42,9 @@ sequenceDiagram
 
     Note over N8N,API: Example data - what an n8n instance sends today<br/>"dataPoints": [<br/>{<br/>"kind": "cumulative",<br/>"name": "billableExecutions",<br/>"value": 402931<br/>},<br/>{<br/>"kind": "daily",<br/>"name": "billableExecutions",<br/>"value": 15234,<br/>"date": "2026-03-25"<br/>}<br/>]<br/>The cumulative point is the lifetime total, the daily point covers the previous completed UTC day.
 
-    API->>API: preValidation (certificate mode): licenseCert chains to the n8n license CA<br/>and its payload signature verifies, then licenseCert is deleted from the body
+    API->>API: preValidation (certificate mode): licenseCert chains to the n8n license CA<br/>and its payload signature verifies; the payload's consumerId is kept as request.consumerId<br/>(null in token mode), then licenseCert is deleted from the body
     API->>API: schema validation of the remaining body
-    API->>DB: INSERT INTO instance_reports<br/>(instanceId, batchId, label, n8nVersion, data, receivedAt)
+    API->>DB: INSERT INTO instance_reports<br/>(instanceId, batchId, consumerId, label, n8nVersion, data, receivedAt)
     Note over DB: Append-only event store.<br/>dataPoints stored as a JSON blob.<br/>UNIQUE (instanceId, batchId).
     DB-->>API: lastInsertRowid
     API-->>N8N: 201 Created, body carries the stored event id
@@ -132,7 +133,7 @@ sequenceDiagram
         SVC->>DB: SELECT * WHERE instanceId = ?<br/>ORDER BY receivedAt ASC, id ASC
         DB-->>SVC: rows, oldest-first, JSON data column parsed
         SVC->>SVC: toEntry(rows)
-        Note right of SVC: instanceId - from any row<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>dataPoints - every point of every row, tagged with<br/>its row's batchId and receivedAt, then grouped by<br/>metric name. Nothing is summed or deduplicated:<br/>reconciliation is the receiver's job.
+        Note right of SVC: instanceId - from any row<br/>consumerId - last row wins<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>dataPoints - every point of every row, tagged with<br/>its row's batchId and receivedAt, then grouped by<br/>metric name. Nothing is summed or deduplicated:<br/>reconciliation is the receiver's job.
         SVC-->>API: yield InstanceReportEntry
         API-->>C: chunk: JSON.stringify(entry)<br/>prefixed with "," for every entry but the first
     end
@@ -165,6 +166,7 @@ Content-Disposition: attachment; filename="n8n-instance-report-2026-03-28T08-00-
     "instances": [
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
+        "consumerId": "7f3a9c2e-1b4d-4e8f-9a6c-2d5e7f8a9b0c",
         "label": "prod-renamed",
         "firstSeen": "2026-03-26T02:00:00.000Z",
         "lastReportAt": "2026-03-27T02:00:00.000Z",

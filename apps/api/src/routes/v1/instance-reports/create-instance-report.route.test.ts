@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { LABEL_MAX_LENGTH } from "../../../instance-report/label";
 import { build } from "../../../test-utils/build-app";
 import {
+  DEFAULT_MOCK_CONSUMER_ID,
   generateMockLicense,
   generateMockLicenseWithForgedIssuer,
   generateMockLicenseWithTamperedPayload,
@@ -57,6 +58,7 @@ test("stores an accepted instance report", async () => {
 
   expect(row.instanceId).toBe("instance-1");
   expect(row.batchId).toBe("batch-1");
+  expect(row.consumerId).toBe(DEFAULT_MOCK_CONSUMER_ID);
   expect(row.label).toBe(null);
   expect(row.n8nVersion).toBe("1.99.0");
   expect(JSON.parse(row.data)).toEqual(validReport.dataPoints);

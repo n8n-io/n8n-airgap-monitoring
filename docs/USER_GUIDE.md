@@ -168,8 +168,10 @@ GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report
 The request must carry the **read token** as a bearer token in the
 `Authorization` header.
 
-The file contains one entry per instance, with when it was first and last
-seen and every value it ever reported for each metric:
+The file contains one entry per instance, with the id of the n8n customer its
+license certificate names (`null` when it authenticates with a write token),
+when it was first and last seen, and every value it ever reported for each
+metric:
 
 ```json
 {
@@ -179,6 +181,7 @@ seen and every value it ever reported for each metric:
     "instances": [
       {
         "instanceId": "450b5c85…",
+        "consumerId": "7f3a9c2e-…",
         "label": "acme-prod",
         "firstSeen": "2026-03-20T02:00:00.000Z",
         "lastReportAt": "2026-03-26T02:00:00.000Z",

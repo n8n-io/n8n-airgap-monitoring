@@ -74,7 +74,7 @@ const successResponseSchema = {
 };
 
 const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> => {
-  fastify.post<{ Body: CreateInstanceReport }>(
+  fastify.post<{ Body: Omit<CreateInstanceReport, "consumerId"> }>(
     "/",
     {
       bodyLimit: REPORT_BODY_LIMIT_BYTES,
@@ -94,7 +94,7 @@ const createInstanceReport: FastifyPluginAsync = async (fastify): Promise<void> 
       try {
         reply.code(201);
 
-        return await fastify.instanceReportService.recordReport(request.body);
+        return await fastify.instanceReportService.recordReport({ ...request.body, consumerId: request.consumerId });
       } catch (error) {
         // An envelope is immutable, so a repeat is rejected.
         // The client sent something it was built never to send.

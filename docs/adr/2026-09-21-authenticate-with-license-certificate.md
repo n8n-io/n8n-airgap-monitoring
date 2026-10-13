@@ -6,6 +6,8 @@ Date: 2026-09-21
 
 Status: Active
 
+Superseded by: in part ADR 14 (Store the consumerId from the license certificate), which reads and stores the payload's `consumerId`
+
 ## Context
 
 `POST /api/v1/instance-reports` was guarded by a shared write token. The customer generated it, set it on this service as `N8N_MONITORING_WRITE_TOKEN`, and copied it to every n8n instance as `N8N_INSTANCE_REPORTING_AUTH_TOKEN`. That is one secret to mint and distribute per fleet, and it bound nothing to the caller.
