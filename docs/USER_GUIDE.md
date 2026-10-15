@@ -205,7 +205,9 @@ GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?instanceId=450b
 To download the report for some days only, pass `start` and `end` as
 `YYYY-MM-DD`. Daily points are matched by `date`; cumulative points are matched
 by the UTC day of `receivedAt`. Both days are included, and either can be used
-alone. For example, October 2026:
+alone. Instances without points in those days are left out, and `firstSeen`,
+`lastReportAt` and `label` still describe the full history. For example,
+October 2026:
 
 ```
 GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?start=2026-10-01&end=2026-10-31

@@ -99,8 +99,8 @@ N+1 queries and that a DB failure after the first chunk yields a truncated file
 rather than an error status, because the `200` is already on the wire.
 
 The diagram shows the happy path only. The endpoint also answers `400` for an
-invalid query parameter (including `start` after `end`) and `401` for a missing
-or wrong token.
+invalid or repeated query parameter, or `start` after `end`, and `401` for a
+missing or wrong token.
 
 ```mermaid
 ---
@@ -115,9 +115,9 @@ sequenceDiagram
     participant SVC as InstanceReportService<br/>streamInstanceReports()
     participant DB as SQLite<br/>instance_reports
 
-    C->>API: GET /api/v1/report (optional query parameters: instanceId, start, end; each may be omitted independently)<br/>Authorization: Bearer N8N_MONITORING_READ_TOKEN
+    C->>API: GET /api/v1/report (optional query parameters: instanceId, start, end, each may be omitted independently)<br/>Authorization: Bearer N8N_MONITORING_READ_TOKEN
     API->>API: bearer-auth: token equals N8N_MONITORING_READ_TOKEN
-    API->>API: filter = instanceIds split on ",", trimmed, deduplicated and sorted,<br/>plus start and end (YYYY-MM-DD, start not after end)<br/>filters = filter as a query string, omitted for none
+    API->>API: filter = instanceIds split on ",", trimmed, deduplicated and sorted,<br/>plus start and end (YYYY-MM-DD, start not after end)<br/>filters = filter as a query string, omitted for none<br/>invalid or repeated parameter, or start after end - 400
     API->>API: generatedAt = now (ISO 8601)<br/>stamp = generatedAt with ":" and "." replaced by "-"
     API-->>C: 200 OK<br/>Content-Type: application/json<br/>Cache-Control: no-store<br/>Content-Disposition: attachment#59; filename="n8n-instance-report-{stamp}.json"
     Note right of API: Headers go out first. The body is a Readable<br/>wrapping the renderReport async generator, so<br/>Fastify pipes chunks as they are produced.<br/>No response schema: the data was validated on<br/>upload and re-validating would undo the streaming.
