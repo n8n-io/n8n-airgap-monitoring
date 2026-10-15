@@ -181,6 +181,19 @@ describe("streamInstanceReports filtered by start and end", () => {
   const cumulative = (batchId: string, receivedAt: string) =>
     row({ batchId, receivedAt, dataPoints: [{ kind: "cumulative", name: "billableExecutions", value: 1 }] });
 
+  test("when daily values fall on the start or end day, then they are kept, and a day outside is left out", async () => {
+    const service = fakeReportService([
+      row({ dataPoints: [daily("2026-09-30"), daily("2026-10-01"), daily("2026-10-31"), daily("2026-11-01")] }),
+    ]);
+
+    const [instance] = await collectInstances(service, { start: "2026-10-01", end: "2026-10-31" });
+
+    expect(instance.dataPoints.billableExecutions.map((point) => (point.kind === "daily" ? point.date : ""))).toEqual([
+      "2026-10-01",
+      "2026-10-31",
+    ]);
+  });
+
   test("when a cumulative value is received on the start or end day, then it is kept, and a millisecond outside is left out", async () => {
     const service = fakeReportService([
       cumulative("before-start", "2026-09-30T23:59:59.999Z"),

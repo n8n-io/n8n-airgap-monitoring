@@ -149,8 +149,9 @@ report.
 
 `?instanceId=` (comma-separated) narrows the report to those
 instances; `?start=` and `?end=` (`YYYY-MM-DD`, both included) narrow it to
-those days. A filtered report lists the applied filters in `filters`, as a query
-string.
+those days. Daily points are filtered by `date`, cumulative points by the UTC
+day of `receivedAt`. A filtered report lists the applied filters in `filters`,
+as a query string.
 
 ## Deployment
 
