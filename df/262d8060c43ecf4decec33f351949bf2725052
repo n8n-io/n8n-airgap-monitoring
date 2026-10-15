@@ -1,0 +1,25 @@
+README.md
+  s_524d522221c849::t_9d53ad8d5e57f8 152-154
+docs/USER_GUIDE.md
+  s_524d522221c849::t_9d53ad8d5e57f8 206-208
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_524d522221c849::t_9d53ad8d5e57f8 184-196
+docs/DIAGRAMS.md
+  s_524d522221c849::t_9d53ad8d5e57f8 101-103,118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "df262d8060c43ecf4decec33f351949bf2725052",
+  "prompts": {},
+  "sessions": {
+    "s_524d522221c849": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6cdc6242-37c6-4294-b1de-f53d73148f40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
