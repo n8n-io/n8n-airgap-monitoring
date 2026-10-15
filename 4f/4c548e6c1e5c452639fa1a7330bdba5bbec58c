@@ -1,0 +1,43 @@
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  s_524d522221c849::t_c72daf3678321d 422,432,442,448
+  s_524d522221c849::t_f68cd1ec125be0 390-410,412-421,423-431,433-441,443-447,449-453,455,457,459,461-508
+  s_524d522221c849::t_c1e34060365bd4 411,454,456,458,460
+docs/DIAGRAMS.md
+  s_524d522221c849::t_76010215794208 134-135
+  s_524d522221c849::t_489f40b6e4495e 117,119
+docs/USER_GUIDE.md
+  s_524d522221c849::t_489f40b6e4495e 208-212,214,216
+  s_524d522221c849::t_cd8ef3cd42806b 205-207
+README.md
+  s_524d522221c849::t_cd8ef3cd42806b 151-152
+apps/api/src/instance-report/instance-report.service.ts
+  s_524d522221c849::t_78ee7469922158 159-161,170,172-177,186,190-194
+  s_524d522221c849::t_12cb217eac748b 127-130,162
+apps/api/src/routes/v1/report/get-report.route.ts
+  s_524d522221c849::t_3d80a459feadd1 16-18,33-34,44,46-48,76-84,87
+  s_524d522221c849::t_b16771b181bb5b 72
+  s_524d522221c849::t_2c430b40fda272 43,45,50
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_524d522221c849::t_a0ce662e016344 179
+  s_524d522221c849::t_d095880f96caa1 211-222
+  s_524d522221c849::t_c1e34060365bd4 181-182,184,186-189,192,194
+  s_524d522221c849::t_cf663e6a91f638 183
+  s_524d522221c849::t_4da49db1d71834 1,3-8,78,80,177-178,180,185,190-191,193,195-210,223-232
+  s_524d522221c849::t_b735e636eff2c0 92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "4f4c548e6c1e5c452639fa1a7330bdba5bbec58c",
+  "prompts": {},
+  "sessions": {
+    "s_524d522221c849": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6cdc6242-37c6-4294-b1de-f53d73148f40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
