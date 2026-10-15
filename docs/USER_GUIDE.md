@@ -202,10 +202,18 @@ characters):
 GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?instanceId=450b5c85…,9f1e2d3c…
 ```
 
-A filtered report has a `filters` field that lists the applied filters as a
-query string (e.g. `instanceId=450b5c85…,9f1e2d3c…`).
+To download the report for some days only, pass `start` and `end` as
+`YYYY-MM-DD`. Both days are included, and either can be used alone. For
+example, October 2026:
 
-As of today the report always contains the complete history. In a future update we're adding a default threshold for the "time to look back" as well as a query parameter to specify the time window to include in the report.
+```
+GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?start=2026-10-01&end=2026-10-31
+```
+
+A filtered report has a `filters` field that lists the applied filters as a
+query string (e.g. `instanceId=450b5c85…,9f1e2d3c…&start=2026-10-01&end=2026-10-31`).
+
+Without `start` or `end` the report contains the complete history. In a future update we're adding a default threshold for the "time to look back".
 
 ## Environment variable reference
 

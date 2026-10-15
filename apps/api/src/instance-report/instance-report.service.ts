@@ -124,6 +124,10 @@ export interface UsageReport {
 
 export interface ReportFilter {
   instanceIds?: string[];
+  /** First UTC day to include, as YYYY-MM-DD. */
+  start?: string;
+  /** Last UTC day to include, as YYYY-MM-DD. */
+  end?: string;
 }
 
 export class InstanceReportService {
@@ -152,7 +156,10 @@ export class InstanceReportService {
    */
   async *streamInstanceReports(filter: ReportFilter = {}): AsyncGenerator<InstanceReportEntry> {
     for (const instanceId of await this.repository.findInstanceIds(filter.instanceIds)) {
-      yield toEntry(await this.repository.findByInstanceId(instanceId));
+      const entry = toEntry(await this.repository.findByInstanceId(instanceId), filter);
+      if (entry !== undefined) {
+        yield entry;
+      }
     }
   }
 }
@@ -160,8 +167,14 @@ export class InstanceReportService {
 /**
  * One instance's rows, oldest-first (repository order) and never empty, so the
  * first row is its earliest and the last carries its latest state.
+ * Only the points are narrowed to the filter's days; undefined when none are left.
  */
-function toEntry(rows: InstanceReportRow[]): InstanceReportEntry {
+function toEntry(rows: InstanceReportRow[], filter: ReportFilter): InstanceReportEntry | undefined {
+  const points = rows.flatMap(toNamedMetrics).filter(({ metric }) => isInDays(metric, filter));
+  if (points.length === 0) {
+    return undefined;
+  }
+
   const first = rows[0];
   const last = rows[rows.length - 1];
 
@@ -170,8 +183,15 @@ function toEntry(rows: InstanceReportRow[]): InstanceReportEntry {
     label: last.label, // last-received label wins
     firstSeen: first.receivedAt,
     lastReportAt: last.receivedAt,
-    dataPoints: byName(rows.flatMap(toNamedMetrics)),
+    dataPoints: byName(points),
   };
+}
+
+/** A daily value counts towards its date, a cumulative total towards the UTC day it was received. */
+function isInDays(metric: ReportedMetric, { start, end }: ReportFilter): boolean {
+  const day = metric.kind === "daily" ? metric.date : metric.receivedAt.slice(0, 10);
+  // YYYY-MM-DD strings compare in calendar order.
+  return (start === undefined || day >= start) && (end === undefined || day <= end);
 }
 
 /** Every point in one row, tagged with the metric name it is filed under. */
