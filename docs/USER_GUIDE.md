@@ -112,7 +112,9 @@ N8N_INSTANCE_REPORTING_LABEL=<optional label that will be included in reports>
 Notes:
 
 - n8n authenticates with its license certificate, the value of
-  `N8N_LICENSE_CERT`, which a licensed instance already has.
+  `N8N_LICENSE_CERT`, which a licensed instance already has. See
+  [Manage your license](https://docs.n8n.io/deploy/host-n8n/configure-n8n/manage-your-license)
+  in the n8n docs for how it is set.
 - `N8N_INSTANCE_REPORTING_BASE_URL` is the origin only. The n8n instance will append
   the path of the reporting endpoint itself.
 - If `N8N_ENABLED_MODULES` already lists other modules, add
@@ -133,9 +135,8 @@ Notes:
 
 - Each instance picks a random report time after 03:00 UTC on first
   boot with the module enabled and keeps reporting daily at that time forever. This spreads out the requests of many n8n self-hosted instances to the n8n-airgap-monitoring service across the day.
-  The first report of an instance will therefore arrive within 24 hours of activating the module.
 - If an instance was down or the n8n-airgap-monitoring service was unreachable, the next report
-  carries the data of the missed days, up to 30 days. Nothing is lost for
+  carries the data of the missed days, up to 90 days. Nothing is lost for
   outages shorter than that.
 
 ## 3. Download usage reports from n8n-airgap-monitoring
@@ -186,7 +187,7 @@ GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?instanceId=450b
 To download the report for some days only, pass `start` and `end` as
 `YYYY-MM-DD`. Daily points are matched by `date`; cumulative points are matched
 by the UTC day of `receivedAt`. Both days are included, and either can be used
-alone. Instances without points in those days are left out, and `firstSeen`,
+alone. Instances without data in those days are left out, and `firstSeen`,
 `lastReportAt` and `label` still describe the full history. For example,
 October 2026:
 
@@ -197,7 +198,7 @@ GET <url-of-self-hosted-airgap-monitoring-service>/api/v1/report?start=2026-10-0
 A filtered report has a `filters` field that lists the applied filters as a
 query string (e.g. `instanceId=450b5c85…,9f1e2d3c…&start=2026-10-01&end=2026-10-31`).
 
-Without `start` or `end` the report contains the complete history. In a future update we're adding a default threshold for the "time to look back".
+Without `start` or `end` the report contains the complete history.
 
 ## Alternative: authenticate instances with a write token
 
