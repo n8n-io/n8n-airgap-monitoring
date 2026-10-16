@@ -2,7 +2,11 @@
 # `pnpm dev` remains the dev workflow.
 services:
   airgap-monitoring:
-    build: .
+    build:
+      context: .
+      args:
+        # SPIKE (API-463): where the submit page sends the data; kept out of the repository.
+        VITE_SUBMIT_ENDPOINT: ${VITE_SUBMIT_ENDPOINT:-}
     ports:
       # 3001 on the host, not 3000: port 3000 is a popular default and is
       # commonly taken by something else already (Grafana, for one).

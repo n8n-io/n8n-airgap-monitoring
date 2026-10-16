@@ -1,7 +1,7 @@
 import { Readable } from "node:stream";
 import bearerAuth from "@fastify/bearer-auth";
 import { httpErrors } from "@fastify/sensible";
-import type { FastifyPluginAsync } from "fastify";
+import type { FastifyInstance, FastifyPluginAsync } from "fastify";
 import type { InstanceReportEntry, ReportFilter } from "../../../instance-report/instance-report.service";
 import { airgapMonitoringVersion } from "../../../version";
 import { errorResponseSchema } from "../error-response.schema";
@@ -120,6 +120,14 @@ const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
     keys: new Set([fastify.config.readToken]),
   });
 
+  addReportRoute(fastify);
+};
+
+/**
+ * SPIKE (API-463): the report route without its auth, so the submissions plugin can serve the
+ * very same stream to the unauthenticated submit page.
+ */
+export function addReportRoute(fastify: FastifyInstance): void {
   fastify.get<{ Querystring: ReportQuery }>("/", { schema }, async (request, reply) => {
     const filter = toFilter(request.query);
     const generatedAt = new Date().toISOString();
@@ -141,6 +149,6 @@ const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     return body;
   });
-};
+}
 
 export default getReport;

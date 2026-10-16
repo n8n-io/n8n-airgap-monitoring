@@ -8,12 +8,16 @@ WORKDIR /repo
 # Manifests first, so a source-only change reuses the cached install layer.
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/api/package.json apps/api/
+# SPIKE (API-463): the submit page, built here and served by the API under /submit/.
+COPY apps/submit/package.json apps/submit/
 
 # Keep this in sync with "packageManager" field in the root package.json.
 RUN npm install -g pnpm@12.3.4
 RUN pnpm install --frozen-lockfile
 
 COPY . .
+# SPIKE (API-463): the n8n endpoint the submit page sends to, baked into the page at build time.
+ARG VITE_SUBMIT_ENDPOINT
 RUN pnpm turbo run build
 
 # Self-contained API: its dist plus a pruned production node_modules, including
@@ -30,6 +34,7 @@ RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
+COPY --from=build --chown=node:node /repo/apps/submit/dist ./public
 
 ENV NODE_ENV=production
 ENV N8N_DB_PATH=/data/database.sqlite
