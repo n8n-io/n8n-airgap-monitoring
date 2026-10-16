@@ -1,0 +1,98 @@
+Dockerfile
+  s_2a5d58328cf1c7::t_e2fb8b35a50213 19-20
+  s_2a5d58328cf1c7::t_a7452fb6ea0fce 11-12,37
+apps/api/src/app.ts
+  s_2a5d58328cf1c7::t_f73404131f6560 56
+  s_2a5d58328cf1c7::t_85c4b7fec5a3a0 1-2,4,42-55,57
+  s_2a5d58328cf1c7::t_29e6c09340eb02 13
+apps/submit/src/components/MonthRow.vue
+  s_2a5d58328cf1c7::t_7e800db8339f73 1-189,199,201-203,206-237
+  s_2a5d58328cf1c7::t_8f86c65b4636c6 190-198,200,204-205
+apps/api/src/routes/v1/submissions/index.ts
+  s_2a5d58328cf1c7::t_4d9b997a902cb8 1,3-11,13-25,28-39
+  s_2a5d58328cf1c7::t_aa734e6959ae56 2,26-27
+  s_2a5d58328cf1c7::t_a74cbabf001a24 12
+apps/submit/tsconfig.app.json
+  s_2a5d58328cf1c7::t_e300e1f9a2b72b 1-17
+apps/submit/env.d.ts
+  s_2a5d58328cf1c7::t_e2fb8b35a50213 3-4
+  s_2a5d58328cf1c7::t_e300e1f9a2b72b 1-2
+apps/submit/tsconfig.json
+  s_2a5d58328cf1c7::t_e300e1f9a2b72b 1-11
+apps/submit/src/App.vue
+  s_2a5d58328cf1c7::t_8538eb3a9baaab 3-4,15-16,24-36,78,90,99-105,141-145,147-155,160-168
+  s_2a5d58328cf1c7::t_05a8cf9684941d 2,14,18,20-23,37,44,79-83,86-87,89,94,114-122,125-140,156-157
+  s_2a5d58328cf1c7::t_aff6adb6fae344 1,5-13,17,38-43,45-70,75-77,84-85,91-93,95-98,106-113,158-159,169-171
+  s_2a5d58328cf1c7::t_e2fb8b35a50213 19,71-74,88,123-124,146
+apps/submit/index.html
+  s_2a5d58328cf1c7::t_e300e1f9a2b72b 1-12
+apps/api/src/db/migrations/1792022400000-CreateReportSubmissions.ts
+  s_2a5d58328cf1c7::t_6aed81996f3862 1-11,13-22
+  s_2a5d58328cf1c7::t_a74cbabf001a24 12
+apps/submit/vite.config.ts
+  s_2a5d58328cf1c7::t_e2fb8b35a50213 5-6,8,12,15
+  s_2a5d58328cf1c7::t_0761287fd58ea0 1-4,7,9-11,13-14,16-44
+apps/submit/.prettierrc.json
+  s_2a5d58328cf1c7::t_e300e1f9a2b72b 1-6
+apps/submit/src/main.css
+  s_2a5d58328cf1c7::t_8f86c65b4636c6 23-25,54-56
+  s_2a5d58328cf1c7::t_1e3f5ab978795f 317-318
+  s_2a5d58328cf1c7::t_e2fb8b35a50213 149-153
+  s_2a5d58328cf1c7::t_de1a79326c55ec 3-7,9-22,26-28,34-38,40-51,53,57-59,63-66,69,72,74,83-86,90,92-104,106-127,131-132,134,137-148,154-195,197-210,231-233,236-237,240,246-254,264,266-292,297,300,302,305-316,319-328
+  s_2a5d58328cf1c7::t_f185faf246001f 1-2,29-33,52,60-62,67-68,70-71,73,75-77,79-82,87-89,91,128-130,133,135-136,196,212-213,230,234-235,238-239,241-245,255-263,265,293-296,298-299,301,303-304,329
+  s_2a5d58328cf1c7::t_e87c512049394c 8,39
+  s_2a5d58328cf1c7::t_f3e10548783c66 78,105,211,214-229
+apps/api/src/routes/v1/report/get-report.route.ts
+  s_2a5d58328cf1c7::t_608cd8ea379351 4
+  s_2a5d58328cf1c7::t_c1e3159eea4808 123-130
+  s_2a5d58328cf1c7::t_002a989e16fcf2 152
+apps/submit/package.json
+  s_2a5d58328cf1c7::t_e300e1f9a2b72b 1-24
+apps/api/package.json
+  s_2a5d58328cf1c7::t_7b0a5f7d10c784 24
+apps/submit/src/send.ts
+  s_2a5d58328cf1c7::t_0fe75a46ab5d4c 1-12,14-25,27-35,37-52
+  s_2a5d58328cf1c7::t_e2fb8b35a50213 13,26,36
+apps/submit/src/format.ts
+  s_2a5d58328cf1c7::t_922e9ed0c1ce2e 1-12,23-30
+  s_2a5d58328cf1c7::t_e87c512049394c 13-22
+apps/submit/src/main.ts
+  s_2a5d58328cf1c7::t_07a70ebb419b09 1-5
+apps/submit/tsconfig.node.json
+  s_2a5d58328cf1c7::t_e300e1f9a2b72b 1-31
+apps/api/src/submissions/submissions.service.ts
+  s_2a5d58328cf1c7::t_29e6c09340eb02 186-187
+  s_2a5d58328cf1c7::t_fd5e5b4054b0d5 1-13,19-47,60-62,65-100,102-103,107,109,111-185,188-218,233-234,236-238,247-261
+  s_2a5d58328cf1c7::t_aa734e6959ae56 14-18,48-59,63-64,101,104-106,108,110,219-232,235,239-246
+apps/submit/src/api.ts
+  s_2a5d58328cf1c7::t_e87c512049394c 25-33,36
+  s_2a5d58328cf1c7::t_816104b389d8dd 40-42
+  s_2a5d58328cf1c7::t_a89cc501da8d35 43-48
+  s_2a5d58328cf1c7::t_abd9a4243e657d 1-24,34-35,37-39,49-64
+apps/api/src/submissions/submissions.plugin.ts
+  s_2a5d58328cf1c7::t_26dee37a7ddb10 1-20
+turbo.json
+  s_2a5d58328cf1c7::t_e2fb8b35a50213 6
+apps/api/src/db/migrations/index.ts
+  s_2a5d58328cf1c7::t_7b0a5f7d10c784 2,8
+docker-compose.yml
+  s_2a5d58328cf1c7::t_e2fb8b35a50213 5-9
+apps/api/src/routes/v1/index.ts
+  s_2a5d58328cf1c7::t_2ca16caa28170d 4,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "708ce41b412357b6afd8ea3c8c93bb761778f2a7",
+  "prompts": {},
+  "sessions": {
+    "s_2a5d58328cf1c7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cb26bf25-0042-4bf1-9171-1537ed8b4d1f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dmitrii Kulikov <dmitrii.kulikov@n8n.io>"
+    }
+  }
+}
