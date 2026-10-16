@@ -10,7 +10,7 @@ Source: [API-299](https://linear.app/n8n/issue/API-299/filter-report-response-by
 
 ## Context
 
-`GET /api/v1/report` returns every instance (ADR 9). With many instances it is hard to find the one you need. API-299 adds a filter by `instanceId` and a `filters` field that records the applied filters. More filters will follow, for example `from` and `to` for a time window. So the first filter sets the rules for the next ones.
+`GET /api/v1/report` returns every instance (ADR 9). With many instances it is hard to find the one you need. API-299 adds a filter by `instanceId` and a `filters` field that records the applied filters. More filters will follow, for example `start` and `end` for a time window. So the first filter sets the rules for the next ones.
 
 ## Decision
 

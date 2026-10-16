@@ -124,9 +124,7 @@ export interface UsageReport {
 
 export interface ReportFilter {
   instanceIds?: string[];
-  /** First UTC day to include, as YYYY-MM-DD. */
   start?: string;
-  /** Last UTC day to include, as YYYY-MM-DD. */
   end?: string;
 }
 
@@ -167,7 +165,7 @@ export class InstanceReportService {
 /**
  * One instance's rows, oldest-first (repository order) and never empty, so the
  * first row is its earliest and the last carries its latest state.
- * Only the points are narrowed to the filter's days; undefined when none are left.
+ * Only the points are narrowed to the filter's days.
  */
 function toEntry(rows: InstanceReportRow[], filter: ReportFilter): InstanceReportEntry | undefined {
   const points = rows.flatMap(toNamedMetrics).filter(({ metric }) => isInDays(metric, filter));

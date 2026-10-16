@@ -389,7 +389,6 @@ describe("filtering by instanceId", () => {
 });
 
 describe("filtering by start and end", () => {
-  /** One batch per instance, carrying a daily value for each given day. */
   async function seedDays(app: App, instanceId: string, dates: string[]): Promise<void> {
     await insertRow(app, {
       instanceId,

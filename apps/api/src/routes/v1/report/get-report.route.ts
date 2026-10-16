@@ -41,7 +41,6 @@ function invalidInstanceId(reason: string): Error {
 
 function toFilter(query: ReportQuery): ReportFilter {
   const { start, end } = query;
-  // YYYY-MM-DD strings compare in calendar order.
   if (start !== undefined && end !== undefined && start > end) {
     throw httpErrors.badRequest("querystring/start must not be after end");
   }
