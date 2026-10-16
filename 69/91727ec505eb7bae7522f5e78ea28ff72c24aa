@@ -1,0 +1,25 @@
+docs/USER_GUIDE.md
+  h_c63dce324dfc7b 139,190,201
+  s_ec2f36e6690ede::t_ff03ae840a4cf1 115-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6991727ec505eb7bae7522f5e78ea28ff72c24aa",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_ec2f36e6690ede": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f3f5594a-7af1-40b5-ba9c-fbb11477835d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

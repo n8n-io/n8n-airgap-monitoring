@@ -1,0 +1,30 @@
+docs/USER_GUIDE.md
+  s_ec2f36e6690ede::t_ee64c18b0acb6c 264
+  s_ec2f36e6690ede::t_eb5f558fd9ebaa 29-33
+  s_ec2f36e6690ede::t_945fb03724656e 45-47,51-56,60-64,66,73-74
+  s_ec2f36e6690ede::t_1a74911b7a6bb1 114-115
+  s_ec2f36e6690ede::t_c7cf5d849729f8 102
+  s_ec2f36e6690ede::t_50d995a12e3c32 202-217,226,229
+  s_ec2f36e6690ede::t_5f584132081ba0 237,239
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7d237dbb7503dae1a4ff149871259130700923b0",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_ec2f36e6690ede": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f3f5594a-7af1-40b5-ba9c-fbb11477835d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
