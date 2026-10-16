@@ -148,8 +148,10 @@ value that instance reported for that metric, oldest-first, tagged with the
 report.
 
 `?instanceId=` (comma-separated) narrows the report to those
-instances; a filtered report lists the applied filters in `filters`, as a query
-string.
+instances; `?start=` and `?end=` (`YYYY-MM-DD`, both included) narrow it to
+those days. Daily points are filtered by `date`, cumulative points by the UTC
+day of `receivedAt`. A filtered report lists the applied filters in `filters`,
+as a query string.
 
 ## Deployment
 

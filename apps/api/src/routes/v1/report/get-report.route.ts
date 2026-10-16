@@ -13,6 +13,9 @@ const schema = {
     type: "object",
     properties: {
       instanceId: { type: "string" },
+      // UTC calendar days, both included. `format: date` rejects timestamps and non-calendar days.
+      start: { type: "string", format: "date" },
+      end: { type: "string", format: "date" },
     },
   },
   // Only 400: the 200 body is a stream and has no schema.
@@ -27,6 +30,8 @@ const MAX_INSTANCE_ID_LENGTH = 256;
 
 interface ReportQuery {
   instanceId?: string;
+  start?: string;
+  end?: string;
 }
 
 /** Worded like the schema's own errors, e.g. "querystring/instanceId must be string". */
@@ -35,8 +40,13 @@ function invalidInstanceId(reason: string): Error {
 }
 
 function toFilter(query: ReportQuery): ReportFilter {
+  const { start, end } = query;
+  if (start !== undefined && end !== undefined && start > end) {
+    throw httpErrors.badRequest("querystring/start must not be after end");
+  }
+
   if (query.instanceId === undefined) {
-    return {};
+    return { start, end };
   }
 
   const instanceIds = [
@@ -58,15 +68,22 @@ function toFilter(query: ReportQuery): ReportFilter {
     throw invalidInstanceId(`must not be longer than ${MAX_INSTANCE_ID_LENGTH} characters`);
   }
 
-  return { instanceIds };
+  return { instanceIds, start, end };
 }
 
 function toFiltersString(filter: ReportFilter): string | undefined {
-  if (filter.instanceIds === undefined) {
-    return undefined;
+  const params: string[] = [];
+  if (filter.instanceIds !== undefined) {
+    params.push(`instanceId=${filter.instanceIds.map(encodeURIComponent).join(",")}`);
+  }
+  if (filter.start !== undefined) {
+    params.push(`start=${filter.start}`);
+  }
+  if (filter.end !== undefined) {
+    params.push(`end=${filter.end}`);
   }
 
-  return `instanceId=${filter.instanceIds.map(encodeURIComponent).join(",")}`;
+  return params.length === 0 ? undefined : params.join("&");
 }
 
 /**

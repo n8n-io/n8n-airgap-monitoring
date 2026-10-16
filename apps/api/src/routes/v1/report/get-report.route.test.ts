@@ -387,3 +387,121 @@ describe("filtering by instanceId", () => {
     expect(res.statusCode).toBe(401);
   });
 });
+
+describe("filtering by start and end", () => {
+  async function seedDays(app: App, instanceId: string, dates: string[]): Promise<void> {
+    await insertRow(app, {
+      instanceId,
+      batchId: `${instanceId}-b1`,
+      dataPoints: dates.map((date) => ({ kind: "daily", name: "billableExecutions", value: 1, date })),
+      receivedAt: "2026-11-02T02:00:00.000Z",
+    });
+  }
+
+  function dates(data: UsageReport["data"] | undefined): Record<string, string[]> {
+    return Object.fromEntries(
+      (data?.instances ?? []).map((i) => [
+        i.instanceId,
+        i.dataPoints.billableExecutions.map((point) => (point.kind === "daily" ? point.date : "")),
+      ]),
+    );
+  }
+
+  test("when start and end are the first and last day of a month, then only that month's days are reported and data.filters holds both parameters", async () => {
+    const app = await build();
+    await seedDays(app, "a", ["2026-09-30", "2026-10-01", "2026-10-31", "2026-11-01"]);
+
+    const { res, data } = await getReport(app, "?start=2026-10-01&end=2026-10-31");
+
+    expect(res.statusCode).toBe(200);
+    expect(dates(data)).toEqual({ a: ["2026-10-01", "2026-10-31"] });
+    expect(data?.filters).toBe("start=2026-10-01&end=2026-10-31");
+  });
+
+  test("when only start is given, then the days from start on are reported and data.filters holds only start", async () => {
+    const app = await build();
+    await seedDays(app, "a", ["2026-09-30", "2026-10-01"]);
+
+    const { data } = await getReport(app, "?start=2026-10-01");
+
+    expect(dates(data)).toEqual({ a: ["2026-10-01"] });
+    expect(data?.filters).toBe("start=2026-10-01");
+  });
+
+  test("when only end is given, then the days up to and including end are reported and data.filters holds only end", async () => {
+    const app = await build();
+    await seedDays(app, "a", ["2026-09-30", "2026-10-01"]);
+
+    const { data } = await getReport(app, "?end=2026-09-30");
+
+    expect(dates(data)).toEqual({ a: ["2026-09-30"] });
+    expect(data?.filters).toBe("end=2026-09-30");
+  });
+
+  test("when start and end are combined with instanceId, then only those instances' days in range are reported and data.filters holds all three", async () => {
+    const app = await build();
+    await seedDays(app, "a", ["2026-10-01", "2026-11-01"]);
+    await seedDays(app, "b", ["2026-10-01"]);
+    await seedDays(app, "c", ["2026-11-01"]);
+
+    const { data } = await getReport(app, "?instanceId=a,c&start=2026-10-01&end=2026-10-31");
+
+    expect(dates(data)).toEqual({ a: ["2026-10-01"] });
+    expect(data?.filters).toBe("instanceId=a,c&start=2026-10-01&end=2026-10-31");
+  });
+
+  test("when start equals end, then only that day is reported", async () => {
+    const app = await build();
+    await seedDays(app, "a", ["2026-10-30", "2026-10-31", "2026-11-01"]);
+
+    const { data } = await getReport(app, "?start=2026-10-31&end=2026-10-31");
+
+    expect(dates(data)).toEqual({ a: ["2026-10-31"] });
+  });
+
+  test("when start is a day after end, then it is rejected", async () => {
+    const app = await build();
+
+    const { res } = await getReport(app, "?start=2026-11-01&end=2026-10-31");
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json()).toEqual({
+      statusCode: 400,
+      error: "Bad Request",
+      message: "querystring/start must not be after end",
+    });
+    expect(res.headers["content-disposition"]).toBeUndefined();
+  });
+
+  test.each(["start", "end"])("when %s is repeated, then it is rejected", async (param) => {
+    const app = await build();
+
+    const { res } = await getReport(app, `?${param}=2026-10-01&${param}=2026-10-02`);
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test.each(["", "2026-02-30", "2026-10-1", "20261001", "2026-10-01T00:00:00Z", "2026-10-01T00:00:00.000Z"])(
+    "when start is %j, then it is rejected in the schema's error format",
+    async (value) => {
+      const app = await build();
+
+      const { res } = await getReport(app, `?start=${encodeURIComponent(value)}`);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.json()).toEqual({
+        statusCode: 400,
+        error: "Bad Request",
+        message: 'querystring/start must match format "date"',
+      });
+    },
+  );
+
+  test("when end is not a calendar day, then it is rejected", async () => {
+    const app = await build();
+
+    const { res } = await getReport(app, "?end=2026-02-29");
+
+    expect(res.statusCode).toBe(400);
+  });
+});
