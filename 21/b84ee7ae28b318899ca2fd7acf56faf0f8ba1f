@@ -1,0 +1,27 @@
+apps/dashboard/src/utils/report.test.ts
+  s_73ac0a75ac5fb6::t_44a7d14e91e09a 331-341,352-357
+apps/dashboard/src/components/GrowthChart.vue
+  s_73ac0a75ac5fb6::t_838c4b576a3a55 100
+  s_73ac0a75ac5fb6::t_b09dc0d0fb3072 61-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "21b84ee7ae28b318899ca2fd7acf56faf0f8ba1f",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_73ac0a75ac5fb6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36399a59-92bc-4042-bed0-9c8131dec8f3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

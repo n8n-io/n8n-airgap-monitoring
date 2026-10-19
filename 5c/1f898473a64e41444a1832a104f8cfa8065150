@@ -1,0 +1,33 @@
+apps/dashboard/src/components/GrowthChart.vue
+  s_73ac0a75ac5fb6::t_d3e87eb65c9a53 7,9-13,27-29,35,38-39,50-53,60-62,75-77,91-114,133-135,137-138,168
+  s_73ac0a75ac5fb6::t_a2a1fbe5be805c 23-25
+apps/dashboard/src/components/InstanceReport.vue
+  s_73ac0a75ac5fb6::t_6a906017246a2a 13,54,122
+  s_73ac0a75ac5fb6::t_a2a1fbe5be805c 124-125
+apps/dashboard/src/utils/report.ts
+  s_73ac0a75ac5fb6::t_3898bbe825b311 268-316
+apps/dashboard/src/utils/report.test.ts
+  s_73ac0a75ac5fb6::t_84d5b6c7367426 295-355
+  s_73ac0a75ac5fb6::t_c19594cbde342a 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5c1f898473a64e41444a1832a104f8cfa8065150",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_73ac0a75ac5fb6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36399a59-92bc-4042-bed0-9c8131dec8f3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
