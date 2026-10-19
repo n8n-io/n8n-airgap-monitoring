@@ -58,8 +58,8 @@ const data = computed<ChartData<'bar' | 'line', number[], string>>(() => {
         type: 'bar',
         label: 'Total grew by',
         data: points(grown.map(({ day, growth }) => ({ x: day, y: growth }))),
-        backgroundColor: grown.map(({ entry, growth }) =>
-          growth < 0 || entry.batches.some(({ mismatch }) => mismatch)
+        backgroundColor: grown.map(({ entry }) =>
+          entry.batches.some(({ mismatch, growth }) => mismatch || growth < 0)
             ? chartTheme.value.critical
             : chartTheme.value.series,
         ),
@@ -97,7 +97,7 @@ function describe(day: string): string[] {
   if (growth === undefined) {
     return [
       `Daily ${formatNumber(dailySum ?? 0)}`,
-      '  no growth of the total to compare: no total before this day',
+      '  no growth of the total covers this day to compare',
     ]
   }
   return [

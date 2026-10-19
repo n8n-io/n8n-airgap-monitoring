@@ -328,12 +328,17 @@ describe('growthByDay', () => {
       ['2026-03-10T23:00Z', { '2026-03-09': 100 }, 1900],
     )
 
-    expect(byDay(execs)).toContainEqual({
-      day: '2026-03-09',
-      growth: 700,
-      dailyDays: daysFrom('2026-03-03', '2026-03-09'),
-      dailySum: 700,
-    })
+    expect(byDay(execs)).toEqual([
+      { day: '2026-03-01', growth: undefined, dailyDays: ['2026-03-01'], dailySum: 100 },
+      { day: '2026-03-02', growth: 100, dailyDays: ['2026-03-02'], dailySum: 100 },
+      {
+        day: '2026-03-09',
+        growth: 700,
+        dailyDays: daysFrom('2026-03-03', '2026-03-09'),
+        dailySum: 700,
+      },
+      { day: '2026-03-10', growth: 100, dailyDays: [], dailySum: undefined },
+    ])
   })
 
   it('when two batches arrive on one day, then their growth is added', () => {
@@ -344,12 +349,12 @@ describe('growthByDay', () => {
       ['2026-03-03T06:00Z', { '2026-03-02': 150 }, 1200],
     )
 
-    expect(byDay(execs)).toContainEqual({
-      day: '2026-03-02',
-      growth: 150,
-      dailyDays: ['2026-03-02'],
-      dailySum: 150,
-    })
+    expect(byDay(execs)).toEqual([
+      { day: '2026-02-28', growth: undefined, dailyDays: ['2026-02-28'], dailySum: 100 },
+      { day: '2026-03-01', growth: undefined, dailyDays: ['2026-03-01'], dailySum: 100 },
+      { day: '2026-03-02', growth: 150, dailyDays: ['2026-03-02'], dailySum: 150 },
+      { day: '2026-03-03', growth: 50, dailyDays: [], dailySum: undefined },
+    ])
   })
 })
 
