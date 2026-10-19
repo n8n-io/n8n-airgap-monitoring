@@ -2,8 +2,6 @@ name: 'CI: CLA Check'
 run-name: "${{ github.event_name == 'workflow_dispatch' && format('CI: CLA Check (PR #{0})', inputs.pr_number) || '' }}"
 
 on:
-  # TEMP: pull_request_target runs from main, so this lets the check run on its own PR. Remove before merge.
-  pull_request:
   pull_request_target:
     types: [opened, synchronize, reopened]
   issue_comment:
