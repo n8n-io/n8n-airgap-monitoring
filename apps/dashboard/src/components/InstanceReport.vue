@@ -10,7 +10,7 @@ import {
   anomaliesByCell,
   type CumulativePoint,
   dailyValues,
-  growthPerBatch,
+  growthByDay,
   metricColumns,
   rawRows,
   utcDay,
@@ -51,7 +51,7 @@ const metrics = computed(() =>
         name,
         daily,
         cumulative,
-        growth: daily !== undefined && cumulative.length > 1 ? growthPerBatch(points) : undefined,
+        growth: daily !== undefined && cumulative.length > 1 ? growthByDay(points) : undefined,
         from: days[0] ?? '',
         to: days[days.length - 1] ?? '',
       }
@@ -119,10 +119,10 @@ async function copyId(): Promise<void> {
         </div>
         <div v-if="metric.growth">
           <h3>
-            Total vs daily, per batch
+            Total vs daily, per day
             <span class="muted">
-              · on the day a batch arrived: how much the total grew, and what the dailies it covers
-              add up to. Red: they differ, or the total dropped
+              · how much the total grew on a day, and what the dailies since the total before add up
+              to. Red: they differ, or the total dropped
             </span>
           </h3>
           <GrowthChart

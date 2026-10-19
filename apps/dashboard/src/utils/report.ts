@@ -265,6 +265,55 @@ export function growthPerBatch(points: ReportedMetric[]): BatchGrowth[] {
   })
 }
 
+/** A day of the growth chart: how much the total grew on it, next to its dailies. */
+export interface DayGrowth {
+  /** The batches that arrived on the day and grew from an earlier one. */
+  batches: BatchGrowth[]
+  /** Summed over {@link batches}; absent when there are none. */
+  growth?: number
+  /** The reported dates the day's dailies come from, oldest first. */
+  dailyDays: string[]
+  /** Absent when none of the day's dates has a daily yet. */
+  dailySum?: number
+}
+
+/**
+ * Per day, each number on the day it is about. A total counts the day it arrives on, so its growth
+ * is that day's, and the growth since the total before covers the days after that one's arrival.
+ * A daily arrives a day after its date, so it is drawn on the day whose growth covers it instead:
+ * the latest day then has a growth without a daily, and a date no growth covers has a daily alone.
+ */
+export function growthByDay(points: ReportedMetric[]): Map<string, DayGrowth> {
+  const days = new Map<string, DayGrowth>()
+  const dayOf = (day: string): DayGrowth => {
+    const entry = days.get(day) ?? { batches: [], dailyDays: [] }
+    days.set(day, entry)
+    return entry
+  }
+
+  for (const batch of growthPerBatch(points)) {
+    const entry = dayOf(utcDay(batch.point.receivedAt))
+    entry.batches.push(batch)
+    entry.growth = (entry.growth ?? 0) + batch.growth
+  }
+
+  const arrivals = [
+    ...new Set(
+      points.flatMap((point) => (point.kind === 'cumulative' ? [utcDay(point.receivedAt)] : [])),
+    ),
+  ].sort()
+  for (const [date, value] of [...dailyValues(points)].sort(([a], [b]) => a.localeCompare(b))) {
+    const covering = arrivals.find((day) => day >= date)
+    const entry = dayOf(
+      covering !== undefined && days.get(covering)?.growth !== undefined ? covering : date,
+    )
+    entry.dailyDays.push(date)
+    entry.dailySum = (entry.dailySum ?? 0) + value
+  }
+
+  return new Map([...days].sort(([a], [b]) => a.localeCompare(b)))
+}
+
 /** Each checked batch whose total grew by more than a day beyond its dailies. */
 function cumulativeDailyMismatch(name: string, points: ReportedMetric[]): Anomaly[] {
   return growthPerBatch(points)

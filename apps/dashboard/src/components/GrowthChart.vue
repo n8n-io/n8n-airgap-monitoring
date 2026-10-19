@@ -4,10 +4,13 @@ import { computed } from 'vue'
 import { Chart } from 'vue-chartjs'
 import { chartTheme } from '@/utils/chartTheme'
 import { formatDay, formatNumber } from '@/utils/format'
-import { daysFrom, type BatchGrowth, utcDay } from '@/utils/report'
+import { type DayGrowth, daysFrom } from '@/utils/report'
 
-/** Each report is drawn on the day it arrived; a weekly batch is one bar for its seven days. */
-const props = defineProps<{ growth: BatchGrowth[]; from: string; to: string }>()
+/**
+ * Each number on the day it is about: a total's growth on the day it arrived, which it counts,
+ * and a daily on the day whose growth covers it. A weekly batch is one bar for its seven days.
+ */
+const props = defineProps<{ growth: Map<string, DayGrowth>; from: string; to: string }>()
 const emit = defineEmits<{ selectDay: [day: string] }>()
 
 const days = computed(() => daysFrom(props.from, props.to))
@@ -17,30 +20,23 @@ function dayLabel(index: number): string {
   return day === undefined ? '' : formatDay(day)
 }
 
-const byArrival = computed(() => {
-  const reports = new Map<string, BatchGrowth[]>()
-  for (const report of props.growth) {
-    const day = utcDay(report.point.receivedAt)
-    reports.set(day, [...(reports.get(day) ?? []), report])
-  }
-  return reports
-})
+const hasGrowth = computed(() =>
+  [...props.growth.values()].some(({ growth }) => growth !== undefined),
+)
 
-const sum = (values: number[]) => values.reduce((total, value) => total + value, 0)
-
-function window(report: BatchGrowth): string {
-  const first = report.days[0]
-  const last = report.days[report.days.length - 1]
+function window(dates: string[]): string {
+  const first = dates[0]
+  const last = dates[dates.length - 1]
   if (first === undefined || last === undefined) {
     return ''
   }
   return first === last
     ? formatDay(first)
-    : `${formatDay(first)} – ${formatDay(last)} (${report.days.length} days)`
+    : `${formatDay(first)} – ${formatDay(last)} (${dates.length} days)`
 }
 
-// Points only on the days a batch arrived, so hovering or clicking anywhere snaps to the
-// nearest batch instead of an empty day. A category axis takes the label as x, which
+// Points only on the days with a number, so hovering or clicking anywhere snaps to the
+// nearest one instead of an empty day. A category axis takes the label as x, which
 // Chart.js's types do not allow for, hence the casts.
 interface Point {
   x: string
@@ -51,21 +47,19 @@ const dayOf = (raw: unknown) => (raw as Point).x
 const points = (values: Point[]) => values as unknown as number[]
 
 const data = computed<ChartData<'bar' | 'line', number[], string>>(() => {
-  const arrivals = [...byArrival.value].sort(([a], [b]) => a.localeCompare(b))
+  const entries = [...props.growth]
+  const grown = entries.flatMap(([day, entry]) =>
+    entry.growth === undefined ? [] : [{ day, entry, growth: entry.growth }],
+  )
   return {
     labels: days.value,
     datasets: [
       {
         type: 'bar',
         label: 'Total grew by',
-        data: points(
-          arrivals.map(([day, reports]) => ({
-            x: day,
-            y: sum(reports.map(({ growth }) => growth)),
-          })),
-        ),
-        backgroundColor: arrivals.map(([, reports]) =>
-          reports.some(({ mismatch, growth }) => mismatch || growth < 0)
+        data: points(grown.map(({ day, growth }) => ({ x: day, y: growth }))),
+        backgroundColor: grown.map(({ entry, growth }) =>
+          growth < 0 || entry.batches.some(({ mismatch }) => mismatch)
             ? chartTheme.value.critical
             : chartTheme.value.series,
         ),
@@ -78,10 +72,9 @@ const data = computed<ChartData<'bar' | 'line', number[], string>>(() => {
         type: 'line',
         label: 'Daily values of the same days add up to',
         data: points(
-          arrivals.map(([day, reports]) => ({
-            x: day,
-            y: sum(reports.map(({ dailySum }) => dailySum)),
-          })),
+          entries.flatMap(([day, { dailySum }]) =>
+            dailySum === undefined ? [] : [{ x: day, y: dailySum }],
+          ),
         ),
         showLine: false,
         pointRadius: 5,
@@ -94,6 +87,30 @@ const data = computed<ChartData<'bar' | 'line', number[], string>>(() => {
     ],
   }
 })
+
+function describe(day: string): string[] {
+  const entry = props.growth.get(day)
+  if (entry === undefined) {
+    return []
+  }
+  const { growth, dailySum, dailyDays } = entry
+  if (growth === undefined) {
+    return [
+      `Daily ${formatNumber(dailySum ?? 0)}`,
+      '  no growth of the total to compare: no total before this day',
+    ]
+  }
+  return [
+    `Total grew by ${formatNumber(growth)}`,
+    ...(dailySum === undefined
+      ? []
+      : [
+          `Dailies for ${window(dailyDays)} add up to ${formatNumber(dailySum)}`,
+          `  difference ${formatNumber(growth - dailySum)}`,
+        ]),
+    ...(dailyDays.includes(day) ? [] : ['  not checked yet: this day has no daily']),
+  ]
+}
 
 const options = computed<ChartOptions<'bar' | 'line'>>(() => ({
   maintainAspectRatio: false,
@@ -113,16 +130,12 @@ const options = computed<ChartOptions<'bar' | 'line'>>(() => ({
       labels: { color: chartTheme.value.text, usePointStyle: true, boxWidth: 8, boxHeight: 8 },
     },
     tooltip: {
-      filter: (item) => item.datasetIndex === 0,
+      // A day with a bar and a dot has two items; describe it once.
+      filter: (item, index, items) =>
+        items.findIndex((other) => dayOf(other.raw) === dayOf(item.raw)) === index,
       callbacks: {
-        title: ([item]) => (item === undefined ? '' : `Arrived ${formatDay(dayOf(item.raw))}`),
-        label: (item) =>
-          (byArrival.value.get(dayOf(item.raw)) ?? []).flatMap((report) => [
-            `Batch for ${window(report)}`,
-            `  total grew by ${formatNumber(report.growth)}`,
-            `  dailies add up to ${formatNumber(report.dailySum)}, difference ${formatNumber(report.growth - report.dailySum)}`,
-            ...(report.checked ? [] : ['  not checked yet: the day it was made has no daily']),
-          ]),
+        title: ([item]) => (item === undefined ? '' : formatDay(dayOf(item.raw))),
+        label: (item) => describe(dayOf(item.raw)),
       },
     },
   },
@@ -152,7 +165,7 @@ const options = computed<ChartOptions<'bar' | 'line'>>(() => ({
 
 <template>
   <div class="chart">
-    <Chart v-if="growth.length > 0" type="bar" :data="data" :options="options" />
+    <Chart v-if="hasGrowth" type="bar" :data="data" :options="options" />
     <p v-else class="muted empty">Needs at least two reports.</p>
   </div>
 </template>

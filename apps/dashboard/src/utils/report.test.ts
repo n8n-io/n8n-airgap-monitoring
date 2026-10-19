@@ -6,6 +6,7 @@ import {
   type DailyPoint,
   daysFrom,
   findAnomalies,
+  growthByDay,
   type InstanceReportEntry,
   latestPoint,
   metricColumns,
@@ -287,6 +288,67 @@ describe('findAnomalies', () => {
           receivedAt: '2026-03-03T06:00Z',
         },
       ])
+    })
+  })
+})
+
+describe('growthByDay', () => {
+  const byDay = (points: ReportedMetric[]) =>
+    [...growthByDay(points)].map(([day, { growth, dailyDays, dailySum }]) => ({
+      day,
+      growth,
+      dailyDays,
+      dailySum,
+    }))
+
+  it('when batches arrive daily, then each daily is on its date, next to that day’s growth', () => {
+    const execs = batches(
+      ['2026-03-01T23:00Z', { '2026-02-28': 90 }, 1000],
+      ['2026-03-02T23:00Z', { '2026-03-01': 100 }, 1200],
+      ['2026-03-03T23:00Z', { '2026-03-02': 200 }, 1300],
+    )
+
+    expect(byDay(execs)).toEqual([
+      { day: '2026-02-28', growth: undefined, dailyDays: ['2026-02-28'], dailySum: 90 },
+      { day: '2026-03-01', growth: undefined, dailyDays: ['2026-03-01'], dailySum: 100 },
+      { day: '2026-03-02', growth: 200, dailyDays: ['2026-03-02'], dailySum: 200 },
+      { day: '2026-03-03', growth: 100, dailyDays: [], dailySum: undefined },
+    ])
+  })
+
+  it('when a batch covers a week, then one day has its growth and the week’s dailies', () => {
+    const execs = batches(
+      ['2026-03-01T23:00Z', {}, 1000],
+      ['2026-03-02T23:00Z', { '2026-03-01': 100 }, 1100],
+      [
+        '2026-03-09T23:00Z',
+        Object.fromEntries(daysFrom('2026-03-02', '2026-03-08').map((day) => [day, 100])),
+        1800,
+      ],
+      ['2026-03-10T23:00Z', { '2026-03-09': 100 }, 1900],
+    )
+
+    expect(byDay(execs)).toContainEqual({
+      day: '2026-03-09',
+      growth: 700,
+      dailyDays: daysFrom('2026-03-03', '2026-03-09'),
+      dailySum: 700,
+    })
+  })
+
+  it('when two batches arrive on one day, then their growth is added', () => {
+    const execs = batches(
+      ['2026-03-01T06:00Z', { '2026-02-28': 100 }, 1000],
+      ['2026-03-02T06:00Z', { '2026-03-01': 100 }, 1100],
+      ['2026-03-02T18:00Z', { '2026-03-01': 100 }, 1150],
+      ['2026-03-03T06:00Z', { '2026-03-02': 150 }, 1200],
+    )
+
+    expect(byDay(execs)).toContainEqual({
+      day: '2026-03-02',
+      growth: 150,
+      dailyDays: ['2026-03-02'],
+      dailySum: 150,
     })
   })
 })
