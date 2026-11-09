@@ -1,0 +1,21 @@
+.github/release.yml
+  s_683c4a852a7757::t_19288bf73a2e0e 1-8
+.github/workflows/release-publish.yml
+  s_683c4a852a7757::t_cdb161b9c63e4c 129-131,134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3d38c4f5347540c7435ecd7eef2463c97235a59e",
+  "prompts": {},
+  "sessions": {
+    "s_683c4a852a7757": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ff9698d-73d6-49f7-9fcb-414d7956984f",
+        "model": "claude-haiku-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}
