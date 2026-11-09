@@ -25,6 +25,12 @@ RUN pnpm deploy --legacy --filter api --prod /out
 
 FROM node:26-slim AS runtime
 
+# The node base image can lag behind Debian security fixes, so take them from
+# trixie-security at build time.
+RUN apt-get update \
+  && apt-get upgrade -y --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/*
+
 # The app never runs npm, and its bundled dependencies carry CVEs of their own.
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 

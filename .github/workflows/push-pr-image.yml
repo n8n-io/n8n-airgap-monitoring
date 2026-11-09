@@ -90,6 +90,9 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ env.IMAGE }}:test-pr-${{ inputs.pr }}
+          # The runtime stage installs Debian security updates. A cached layer would
+          # keep the old packages while the base image digest stays the same.
+          no-cache-filters: runtime
           cache-from: type=gha
 
       - name: Summary

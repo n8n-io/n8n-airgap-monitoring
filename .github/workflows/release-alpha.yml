@@ -69,5 +69,8 @@ jobs:
           tags: |
             ${{ env.IMAGE }}:alpha
             ${{ env.IMAGE }}:${{ github.sha }}
+          # The runtime stage installs Debian security updates. A cached layer would
+          # keep the old packages while the base image digest stays the same.
+          no-cache-filters: runtime
           cache-from: type=gha
           cache-to: type=gha,mode=max
