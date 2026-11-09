@@ -1,0 +1,21 @@
+apps/api/package.json
+  s_3b68c4ead7d0e6::t_0fb4a74493c2fb 26
+pnpm-lock.yaml
+  s_3b68c4ead7d0e6::t_0be06a124fc18e 149-150,2117-2118,2142-2143,5470,5487,5496,5523
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0239c69d24e47d106e9a5636c2d5fea545f83b85",
+  "prompts": {},
+  "sessions": {
+    "s_3b68c4ead7d0e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4da1a861-309d-4a0c-b7ee-517e554ed309",
+        "model": "claude-haiku-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}
