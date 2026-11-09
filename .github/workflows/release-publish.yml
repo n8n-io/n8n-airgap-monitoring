@@ -127,7 +127,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # --generate-notes appends a "What's Changed" list of merged PRs since
-          # the previous release, grouped by .github/release.yml. The --notes
+          # the previous release, filtered by .github/release.yml. The --notes
           # text is kept first, so the Docker section stays at the top.
           gh release create "v${VERSION}" \
             --title "v${VERSION}" \
