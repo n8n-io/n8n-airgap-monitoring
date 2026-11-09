@@ -1,8 +1,5 @@
-# Controls the "What's Changed" list that `gh release create --generate-notes`
-# (and the GitHub Releases UI) builds from merged pull requests.
-# https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
 changelog:
   exclude:
-    # Release PRs and the automated version-bump PRs are bookkeeping, not changes.
+    # Release PRs and the automated version-bump PRs are omitted from the changelog.
     labels:
       - release
