@@ -1,0 +1,25 @@
+Dockerfile
+  s_3b68c4ead7d0e6::t_f68911ce4d044c 28-33
+.github/workflows/push-pr-image.yml
+  s_3b68c4ead7d0e6::t_41136a39803682 93-95
+.github/workflows/release-publish.yml
+  s_3b68c4ead7d0e6::t_1babd2c5d56901 97-99
+.github/workflows/release-alpha.yml
+  s_3b68c4ead7d0e6::t_d8ed9f18d298c7 72-74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "51375473319b068aeea2fe9647f2c6b9c40bc860",
+  "prompts": {},
+  "sessions": {
+    "s_3b68c4ead7d0e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4da1a861-309d-4a0c-b7ee-517e554ed309",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}
