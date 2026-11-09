@@ -1,7 +1,10 @@
 .github/release.yml
   s_683c4a852a7757::t_bc3f2764d45890 1-8
+  s_683c4a852a7757::t_19288bf73a2e0e 1-8
 .github/workflows/release-publish.yml
   s_683c4a852a7757::t_bc3f2764d45890 129-131,134
+  s_683c4a852a7757::t_cdb161b9c63e4c 129,131,134
+  s_683c4a852a7757::t_fa4e0f3cbd2adc 130
 ---
 {
   "schema_version": "authorship/3.0.0",
