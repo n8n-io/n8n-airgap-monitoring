@@ -1,0 +1,5 @@
+changelog:
+  exclude:
+    # Release PRs and the automated version-bump PRs are omitted from the changelog.
+    labels:
+      - release
