@@ -23,5 +23,8 @@ minimumReleaseAge: 4320
 
 # sqlite3 5.x and its node-gyp 8 pin tar 6, which has unpatched CVEs. Both only
 # call tar.extract, which tar 7 keeps, and only when building from source.
+# @n8n/typeorm pins uuid 9, which has unpatched CVEs. It only calls v4(), which
+# uuid 11 keeps, still with a CommonJS build.
 overrides:
   tar: ^7.5.21
+  uuid: ^11.1.1
