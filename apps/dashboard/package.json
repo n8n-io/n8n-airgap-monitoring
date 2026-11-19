@@ -40,7 +40,7 @@
     "oxlint": "~1.87.0",
     "prettier": "3.9.9",
     "typescript": "catalog:vue",
-    "vite": "^8.2.1",
+    "vite": "~8.2.6",
     "vite-plugin-vue-devtools": "^8.2.1",
     "vitest": "^4.1.9",
     "vue-tsc": "^3.3.12"
