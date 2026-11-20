@@ -1,0 +1,21 @@
+apps/dashboard/package.json
+  s_395c99329da777::t_686019949aaacd 43
+pnpm-lock.yaml
+  s_395c99329da777::t_c4364f9db53baa 131,195,213,223,261-262,265,268,3067-3070,3610-3611,3616,4838,4841,4856,4866,4879,4885,4887,4893,6575-6580,7089,7097,7115,7118-7119,7121,7123,7125,7135-7136,7138,7144-7146,7152,7163,7167,7171,7181,7185,7195,7198,7215,7224,7227,7244,7272,7288,7293
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e9015ff86bcc719f3ef1d5b089f63b3416ffb686",
+  "prompts": {},
+  "sessions": {
+    "s_395c99329da777": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "22b10eab-73e6-4e71-9021-2f48ead31bf3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}
