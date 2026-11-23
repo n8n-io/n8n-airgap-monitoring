@@ -2,12 +2,12 @@ import { timingSafeEqual, X509Certificate } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
 import { N8N_LICENSE_ISSUER_CERT_PEM } from "../license/issuer-cert";
-import { LicenseCertError, verifyLicenseCert } from "../license/license-cert";
+import { consumerIdOf, LicenseCertError, verifyLicenseCert } from "../license/license-cert";
 
 /** Name of the body field carrying the certificate. Stripped before the body goes anywhere else. */
 export const LICENSE_CERT_FIELD = "licenseCert";
 
-type Verifier = (request: FastifyRequest) => void;
+type Verifier = (request: FastifyRequest) => string | null;
 
 /**
  * Authenticates a reporting n8n instance. The operator picks one of two modes
@@ -20,9 +20,10 @@ type Verifier = (request: FastifyRequest) => void;
  *   network restriction beyond TLS.
  * - Certificate mode (variable unset): the request must carry the instance's
  *   n8n license certificate as `licenseCert` in the body. Possession of a
- *   certificate n8n issued is the whole check: no identity is read from it and
- *   nothing is stored. Any licensee's certificate passes, so the endpoint must
- *   be reachable only by the operator's own instances.
+ *   certificate n8n issued is the check. The verified payload's `consumerId`
+ *   is kept when it is a UUID and stored with the report. Nothing else from
+ *   the payload is read. Any licensee's certificate passes, so the endpoint
+ *   must be reachable only by the operator's own instances.
  *
  * The certificate travels in the body, not a header, because a real one is
  * about 7 KB and grows with every feature flag, which sits too close to the
@@ -39,13 +40,15 @@ export default fp(
     const { writeToken } = fastify.config;
     const verify: Verifier = writeToken !== undefined ? bearerVerifier(writeToken) : certificateVerifier();
 
+    fastify.decorateRequest("consumerId", null);
+
     /**
      * Runs as `preValidation`, so the body is parsed but the route schema has
      * not seen it yet: a bad credential gets 401 before a malformed report gets
      * 400, and an unauthenticated caller learns nothing about the schema.
      */
     async function authenticateReport(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
-      verify(request);
+      request.consumerId = verify(request);
 
       // The service persists the whole report object, so a certificate must
       // not still be in it, in either mode. The route schema would strip it
@@ -66,6 +69,8 @@ export default fp(
           request.log.warn({ code: "BAD_TOKEN" }, "Rejected write token");
           throw fastify.httpErrors.unauthorized("Invalid write token");
         }
+
+        return null;
       };
     }
 
@@ -85,7 +90,8 @@ export default fp(
         }
 
         try {
-          verifyLicenseCert(cert, issuer);
+          const payload = verifyLicenseCert(cert, issuer);
+          return consumerIdOf(payload);
         } catch (error) {
           if (error instanceof LicenseCertError) {
             // The code is the only thing about the certificate that may be logged.
@@ -122,6 +128,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 declare module "fastify" {
+  export interface FastifyRequest {
+    /** Set by `authenticateReport`. Null in token mode. */
+    consumerId: string | null;
+  }
+
   export interface FastifyInstance {
     authenticateReport: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }

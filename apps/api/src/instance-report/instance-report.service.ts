@@ -101,6 +101,12 @@ export interface InstanceReportEntry {
   /** Timestamp the collector received the most recent report from this instance. */
   lastReportAt: string;
   /**
+   * Sorted distinct license consumer ids on reports this instance sent whose
+   * `receivedAt` falls in the download window. Empty when those reports had no
+   * certificate. Several ids mean this instance authenticated with more than one license.
+   */
+  consumerIds: string[];
+  /**
    * Every value the instance ever reported, keyed by metric name. Nothing is folded or
    * deduplicated: reconciliation (summing daily values, detecting DB rollbacks or
    * duplicated instances from conflicting values) is the receiver's job — see the ADRs.
@@ -118,6 +124,11 @@ export interface UsageReport {
     airgapMonitoringVersion: string;
     /** Filters applied to this report as a query string (e.g. `instanceId=a,b`). Absent when none. */
     filters?: string;
+    /**
+     * Sorted distinct license consumer ids of rows in this download.
+     * Empty when every matching row was stored without a certificate.
+     */
+    consumerIds: string[];
     instances: InstanceReportEntry[];
   };
 }
@@ -131,16 +142,22 @@ export interface ReportFilter {
 export class InstanceReportService {
   constructor(private readonly repository: InstanceReportRepository) {}
 
-  async recordReport(report: CreateInstanceReport): Promise<{ id: number }> {
+  async recordReport(report: CreateInstanceReport, consumerId: string | null): Promise<{ id: number }> {
     const label = report.label ? sanitizeLabel(report.label) : undefined;
 
     const id = await this.repository.insert({
       ...report,
       label,
+      consumerId,
       receivedAt: new Date().toISOString(),
     });
 
     return { id };
+  }
+
+  /** Distinct certificate consumer ids for the rows this download covers. */
+  async findConsumerIds(filter: ReportFilter = {}): Promise<string[]> {
+    return this.repository.findConsumerIds(filter);
   }
 
   /**
@@ -181,14 +198,34 @@ function toEntry(rows: InstanceReportRow[], filter: ReportFilter): InstanceRepor
     label: last.label, // last-received label wins
     firstSeen: first.receivedAt,
     lastReportAt: last.receivedAt,
+    consumerIds: consumerIdsOf(rows, filter),
     dataPoints: byName(points),
   };
 }
 
+/**
+ * Distinct ids of rows received inside the window. The id belongs to the
+ * envelope, so a daily point dated inside the window does not carry an id
+ * from a report received outside it.
+ */
+function consumerIdsOf(rows: InstanceReportRow[], filter: ReportFilter): string[] {
+  const ids = new Set<string>();
+  for (const row of rows) {
+    if (row.consumerId !== null && isDayInRange(row.receivedAt.slice(0, 10), filter)) {
+      ids.add(row.consumerId);
+    }
+  }
+  return [...ids].sort();
+}
+
 /** A daily value counts towards its date, a cumulative total towards the UTC day it was received. */
-function isInDays(metric: ReportedMetric, { start, end }: ReportFilter): boolean {
+function isInDays(metric: ReportedMetric, filter: ReportFilter): boolean {
   const day = metric.kind === "daily" ? metric.date : metric.receivedAt.slice(0, 10);
-  // YYYY-MM-DD strings compare in calendar order.
+  return isDayInRange(day, filter);
+}
+
+/** YYYY-MM-DD strings compare in calendar order. */
+function isDayInRange(day: string, { start, end }: ReportFilter): boolean {
   return (start === undefined || day >= start) && (end === undefined || day <= end);
 }
 

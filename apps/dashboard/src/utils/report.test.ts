@@ -49,6 +49,7 @@ function instance(dataPoints: Record<string, ReportedMetric[]>): InstanceReportE
     label: null,
     firstSeen: '2026-08-01T00:00:00.000Z',
     lastReportAt: '2026-08-10T00:00:00.000Z',
+    consumerIds: [],
     dataPoints,
   }
 }

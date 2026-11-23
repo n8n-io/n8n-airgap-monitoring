@@ -151,19 +151,26 @@ The request must carry the **read token** as a bearer token in the
 `Authorization` header.
 
 The file contains one entry per instance, with when it was first and last
-seen and every value it ever reported for each metric:
+seen and every value it ever reported for each metric. `consumerIds` at the
+top lists the distinct license consumer ids observed in that download. Each
+instance has its own `consumerIds`, the ids on the reports that instance sent,
+so a customer with several licenses can be matched instance by instance. Either
+list is `[]` when no report in the window came with a certificate, for example
+when instances authenticate with a write token:
 
 ```json
 {
   "data": {
     "generatedAt": "2026-09-03T14:30:00.000Z",
     "airgapMonitoringVersion": "0.2.1",
+    "consumerIds": ["867a53a5-f61d-46ea-8087-ca249b06528e"],
     "instances": [
       {
         "instanceId": "450b5c85…",
         "label": "acme-prod",
         "firstSeen": "2026-03-20T02:00:00.000Z",
         "lastReportAt": "2026-03-26T02:00:00.000Z",
+        "consumerIds": ["867a53a5-f61d-46ea-8087-ca249b06528e"],
         "dataPoints": {
           "billableExecutions": [
             { "kind": "daily", "date": "2026-03-25", "value": 15234, "batchId": "…", "receivedAt": "…" },

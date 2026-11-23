@@ -24,6 +24,7 @@ export interface InstanceReportEntry {
   label: string | null
   firstSeen: string
   lastReportAt: string
+  consumerIds: string[]
   dataPoints: Record<string, ReportedMetric[]>
 }
 
@@ -32,6 +33,7 @@ export interface UsageReport {
     generatedAt: string
     airgapMonitoringVersion: string
     filters?: string
+    consumerIds?: string[]
     instances: InstanceReportEntry[]
   }
 }

@@ -18,11 +18,12 @@ async function insertRow(
     n8nVersion?: string;
     dataPoints: Metric[];
     receivedAt: string;
+    consumerId?: string | null;
   },
 ): Promise<void> {
   await app.dataSource.query(
-    `INSERT INTO instance_reports (instanceId, batchId, label, n8nVersion, data, receivedAt)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO instance_reports (instanceId, batchId, label, n8nVersion, data, receivedAt, consumerId)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       row.instanceId,
       row.batchId,
@@ -30,6 +31,7 @@ async function insertRow(
       row.n8nVersion ?? "1.99.0",
       JSON.stringify(row.dataPoints),
       row.receivedAt,
+      row.consumerId ?? null,
     ],
   );
 }
@@ -69,11 +71,102 @@ test("serves an empty report stamped with the generation time and service versio
 
     expect(res.statusCode).toBe(200);
     expect(res.json<UsageReport>()).toEqual({
-      data: { generatedAt: "2026-09-03T14:30:00.000Z", airgapMonitoringVersion, instances: [] },
+      data: {
+        generatedAt: "2026-09-03T14:30:00.000Z",
+        airgapMonitoringVersion,
+        consumerIds: [],
+        instances: [],
+      },
     });
   } finally {
     vi.useRealTimers();
   }
+});
+
+const CONSUMER_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const CONSUMER_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+const CONSUMER_C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+const onePoint: Metric[] = [{ kind: "cumulative", name: "activeWorkflows", value: 1 }];
+
+test("lists sorted distinct consumerIds and omits rows stored without one", async () => {
+  const app = await build();
+  await insertRow(app, {
+    instanceId: "b",
+    batchId: "b1",
+    dataPoints: onePoint,
+    receivedAt: "2026-10-02T00:00:00.000Z",
+    consumerId: CONSUMER_B,
+  });
+  await insertRow(app, {
+    instanceId: "a",
+    batchId: "a1",
+    dataPoints: onePoint,
+    receivedAt: "2026-10-02T00:00:00.000Z",
+    consumerId: CONSUMER_A,
+  });
+  await insertRow(app, {
+    instanceId: "a",
+    batchId: "a2",
+    dataPoints: onePoint,
+    receivedAt: "2026-10-03T00:00:00.000Z",
+    consumerId: CONSUMER_A,
+  });
+  await insertRow(app, {
+    instanceId: "c",
+    batchId: "c1",
+    dataPoints: onePoint,
+    receivedAt: "2026-10-02T00:00:00.000Z",
+  });
+
+  const res = await app.inject({ method: "GET", url: URL, headers: READ });
+
+  expect(res.statusCode).toBe(200);
+  const { consumerIds, instances } = res.json<UsageReport>().data;
+  expect(consumerIds).toEqual([CONSUMER_A, CONSUMER_B]);
+  expect(instances.map((instance) => [instance.instanceId, instance.consumerIds])).toEqual([
+    ["a", [CONSUMER_A]],
+    ["b", [CONSUMER_B]],
+    ["c", []],
+  ]);
+  expect(res.body.indexOf('"consumerIds"')).toBeLessThan(res.body.indexOf('"instances"'));
+});
+
+test("limits consumerIds to the filtered instances and the UTC day the report was received", async () => {
+  const app = await build();
+  await insertRow(app, {
+    instanceId: "a",
+    batchId: "before",
+    dataPoints: onePoint,
+    receivedAt: "2026-09-30T23:59:59.999Z",
+    consumerId: CONSUMER_A,
+  });
+  await insertRow(app, {
+    instanceId: "a",
+    batchId: "inside",
+    dataPoints: onePoint,
+    receivedAt: "2026-10-15T12:00:00.000Z",
+    consumerId: CONSUMER_B,
+  });
+  await insertRow(app, {
+    instanceId: "b",
+    batchId: "other",
+    dataPoints: onePoint,
+    receivedAt: "2026-10-15T12:00:00.000Z",
+    consumerId: CONSUMER_C,
+  });
+
+  const res = await app.inject({
+    method: "GET",
+    url: `${URL}?instanceId=a&start=2026-10-01&end=2026-10-31`,
+    headers: READ,
+  });
+
+  expect(res.statusCode).toBe(200);
+  const { consumerIds, instances } = res.json<UsageReport>().data;
+  expect(consumerIds).toEqual([CONSUMER_B]);
+  expect(instances.map((instance) => [instance.instanceId, instance.consumerIds])).toEqual([["a", [CONSUMER_B]]]);
+  expect(res.body.indexOf('"filters"')).toBeLessThan(res.body.indexOf('"consumerIds"'));
+  expect(res.body.indexOf('"consumerIds"')).toBeLessThan(res.body.indexOf('"instances"'));
 });
 
 test("returns it as a named, uncacheable JSON download", async () => {

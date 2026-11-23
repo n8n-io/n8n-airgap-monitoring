@@ -1,6 +1,6 @@
 import { type DataSource, QueryFailedError, type Repository } from "@n8n/typeorm";
 import { InstanceReportEntity } from "./instance-report.entity";
-import type { Metric } from "./instance-report.service";
+import type { Metric, ReportFilter } from "./instance-report.service";
 
 /** One row to append, with every value the caller has already decided on. */
 export interface InstanceReport {
@@ -10,6 +10,7 @@ export interface InstanceReport {
   n8nVersion: string;
   dataPoints: Metric[];
   receivedAt: string;
+  consumerId: string | null;
 }
 
 /** One stored event, read back with its JSON `data` column already parsed. */
@@ -20,6 +21,7 @@ export interface InstanceReportRow {
   n8nVersion: string;
   dataPoints: Metric[];
   receivedAt: string;
+  consumerId: string | null;
 }
 
 /**
@@ -68,6 +70,7 @@ export class InstanceReportRepository {
         // An absent label is stored as SQL NULL, not as the string "undefined".
         label: event.label ?? null,
         n8nVersion: event.n8nVersion,
+        consumerId: event.consumerId,
         dataPoints: event.dataPoints,
         receivedAt: event.receivedAt,
       });
@@ -98,6 +101,30 @@ export class InstanceReportRepository {
     const rows = await query.getRawMany<{ instanceId: string }>();
 
     return rows.map((row) => row.instanceId);
+  }
+
+  async findConsumerIds(filter: ReportFilter): Promise<string[]> {
+    const query = this.#reports
+      .createQueryBuilder("report")
+      .select("report.consumerId", "consumerId")
+      .distinct(true)
+      .where("report.consumerId IS NOT NULL");
+
+    if (filter.instanceIds !== undefined) {
+      query.andWhere("report.instanceId IN (:...instanceIds)", { instanceIds: filter.instanceIds });
+    }
+    if (filter.start !== undefined) {
+      query.andWhere("substr(report.receivedAt, 1, 10) >= :start", { start: filter.start });
+    }
+    if (filter.end !== undefined) {
+      query.andWhere("substr(report.receivedAt, 1, 10) <= :end", { end: filter.end });
+    }
+
+    query.orderBy("report.consumerId", "ASC");
+
+    const rows = await query.getRawMany<{ consumerId: string }>();
+
+    return rows.map((row) => row.consumerId);
   }
 
   async findByInstanceId(instanceId: string): Promise<InstanceReportRow[]> {

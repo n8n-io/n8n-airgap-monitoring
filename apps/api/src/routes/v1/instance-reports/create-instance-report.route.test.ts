@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { LABEL_MAX_LENGTH } from "../../../instance-report/label";
 import { build } from "../../../test-utils/build-app";
 import {
+  DEFAULT_MOCK_CONSUMER_ID,
   generateMockLicense,
   generateMockLicenseWithForgedIssuer,
   generateMockLicenseWithTamperedPayload,
@@ -59,6 +60,7 @@ test("stores an accepted instance report", async () => {
   expect(row.batchId).toBe("batch-1");
   expect(row.label).toBe(null);
   expect(row.n8nVersion).toBe("1.99.0");
+  expect(row.consumerId).toBe(DEFAULT_MOCK_CONSUMER_ID);
   expect(JSON.parse(row.data)).toEqual(validReport.dataPoints);
   expect(Number.isNaN(Date.parse(row.receivedAt))).toBe(false);
 });
@@ -370,6 +372,23 @@ describe("in token mode", () => {
     });
 
     expect(res.statusCode).toBe(201);
+  });
+
+  test("stores no consumerId for a token-authenticated report", async () => {
+    const app = await buildInTokenMode();
+
+    const res = await app.inject({
+      method: "POST",
+      url: URL,
+      headers: bearer("test-write-token"),
+      payload: { ...validReport, consumerId: DEFAULT_MOCK_CONSUMER_ID },
+    });
+
+    expect(res.statusCode).toBe(201);
+    const [row] = (await app.dataSource.query("SELECT consumerId FROM instance_reports")) as {
+      consumerId: string | null;
+    }[];
+    expect(row.consumerId).toBeNull();
   });
 
   test("rejects a wrong write token without leaking the right one", async () => {

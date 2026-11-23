@@ -51,8 +51,9 @@ so a certificate sent to a token-mode service is neither verified nor stored.
 This is certificate mode, active when no write token is set. A reporting n8n
 instance proves that it is a licensed instance by sending its
 n8n license certificate with every report. Possession of a certificate that the
-n8n license CA issued is the whole check: the service reads no identity from
-it, stores nothing from it, and contacts no external system to verify it. The
+n8n license CA issued is the check. The service reads one field from the
+verified payload, `consumerId`, and stores that UUID with the report. It
+contacts no external system to verify the certificate. The
 rationale is in
 [ADR 10](adr/2026-09-21-authenticate-with-license-certificate.md); the
 request flow and the full body layout are in
@@ -105,15 +106,20 @@ The steps run in this order. The first failing step ends the request.
 8. **Payload signature.** The third part must be a valid PKCS#1 v1.5 signature
    of the decrypted payload under the leaf's public key. Failure code:
    `SIGNATURE_INVALID`.
-9. **Strip.** `licenseCert` is deleted from the request body. The route schema
-   and the service that persists the report never see it.
+9. **`consumerId`.** The decrypted payload must be a JSON object whose
+   `consumerId` is a UUID (`8-4-4-4-12` hex, either case). The all-zero UUID
+   is accepted and stored verbatim. Failure code: `PAYLOAD_INVALID`. Nothing
+   else in the payload is read.
+10. **Strip.** `licenseCert` is deleted from the request body. The route schema
+    and the service that persists the report never see it. The `consumerId`
+    from step 9 is stored with the report. It is not a field of the body.
 
-Any failure in steps 2 to 8 is answered with `401` and the message
+Any failure in steps 2 to 9 is answered with `401` and the message
 `Invalid license certificate`. The service logs a warning that carries the
 failure code and nothing else: the certificate is the customer's license, so
 neither it nor anything decoded from it reaches a log line or a response body.
-The decrypted payload is used only to verify the signature and is then
-discarded.
+The decrypted payload is used to verify the signature and to read `consumerId`,
+and is then discarded.
 
 Nothing about the leaf's or the CA's validity period is inspected. Steps 4 to
 8 use only the public keys; an expired leaf passes.
@@ -127,9 +133,9 @@ its status code is not documented here.
 Authorization here means only that the caller holds a license certificate n8n
 issued. It binds the request to no identity and no tenant:
 
-- No field is extracted from the certificate for the handler. The verifier
-  returns nothing, and the certificate is removed from the body before the
-  handler runs.
+- The only field extracted from the certificate is `consumerId`. The
+  certificate is removed from the body before the handler runs, and a
+  `consumerId` sent in the body is not the value that is stored.
 - `instanceId`, `label` and every other report field are self-declared by the
   caller. They are not compared with anything in the certificate.
 - Any n8n licensee's certificate is accepted, not only certificates of the
@@ -252,6 +258,7 @@ the token.
 | `401 Unauthorized` | `Invalid license certificate` | `INVALID_ISSUER`: the leaf was not issued by, or does not verify against, the embedded n8n license CA. |
 | `401 Unauthorized` | `Invalid license certificate` | `DECRYPTION_FAILED`: the symmetric key does not recover with the leaf's public key, or the payload does not decrypt to a non-empty string. |
 | `401 Unauthorized` | `Invalid license certificate` | `SIGNATURE_INVALID`: the payload signature does not verify against the leaf's public key. |
+| `401 Unauthorized` | `Invalid license certificate` | `PAYLOAD_INVALID`: the payload is not a JSON object, or `consumerId` is missing, empty, not a string, or not a UUID. |
 | `400 Bad Request` | schema error | Certificate accepted, but the remaining body fails the route schema. Runs only after the certificate check. |
 | `409 Conflict` | names the repeated `batchId` | Certificate accepted and body valid, but a report with the same `instanceId` and `batchId` is already stored. |
 

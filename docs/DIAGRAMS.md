@@ -5,8 +5,10 @@
 The service exposes a single write endpoint, `POST /api/v1/instance-reports`.
 A self-hosted n8n instance posts one report per day to it, carrying its n8n
 license certificate (`N8N_LICENSE_CERT`) in the body as the credential. The
-service verifies that the certificate was issued by the n8n license CA and
-strips it from the body; nothing from it is stored. That is certificate mode.
+service verifies that the certificate was issued by the n8n license CA,
+reads `consumerId` from the verified payload, and strips the certificate from
+the body. That UUID is stored with the report. Nothing else from the
+certificate is stored. That is certificate mode.
 When the operator has set `N8N_MONITORING_WRITE_TOKEN` on the service, it runs
 in token mode instead: the instance sends that token as `Authorization: Bearer`
 (`N8N_INSTANCE_REPORTING_AUTH_TOKEN` on n8n), omits the certificate, and the
@@ -41,9 +43,9 @@ sequenceDiagram
 
     Note over N8N,API: Example data - what an n8n instance sends today<br/>"dataPoints": [<br/>{<br/>"kind": "cumulative",<br/>"name": "billableExecutions",<br/>"value": 402931<br/>},<br/>{<br/>"kind": "daily",<br/>"name": "billableExecutions",<br/>"value": 15234,<br/>"date": "2026-03-25"<br/>}<br/>]<br/>The cumulative point is the lifetime total, the daily point covers the previous completed UTC day.
 
-    API->>API: preValidation (certificate mode): licenseCert chains to the n8n license CA<br/>and its payload signature verifies, then licenseCert is deleted from the body
+    API->>API: preValidation (certificate mode): licenseCert chains to the n8n license CA,<br/>its payload signature verifies, and consumerId is a UUID,<br/>then licenseCert is deleted from the body
     API->>API: schema validation of the remaining body
-    API->>DB: INSERT INTO instance_reports<br/>(instanceId, batchId, label, n8nVersion, data, receivedAt)
+    API->>DB: INSERT INTO instance_reports<br/>(instanceId, batchId, label, n8nVersion, consumerId, data, receivedAt)
     Note over DB: Append-only event store.<br/>dataPoints stored as a JSON blob.<br/>UNIQUE (instanceId, batchId).
     DB-->>API: lastInsertRowid
     API-->>N8N: 201 Created, body carries the stored event id
@@ -119,10 +121,16 @@ sequenceDiagram
     API->>API: bearer-auth: token equals N8N_MONITORING_READ_TOKEN
     API->>API: filter = instanceIds split on ",", trimmed, deduplicated and sorted,<br/>plus start and end (YYYY-MM-DD, start not after end)<br/>filters = filter as a query string, omitted for none<br/>invalid or repeated parameter, or start after end - 400
     API->>API: generatedAt = now (ISO 8601)<br/>stamp = generatedAt with ":" and "." replaced by "-"
+    API->>SVC: findConsumerIds(filter)
+    SVC->>DB: SELECT DISTINCT consumerId<br/>WHERE consumerId IS NOT NULL<br/>[AND instanceId IN (…)]<br/>[AND the UTC day of receivedAt is inside start..end]<br/>ORDER BY consumerId
+    DB-->>SVC: consumerIds
+    SVC-->>API: sorted string[]. [] when every matching row is null
+    Note right of API: This query finishes before the response starts,<br/>so a database error here is still a normal error status.
+
     API-->>C: 200 OK<br/>Content-Type: application/json<br/>Cache-Control: no-store<br/>Content-Disposition: attachment#59; filename="n8n-instance-report-{stamp}.json"
     Note right of API: Headers go out first. The body is a Readable<br/>wrapping the renderReport async generator, so<br/>Fastify pipes chunks as they are produced.<br/>No response schema: the data was validated on<br/>upload and re-validating would undo the streaming.
 
-    API-->>C: chunk: {"data":{"generatedAt":"...","airgapMonitoringVersion":"...",["filters":"...",]"instances":[
+    API-->>C: chunk: {"data":{"generatedAt":"...","airgapMonitoringVersion":"...",["filters":"...",]"consumerIds":[...],"instances":[
 
     API->>SVC: for await entry of streamInstanceReports(filter)
     SVC->>DB: SELECT DISTINCT instanceId<br/>[WHERE instanceId IN (…)]<br/>ORDER BY instanceId ASC
@@ -133,7 +141,7 @@ sequenceDiagram
         SVC->>DB: SELECT * WHERE instanceId = ?<br/>ORDER BY receivedAt ASC, id ASC
         DB-->>SVC: rows, oldest-first, JSON data column parsed
         SVC->>SVC: toEntry(rows, filter)
-        Note right of SVC: instanceId - from any row<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>dataPoints - every point of every row in start..end<br/>(daily - its date, cumulative - UTC day of receivedAt),<br/>tagged with its row's batchId and receivedAt, then<br/>grouped by metric name. Nothing is summed or<br/>deduplicated: reconciliation is the receiver's job.<br/>No points left - the instance is skipped.
+        Note right of SVC: instanceId - from any row<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>consumerIds - distinct ids of rows received in start..end<br/>dataPoints - every point of every row in start..end<br/>(daily - its date, cumulative - UTC day of receivedAt),<br/>tagged with its row's batchId and receivedAt, then<br/>grouped by metric name. Nothing is summed or<br/>deduplicated: reconciliation is the receiver's job.<br/>No points left - the instance is skipped.
         SVC-->>API: yield InstanceReportEntry
         API-->>C: chunk: JSON.stringify(entry)<br/>prefixed with "," for every entry but the first
     end
@@ -163,12 +171,14 @@ Content-Disposition: attachment; filename="n8n-instance-report-2026-03-28T08-00-
   "data": {
     "generatedAt": "2026-03-28T08:00:00.000Z",
     "airgapMonitoringVersion": "0.2.1",
+    "consumerIds": ["867a53a5-f61d-46ea-8087-ca249b06528e"],
     "instances": [
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
         "label": "prod-renamed",
         "firstSeen": "2026-03-26T02:00:00.000Z",
         "lastReportAt": "2026-03-27T02:00:00.000Z",
+        "consumerIds": ["867a53a5-f61d-46ea-8087-ca249b06528e"],
         "dataPoints": {
           "billableExecutions": [
             { "kind": "cumulative", "value": 402931, "batchId": "a1b2c3d4", "receivedAt": "2026-03-26T02:00:00.000Z" },

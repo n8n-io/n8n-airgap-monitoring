@@ -39,7 +39,7 @@ function fakeRepository() {
 test("stamps the arrival time itself", async () => {
   const { inserted, repository } = fakeRepository();
 
-  await new InstanceReportService(repository).recordReport(report);
+  await new InstanceReportService(repository).recordReport(report, null);
 
   expect(inserted.length).toBe(1);
   expect(Number.isNaN(Date.parse(inserted[0].receivedAt))).toBe(false);
@@ -48,7 +48,7 @@ test("stamps the arrival time itself", async () => {
 test("passes the reporting instance's batchId through untouched", async () => {
   const { inserted, repository } = fakeRepository();
 
-  await new InstanceReportService(repository).recordReport(report);
+  await new InstanceReportService(repository).recordReport(report, null);
 
   expect(inserted[0].batchId).toBe("batch-1");
 });
@@ -57,8 +57,39 @@ test("returns the id assigned by the repository", async () => {
   const { repository } = fakeRepository();
   const service = new InstanceReportService(repository);
 
-  expect(await service.recordReport(report)).toEqual({ id: 1 });
-  expect(await service.recordReport(report)).toEqual({ id: 2 });
+  expect(await service.recordReport(report, null)).toEqual({ id: 1 });
+  expect(await service.recordReport(report, null)).toEqual({ id: 2 });
+});
+
+test("passes the consumerId through to the repository", async () => {
+  const { inserted, repository } = fakeRepository();
+  const consumerId = "867a53a5-f61d-46ea-8087-ca249b06528e";
+
+  await new InstanceReportService(repository).recordReport(report, consumerId);
+
+  expect(inserted[0].consumerId).toBe(consumerId);
+});
+
+test("passes a null consumerId through for a token-authenticated report", async () => {
+  const { inserted, repository } = fakeRepository();
+
+  await new InstanceReportService(repository).recordReport(report, null);
+
+  expect(inserted[0].consumerId).toBeNull();
+});
+
+test("findConsumerIds returns the ids the repository found for the filter", async () => {
+  const filter: ReportFilter = { instanceIds: ["instance-1"], start: "2026-10-01", end: "2026-10-31" };
+  const service = new InstanceReportService({
+    findConsumerIds: async (received: ReportFilter) => {
+      expect(received).toEqual(filter);
+      return ["bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"];
+    },
+  } as unknown as InstanceReportRepository);
+
+  const ids = await service.findConsumerIds(filter);
+
+  expect(ids).toEqual(["bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"]);
 });
 
 /**
@@ -91,9 +122,49 @@ function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
     n8nVersion: "1.99.0",
     dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 1 }],
     receivedAt: "2026-03-25T02:00:00.000Z",
+    consumerId: null,
     ...overrides,
   };
 }
+
+const CONSUMER_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const CONSUMER_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+
+test("streamInstanceReports lists each instance's consumerIds from reports received in the window", async () => {
+  const [instance] = await collectInstances(
+    fakeReportService([
+      row({ batchId: "b", receivedAt: "2026-10-02T00:00:00.000Z", consumerId: CONSUMER_B }),
+      row({ batchId: "a1", receivedAt: "2026-10-03T00:00:00.000Z", consumerId: CONSUMER_A }),
+      row({ batchId: "a2", receivedAt: "2026-10-04T00:00:00.000Z", consumerId: CONSUMER_A }),
+      row({ batchId: "none", receivedAt: "2026-10-05T00:00:00.000Z", consumerId: null }),
+    ]),
+    { start: "2026-10-01", end: "2026-10-31" },
+  );
+
+  expect(instance.consumerIds).toEqual([CONSUMER_A, CONSUMER_B]);
+});
+
+test("streamInstanceReports omits a consumerId received outside the window", async () => {
+  const [instance] = await collectInstances(
+    fakeReportService([
+      row({
+        batchId: "outside",
+        receivedAt: "2026-09-30T23:59:59.999Z",
+        consumerId: CONSUMER_A,
+        dataPoints: [{ kind: "daily", name: "billableExecutions", value: 1, date: "2026-10-01" }],
+      }),
+      row({
+        batchId: "inside",
+        receivedAt: "2026-10-15T00:00:00.000Z",
+        consumerId: CONSUMER_B,
+        dataPoints: [{ kind: "cumulative", name: "billableExecutions", value: 1 }],
+      }),
+    ]),
+    { start: "2026-10-01", end: "2026-10-31" },
+  );
+
+  expect(instance.consumerIds).toEqual([CONSUMER_B]);
+});
 
 test("streamInstanceReports takes firstSeen from the earliest row, and label and lastReportAt from the latest", async () => {
   const [instance] = await collectInstances(

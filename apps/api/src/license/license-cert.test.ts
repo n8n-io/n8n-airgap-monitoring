@@ -2,6 +2,7 @@ import { X509Certificate } from "node:crypto";
 import { expect, test } from "vitest";
 import {
   buildContainer,
+  DEFAULT_MOCK_CONSUMER_ID,
   generateMockCa,
   generateMockLicense,
   generateMockLicenseWithForgedIssuer,
@@ -9,7 +10,7 @@ import {
   TEST_CA,
 } from "../test-utils/mock-license";
 import { N8N_LICENSE_ISSUER_CERT_PEM } from "./issuer-cert";
-import { LicenseCertError, verifyLicenseCert } from "./license-cert";
+import { consumerIdOf, LicenseCertError, verifyLicenseCert } from "./license-cert";
 
 const trusted = new X509Certificate(TEST_CA.certPem);
 
@@ -75,4 +76,71 @@ test("the embedded n8n issuer certificate parses and is a CA valid until 2049", 
 
   expect(issuer.subject).toContain("license.n8n.io");
   expect(new Date(issuer.validTo).getFullYear()).toBe(2049);
+});
+
+test("returns the signed payload", () => {
+  const payload = verifyLicenseCert(generateMockLicense(), trusted);
+
+  expect(JSON.parse(payload)).toMatchObject({ consumerId: DEFAULT_MOCK_CONSUMER_ID });
+});
+
+test("reads the consumerId from a verified payload", () => {
+  const payload = verifyLicenseCert(generateMockLicense({ consumerId: DEFAULT_MOCK_CONSUMER_ID }), trusted);
+
+  expect(consumerIdOf(payload)).toBe(DEFAULT_MOCK_CONSUMER_ID);
+});
+
+test("keeps the legacy zero UUID", () => {
+  const zero = "00000000-0000-0000-0000-000000000000";
+  const payload = verifyLicenseCert(generateMockLicense({ consumerId: zero }), trusted);
+
+  expect(consumerIdOf(payload)).toBe(zero);
+});
+
+test("keeps an uppercase UUID unchanged", () => {
+  const upper = "867A53A5-F61D-46EA-8087-CA249B06528E";
+  const payload = verifyLicenseCert(generateMockLicense({ consumerId: upper }), trusted);
+
+  expect(consumerIdOf(payload)).toBe(upper);
+});
+
+function payloadInvalidCode(payload: string): string {
+  try {
+    consumerIdOf(verifyLicenseCert(buildContainer(payload), trusted));
+  } catch (error) {
+    if (error instanceof LicenseCertError) return error.code;
+    throw error;
+  }
+  throw new Error("expected consumerIdOf to throw");
+}
+
+test("rejects a payload that is not JSON", () => {
+  expect(payloadInvalidCode("not-json")).toBe("PAYLOAD_INVALID");
+});
+
+test("rejects a payload that is not an object", () => {
+  expect(payloadInvalidCode("[]")).toBe("PAYLOAD_INVALID");
+});
+
+test("rejects a payload with no consumerId", () => {
+  expect(payloadInvalidCode("{}")).toBe("PAYLOAD_INVALID");
+});
+
+test("rejects an empty consumerId", () => {
+  expect(payloadInvalidCode(JSON.stringify({ consumerId: "" }))).toBe("PAYLOAD_INVALID");
+});
+
+test("rejects a consumerId that is not a string", () => {
+  expect(payloadInvalidCode(JSON.stringify({ consumerId: 1 }))).toBe("PAYLOAD_INVALID");
+});
+
+test("rejects a consumerId that is not a UUID", () => {
+  expect(payloadInvalidCode(JSON.stringify({ consumerId: "someone-else" }))).toBe("PAYLOAD_INVALID");
+});
+
+test("does not include the rejected consumerId in the error", () => {
+  const value = "someone-else";
+  expect(() => consumerIdOf(JSON.stringify({ consumerId: value }))).toThrowError(
+    expect.objectContaining({ code: "PAYLOAD_INVALID", message: expect.not.stringContaining(value) }),
+  );
 });

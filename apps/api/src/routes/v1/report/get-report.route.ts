@@ -96,11 +96,13 @@ function toFiltersString(filter: ReportFilter): string | undefined {
 async function* renderReport(
   generatedAt: string,
   filters: string | undefined,
+  consumerIds: string[],
   entries: AsyncIterable<InstanceReportEntry>,
 ): AsyncGenerator<string> {
   const filtersField = filters === undefined ? "" : `"filters":${JSON.stringify(filters)},`;
   const versionField = `"airgapMonitoringVersion":${JSON.stringify(airgapMonitoringVersion)},`;
-  yield `{"data":{"generatedAt":${JSON.stringify(generatedAt)},${versionField}${filtersField}"instances":[`;
+  const consumerIdsField = `"consumerIds":${JSON.stringify(consumerIds)},`;
+  yield `{"data":{"generatedAt":${JSON.stringify(generatedAt)},${versionField}${filtersField}${consumerIdsField}"instances":[`;
 
   let first = true;
   for await (const entry of entries) {
@@ -125,6 +127,7 @@ const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
     const generatedAt = new Date().toISOString();
     // Colons and dots are unsafe in filenames on some OSes, so flatten the timestamp.
     const stamp = generatedAt.replace(/[:.]/g, "-");
+    const consumerIds = await fastify.instanceReportService.findConsumerIds(filter);
 
     reply
       .header("cache-control", "no-store")
@@ -132,7 +135,12 @@ const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
       .type("application/json");
 
     const body = Readable.from(
-      renderReport(generatedAt, toFiltersString(filter), fastify.instanceReportService.streamInstanceReports(filter)),
+      renderReport(
+        generatedAt,
+        toFiltersString(filter),
+        consumerIds,
+        fastify.instanceReportService.streamInstanceReports(filter),
+      ),
     );
 
     body.on("error", (error) => {
