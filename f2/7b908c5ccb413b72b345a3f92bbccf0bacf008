@@ -1,0 +1,140 @@
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_cbe2c930157713::t_2eee9701381301 42,51,60-61
+  s_cbe2c930157713::t_8f792799142282 64-92
+  s_cbe2c930157713::t_dd32f2ad2ff614 62,130-168
+  s_cbe2c930157713::t_275a8613c78fc4 125
+  s_cbe2c930157713::t_4c3d3acdb339aa 63
+apps/api/src/instance-report/instance-report.repository.test.ts
+  s_cbe2c930157713::t_28eb7c19116c98 11
+  s_cbe2c930157713::t_f66d3da4966e84 121-190
+apps/api/src/plugins/report-auth.ts
+  s_cbe2c930157713::t_bced80fc802f27 10
+  s_cbe2c930157713::t_0f6d1c57f51cd0 51
+  s_cbe2c930157713::t_9649cd5b403fb5 43-44
+  s_cbe2c930157713::t_24aadad3a863d6 23-26
+  s_cbe2c930157713::t_381711520217af 93-94
+  s_cbe2c930157713::t_71148132343c88 5
+  s_cbe2c930157713::t_8e6cba39e2add7 72-73
+  s_cbe2c930157713::t_15e06c6df6b884 131-135
+apps/api/src/test/integration/license-cert-auth.test.ts
+  s_cbe2c930157713::t_a35b6c2239f192 3
+  s_cbe2c930157713::t_0edf614dd87e0b 31-34,37
+apps/api/src/plugins/report-auth.test.ts
+  s_cbe2c930157713::t_1f8ec3ad11984d 1,4
+  s_cbe2c930157713::t_076eb6d2469942 68-112
+apps/api/src/instance-report/instance-report.entity.ts
+  s_cbe2c930157713::t_7a52bf21182de1 22-25
+apps/api/src/instance-report/instance-report.service.ts
+  s_cbe2c930157713::t_cc59aa0a3e55c3 104-108
+  s_cbe2c930157713::t_e910fd71e35f34 145,151,158-160
+  s_cbe2c930157713::t_985fa2faa44144 127-131
+  s_cbe2c930157713::t_1f43a5af31cfd4 161,201,206-220,222,224-228
+  s_cbe2c930157713::t_d76f2caf7a404e 103
+  s_cbe2c930157713::t_b4241eb11d801f 162
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.test.ts
+  s_cbe2c930157713::t_25f78474a19c9e 63
+  s_cbe2c930157713::t_6109312ca27e85 377-387,391-393
+  s_cbe2c930157713::t_b94db14bb6548f 5
+  s_cbe2c930157713::t_639524376bc5ab 388-390
+apps/dashboard/src/utils/report.ts
+  s_cbe2c930157713::t_58d3489d2eaec8 27
+  s_cbe2c930157713::t_d510ffa732fa65 36
+apps/api/src/db/migrations/1795132800000-AddConsumerIdToInstanceReports.ts
+  s_cbe2c930157713::t_62c53edf55d529 1-17
+apps/dashboard/src/utils/report.test.ts
+  s_cbe2c930157713::t_4c90835bff6386 52
+docs/USER_GUIDE.md
+  s_cbe2c930157713::t_605f8f11bc3edd 154-159
+  s_cbe2c930157713::t_40ecf119bc1b7f 166
+  s_cbe2c930157713::t_6e35e0e9e876cb 173
+apps/api/src/routes/v1/instance-reports/create-instance-report.route.ts
+  s_cbe2c930157713::t_bdd438a60a0925 97
+apps/api/src/license/license-cert.test.ts
+  s_cbe2c930157713::t_e2b245afca9363 5,13
+  s_cbe2c930157713::t_30fd864c267cad 80-146
+apps/api/src/routes/v1/report/get-report.route.ts
+  s_cbe2c930157713::t_fb90631db29eca 130,138-143
+  s_cbe2c930157713::t_c19ca86eda2a4f 99,104-105
+docs/AUTHORIZATION.md
+  s_cbe2c930157713::t_a040b4f50f87bb 261
+  s_cbe2c930157713::t_99fde7e982a670 54-56
+  s_cbe2c930157713::t_ed3285c77c8450 109-117,121-122
+  s_cbe2c930157713::t_6faf3b8bad67a6 136-138
+apps/api/src/instance-report/instance-report.repository.ts
+  s_cbe2c930157713::t_baa75d15929b46 73
+  s_cbe2c930157713::t_69bfa200ed3455 106-129
+  s_cbe2c930157713::t_b2be2d4cdddd3a 3
+  s_cbe2c930157713::t_d0c1f2291363bf 13
+  s_cbe2c930157713::t_f4f8181fb283d2 24
+docs/adr/2026-09-21-authenticate-with-license-certificate.md
+  s_cbe2c930157713::t_6d68212cf49a87 25
+  s_cbe2c930157713::t_0cd5b43ecbc57a 44
+  s_cbe2c930157713::t_769ce41e31b582 9-10
+apps/dashboard/src/utils/summary.test.ts
+  s_cbe2c930157713::t_a3dc34c9093525 14
+apps/api/src/test-utils/mock-license.ts
+  s_cbe2c930157713::t_ba8411bd218a1d 88
+  s_cbe2c930157713::t_1636552c3cf55c 18-20,28-29
+  s_cbe2c930157713::t_c05f07c1760856 5-7
+  s_cbe2c930157713::t_10885462173f90 76-82
+apps/api/src/plugins/db.test.ts
+  s_cbe2c930157713::t_dbf3ecde693a0e 44
+  s_cbe2c930157713::t_32387ac37cdc8f 20-23
+docs/DIAGRAMS.md
+  s_cbe2c930157713::t_6f2efd9d09b758 133
+  s_cbe2c930157713::t_9d785127365cc3 46,48
+  s_cbe2c930157713::t_844c82c460078b 124-125,128-129
+  s_cbe2c930157713::t_4b4ee5d649ea91 126-127
+  s_cbe2c930157713::t_a974b36b947f87 181
+  s_cbe2c930157713::t_0169368418fc64 174
+  s_cbe2c930157713::t_41e21c3c7efc18 144
+  s_cbe2c930157713::t_17f2b33c4d37fc 8-11
+apps/api/src/db/migrations/index.ts
+  s_cbe2c930157713::t_639524376bc5ab 2
+  s_cbe2c930157713::t_c268858608f31e 8
+apps/api/src/test-utils/build-app.ts
+  s_cbe2c930157713::t_e65911ccb0100a 5
+  s_cbe2c930157713::t_23be122fd1deed 21,28
+docs/adr/2026-11-20-store-consumer-id-from-license-certificate.md
+  s_cbe2c930157713::t_d4c354d5a4fa8e 27
+  s_cbe2c930157713::t_68111521357520 1-26,28-33,36-51
+  s_cbe2c930157713::t_4ca50e57eaed08 34-35
+apps/api/src/license/license-cert.ts
+  s_cbe2c930157713::t_1efcd67d3196a1 173-174
+  s_cbe2c930157713::t_d850b7e50eda20 10-15
+  s_cbe2c930157713::t_baa77b1103f4ad 38-40,42-44,59,72-94
+  s_cbe2c930157713::t_bbf91dc960eba1 134-142
+README.md
+  s_cbe2c930157713::t_6f349867bd79ac 161
+  s_cbe2c930157713::t_ea3c1355ad306b 155-160
+  s_cbe2c930157713::t_964b6b5203a655 125
+  s_cbe2c930157713::t_cdeea645357d0d 133
+  s_cbe2c930157713::t_0782dd696e5d61 56-61,63-65
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  s_cbe2c930157713::t_7fdf91eb91c3b7 165-167
+  s_cbe2c930157713::t_87333898781e09 74-79
+  s_cbe2c930157713::t_093e5f31bd3548 86-123,131-164,168-171
+  s_cbe2c930157713::t_4e674102deab2d 124-130
+  s_cbe2c930157713::t_29b849449959a6 21,25-26,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f27b908c5ccb413b72b345a3f92bbccf0bacf008",
+  "prompts": {},
+  "humans": {
+    "h_ed1b2d65e81e8e": {
+      "author": "Ali Elkhateeb <ali.elkhateeb@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_cbe2c930157713": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e7db5deb-6ff4-4902-96eb-a0109df3a0da",
+        "model": "grok-4.7"
+      },
+      "human_author": "Ali Elkhateeb <ali.elkhateeb@n8n.io>"
+    }
+  }
+}
