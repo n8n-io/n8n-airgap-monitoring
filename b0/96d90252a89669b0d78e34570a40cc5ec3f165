@@ -1,0 +1,46 @@
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_025de1b0222735::t_0ccaeb3d0e6dfe 2,116-117
+  s_025de1b0222735::t_290280c0f154df 118
+docs/adr/2026-11-20-store-consumer-id-from-license-certificate.md
+  s_025de1b0222735::t_2c745dab3f5b18 27
+  s_025de1b0222735::t_b7e0d1c9f69c00 35-36
+  s_025de1b0222735::t_450de7580e39d4 43
+apps/api/src/routes/v1/report/get-report.route.ts
+  s_025de1b0222735::t_0ccaeb3d0e6dfe 128-134,136-142
+  s_025de1b0222735::t_a6f4f2d1736b22 103
+  s_025de1b0222735::t_43b4a8b2e9135b 135
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  s_025de1b0222735::t_09a3a0fedf6f16 123-125
+  s_025de1b0222735::t_1328dc89dfacd3 163-165
+  s_025de1b0222735::t_c40eb8e69805e2 166
+docs/DIAGRAMS.md
+  s_025de1b0222735::t_63915a4392ddd9 128
+apps/api/src/instance-report/instance-report.service.ts
+  s_025de1b0222735::t_0ccaeb3d0e6dfe 163-164
+docs/USER_GUIDE.md
+  s_025de1b0222735::t_390b1568cb7b15 154-158
+apps/api/src/instance-report/instance-report.repository.ts
+  s_025de1b0222735::t_0ccaeb3d0e6dfe 1,90-95,97-98,101-103,106-111,113
+  s_025de1b0222735::t_50e123538da4fc 3
+  s_025de1b0222735::t_5229956f805081 112
+apps/api/src/instance-report/instance-report.repository.test.ts
+  s_025de1b0222735::t_616318543b208f 124,130-131
+README.md
+  s_025de1b0222735::t_d78036c952b32e 154-158
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b096d90252a89669b0d78e34570a40cc5ec3f165",
+  "prompts": {},
+  "sessions": {
+    "s_025de1b0222735": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "98d14f3d-5309-41e1-a6a9-70725104e31b",
+        "model": "grok-4.7"
+      },
+      "human_author": "Ali Elkhateeb <ali.elkhateeb@n8n.io>"
+    }
+  }
+}
