@@ -1,0 +1,38 @@
+apps/api/src/instance-report/instance-report.repository.ts
+  s_025de1b0222735::t_35895340c34ff2 54-62,68,72,76-104
+  s_025de1b0222735::t_67612efd492ef3 226-227,230
+  s_025de1b0222735::t_63cb7a08c2c9d8 199,204-205
+  s_025de1b0222735::t_598f6d0d254efe 105,133-135,137-139,141-151,153-154,157-159,161-178,180-192,194-197,200-201,206-225,228-229,231-232
+  s_025de1b0222735::t_cc5fa6b739254b 1
+  s_025de1b0222735::t_684e37e75fb57f 53,106
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_025de1b0222735::t_c39375e2b29697 2
+  s_025de1b0222735::t_745ab88c0a4afd 85-95,97-109,112-114,117-125
+  s_025de1b0222735::t_05f3db3983fea5 110-111
+  s_025de1b0222735::t_3ff41c57815112 3,11-13,126-127
+apps/api/src/instance-report/instance-report.service.ts
+  s_025de1b0222735::t_e6699ed1b96c4c 183-185
+  s_025de1b0222735::t_140e2b375e113c 178-182,186-210,215-218
+  s_025de1b0222735::t_2a9602120580c7 142-151
+apps/api/src/routes/v1/report/get-report.route.ts
+  s_025de1b0222735::t_9c92b2654bf447 130
+  s_025de1b0222735::t_63ed122ab1879d 132-147,149-150
+  s_025de1b0222735::t_dfb00bf6a98c16 148
+  s_025de1b0222735::t_acce4f6c74278e 131
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7c967c88933e8635f679e48e52eb462b603fe406",
+  "prompts": {},
+  "sessions": {
+    "s_025de1b0222735": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "98d14f3d-5309-41e1-a6a9-70725104e31b",
+        "model": "grok-4.7"
+      },
+      "human_author": "Ali Elkhateeb <ali.elkhateeb@n8n.io>"
+    }
+  }
+}
