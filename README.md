@@ -55,7 +55,7 @@ Content-Type: application/json
 `licenseCert` is the credential. The service checks that the certificate chains
 to the n8n license CA and that its payload signature verifies, keeps the
 payload's `consumerId` when it is a UUID, then drops the certificate. That id
-ties the report to a customer in the license server. A certificate with no UUID
+ties the report to a customer in the license server for customer-specific UUIDs. A certificate with no UUID
 `consumerId` is rejected. Expiry is not checked, so an instance whose license
 has run out still reports. The certificate travels in the body rather than a
 header because a real certificate is about 7 KB and sits too close to the
