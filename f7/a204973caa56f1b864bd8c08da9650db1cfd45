@@ -1,0 +1,19 @@
+docs/AUTHORIZATION.md
+  s_cbe2c930157713::t_8460c17cb88c6c 207,210,216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f7a204973caa56f1b864bd8c08da9650db1cfd45",
+  "prompts": {},
+  "sessions": {
+    "s_cbe2c930157713": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e7db5deb-6ff4-4902-96eb-a0109df3a0da",
+        "model": "grok-4.7"
+      },
+      "human_author": "Ali Elkhateeb <ali.elkhateeb@n8n.io>"
+    }
+  }
+}
