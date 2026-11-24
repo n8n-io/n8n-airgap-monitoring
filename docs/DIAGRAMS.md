@@ -121,16 +121,11 @@ sequenceDiagram
     API->>API: bearer-auth: token equals N8N_MONITORING_READ_TOKEN
     API->>API: filter = instanceIds split on ",", trimmed, deduplicated and sorted,<br/>plus start and end (YYYY-MM-DD, start not after end)<br/>filters = filter as a query string, omitted for none<br/>invalid or repeated parameter, or start after end - 400
     API->>API: generatedAt = now (ISO 8601)<br/>stamp = generatedAt with ":" and "." replaced by "-"
-    API->>SVC: findConsumerIds(filter)
-    SVC->>DB: SELECT DISTINCT consumerId<br/>WHERE consumerId IS NOT NULL<br/>[AND instanceId IN (…)]<br/>[AND the UTC day of receivedAt is inside start..end]<br/>ORDER BY consumerId
-    DB-->>SVC: consumerIds
-    SVC-->>API: sorted string[]. [] when every matching row is null
-    Note right of API: This query finishes before the response starts,<br/>so a database error here is still a normal error status.
 
     API-->>C: 200 OK<br/>Content-Type: application/json<br/>Cache-Control: no-store<br/>Content-Disposition: attachment#59; filename="n8n-instance-report-{stamp}.json"
     Note right of API: Headers go out first. The body is a Readable<br/>wrapping the renderReport async generator, so<br/>Fastify pipes chunks as they are produced.<br/>No response schema: the data was validated on<br/>upload and re-validating would undo the streaming.
 
-    API-->>C: chunk: {"data":{"generatedAt":"...","airgapMonitoringVersion":"...",["filters":"...",]"consumerIds":[...],"instances":[
+    API-->>C: chunk: {"data":{"generatedAt":"...","airgapMonitoringVersion":"...",["filters":"...","]instances":[
 
     API->>SVC: for await entry of streamInstanceReports(filter)
     SVC->>DB: SELECT DISTINCT instanceId<br/>[WHERE instanceId IN (…)]<br/>ORDER BY instanceId ASC
@@ -171,7 +166,6 @@ Content-Disposition: attachment; filename="n8n-instance-report-2026-03-28T08-00-
   "data": {
     "generatedAt": "2026-03-28T08:00:00.000Z",
     "airgapMonitoringVersion": "0.2.1",
-    "consumerIds": ["867a53a5-f61d-46ea-8087-ca249b06528e"],
     "instances": [
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",

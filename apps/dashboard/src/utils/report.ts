@@ -33,7 +33,6 @@ export interface UsageReport {
     generatedAt: string
     airgapMonitoringVersion: string
     filters?: string
-    consumerIds?: string[]
     instances: InstanceReportEntry[]
   }
 }

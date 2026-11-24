@@ -24,7 +24,7 @@ The value must be a UUID, `8-4-4-4-12` hex, either case. It is stored verbatim, 
 
 The id comes from the certificate, never from the request body. Token-mode reports store `NULL`. [API-634](https://linear.app/n8n/issue/API-634/send-consumerid-from-n8n-instance-when-write-token-auth-is-used-for) covers sending one in that mode.
 
-`GET /api/v1/report` adds `data.consumerIds`: the sorted, distinct, non-null ids of rows for the filtered instances whose `receivedAt` falls on a UTC day inside `start`/`end`. The field is always present and is `[]` when no matching row has an id. Each instance carries the same kind of list for the reports that instance sent in the window. A license swap on one instance is two ids on that instance, and a customer with one license per instance can be joined without collapsing the file to a single id.
+`GET /api/v1/report` adds `consumerIds` on each instance: the sorted, non-null ids of reports that instance sent whose `receivedAt` falls on a UTC day inside `start`/`end`. The field is `[]` when that instance's reports in the window had no certificate. A license swap on one instance is two ids on that instance, next to the executions it reported.
 
 ## Alternatives Considered
 
@@ -32,14 +32,15 @@ The id comes from the certificate, never from the request body. Token-mode repor
 - **Accept a missing `consumerId` as null.** Rejected: every airgapped license n8n issues has one, and a report without it cannot be matched to a customer.
 - **Normalise the all-zero UUID to null.** Rejected: it is a real id on licenses issued before consumer ids were unique, and the receiver should see it.
 - **One `consumerId` per instance, latest row wins.** Rejected: a cloned instance or a swapped license disappears from the export. The instance carries every distinct id instead.
-- **A top-level list and no per-instance list.** Rejected: one license per customer makes them the same, and several instance-locked licenses makes the top-level list unable to attribute an instance's usage. The top-level list is the union of the per-instance lists.
+- **A top-level list and no per-instance list.** Rejected: several instance-locked licenses make one list unable to attribute an instance's usage.
+- **A top-level list as well as the per-instance lists.** Rejected: it only repeats those lists.
 - **Validate only on ingest and detect conflicts there.** Rejected: that needs a read before every write, and the export already shows every distinct id.
 
 ## Consequences
 
 - New certificate-mode rows carry `consumerId`. Rows from before this column, and token-mode rows, are null and do not appear in `consumerIds`.
 - A certificate without a UUID `consumerId` gets `401`. Operators see `PAYLOAD_INVALID` in the log.
-- `consumerIds` uses the receipt day. An instance can appear in `instances` because a daily metric falls in the window while its `consumerId` stays out, and the reverse.
+- `consumerIds` uses the receipt day. An instance can appear in `instances` because a daily metric falls in the window while its `consumerIds` stays empty, when the report that carried that point was received outside the window.
 - Switching a deployment from certificate mode to token mode is not a supported path. Later rows are null, and the export skips null.
 
 ## Links

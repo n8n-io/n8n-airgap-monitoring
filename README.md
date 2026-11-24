@@ -122,7 +122,6 @@ Its shape is:
   "data": {
     "generatedAt": "2026-09-16T14:30:00.000Z",
     "airgapMonitoringVersion": "0.2.1",
-    "consumerIds": ["867a53a5-f61d-46ea-8087-ca249b06528e"],
     "instances": [
       {
         "instanceId": "450b5c8502c2a390dba93257bde5fe7eb39397d43d8b307e8626f9d84b19e4d2",
@@ -152,12 +151,11 @@ value that instance reported for that metric, oldest-first, tagged with the
 `airgapMonitoringVersion` is the version of this service that generated the
 report.
 
-`consumerIds` on the report lists every distinct license consumer id stored on
-a report in this download, sorted. Each instance repeats that list for the
-reports it sent, so usage can be joined to a license when a customer holds
-more than one. Either list is `[]` when the reports in the window came without
-a certificate, which is the case for write-token authentication. The id is
-taken from the UTC day the report was received, not from a metric's `date`.
+`consumerIds` on each instance lists the distinct license consumer ids stored
+on the reports that instance sent, sorted. It is `[]` when those reports came
+without a certificate, which is the case for write-token authentication. The
+id is taken from the UTC day the report was received, not from a metric's
+`date`. Several ids mean the instance authenticated with more than one license.
 
 `?instanceId=` (comma-separated) narrows the report to those
 instances; `?start=` and `?end=` (`YYYY-MM-DD`, both included) narrow it to

@@ -120,71 +120,13 @@ test("findInstanceIds narrows to the given instanceIds that are stored, ascendin
 });
 
 const CONSUMER_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-const CONSUMER_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
-const CONSUMER_C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 
-test("insert stores a consumerId and findConsumerIds reads it back", async () => {
+test("insert stores a consumerId", async () => {
   const app = await build();
   const repository = new InstanceReportRepository(app.dataSource);
 
   await repository.insert({ ...event, consumerId: CONSUMER_A });
 
-  expect(await repository.findConsumerIds({})).toEqual([CONSUMER_A]);
-});
-
-test("findConsumerIds returns sorted distinct ids and skips null", async () => {
-  const app = await build();
-  const repository = new InstanceReportRepository(app.dataSource);
-
-  await repository.insert({ ...event, instanceId: "instance-1", batchId: "b", consumerId: CONSUMER_B });
-  await repository.insert({ ...event, instanceId: "instance-2", batchId: "a1", consumerId: CONSUMER_A });
-  await repository.insert({ ...event, instanceId: "instance-2", batchId: "a2", consumerId: CONSUMER_A });
-  await repository.insert({ ...event, instanceId: "instance-3", batchId: "none", consumerId: null });
-
-  expect(await repository.findConsumerIds({})).toEqual([CONSUMER_A, CONSUMER_B]);
-});
-
-test("findConsumerIds honours the instance filter", async () => {
-  const app = await build();
-  const repository = new InstanceReportRepository(app.dataSource);
-
-  await repository.insert({ ...event, instanceId: "instance-1", batchId: "a", consumerId: CONSUMER_A });
-  await repository.insert({ ...event, instanceId: "instance-2", batchId: "b", consumerId: CONSUMER_B });
-
-  expect(await repository.findConsumerIds({ instanceIds: ["instance-2"] })).toEqual([CONSUMER_B]);
-});
-
-test("findConsumerIds honours start and end against the receivedAt day", async () => {
-  const app = await build();
-  const repository = new InstanceReportRepository(app.dataSource);
-
-  await repository.insert({
-    ...event,
-    batchId: "before",
-    receivedAt: "2026-09-30T23:59:59.999Z",
-    consumerId: CONSUMER_A,
-  });
-  await repository.insert({
-    ...event,
-    batchId: "on-start",
-    receivedAt: "2026-10-01T00:00:00.000Z",
-    consumerId: CONSUMER_B,
-  });
-  await repository.insert({
-    ...event,
-    batchId: "on-end",
-    receivedAt: "2026-10-31T23:59:59.999Z",
-    consumerId: CONSUMER_C,
-  });
-  await repository.insert({
-    ...event,
-    batchId: "after",
-    receivedAt: "2026-11-01T00:00:00.000Z",
-    consumerId: CONSUMER_A,
-  });
-
-  expect(await repository.findConsumerIds({ start: "2026-10-01", end: "2026-10-31" })).toEqual([
-    CONSUMER_B,
-    CONSUMER_C,
-  ]);
+  const [row] = await repository.findByInstanceId("instance-1");
+  expect(row.consumerId).toBe(CONSUMER_A);
 });

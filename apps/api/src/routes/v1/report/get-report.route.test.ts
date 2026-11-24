@@ -74,7 +74,6 @@ test("serves an empty report stamped with the generation time and service versio
       data: {
         generatedAt: "2026-09-03T14:30:00.000Z",
         airgapMonitoringVersion,
-        consumerIds: [],
         instances: [],
       },
     });
@@ -121,14 +120,13 @@ test("lists sorted distinct consumerIds and omits rows stored without one", asyn
   const res = await app.inject({ method: "GET", url: URL, headers: READ });
 
   expect(res.statusCode).toBe(200);
-  const { consumerIds, instances } = res.json<UsageReport>().data;
-  expect(consumerIds).toEqual([CONSUMER_A, CONSUMER_B]);
-  expect(instances.map((instance) => [instance.instanceId, instance.consumerIds])).toEqual([
+  const data = res.json<UsageReport>().data;
+  expect(data).not.toHaveProperty("consumerIds");
+  expect(data.instances.map((instance) => [instance.instanceId, instance.consumerIds])).toEqual([
     ["a", [CONSUMER_A]],
     ["b", [CONSUMER_B]],
     ["c", []],
   ]);
-  expect(res.body.indexOf('"consumerIds"')).toBeLessThan(res.body.indexOf('"instances"'));
 });
 
 test("limits consumerIds to the filtered instances and the UTC day the report was received", async () => {
@@ -162,11 +160,10 @@ test("limits consumerIds to the filtered instances and the UTC day the report wa
   });
 
   expect(res.statusCode).toBe(200);
-  const { consumerIds, instances } = res.json<UsageReport>().data;
-  expect(consumerIds).toEqual([CONSUMER_B]);
-  expect(instances.map((instance) => [instance.instanceId, instance.consumerIds])).toEqual([["a", [CONSUMER_B]]]);
-  expect(res.body.indexOf('"filters"')).toBeLessThan(res.body.indexOf('"consumerIds"'));
-  expect(res.body.indexOf('"consumerIds"')).toBeLessThan(res.body.indexOf('"instances"'));
+  const data = res.json<UsageReport>().data;
+  expect(data).not.toHaveProperty("consumerIds");
+  expect(data.instances.map((instance) => [instance.instanceId, instance.consumerIds])).toEqual([["a", [CONSUMER_B]]]);
+  expect(res.body.indexOf('"filters"')).toBeLessThan(res.body.indexOf('"instances"'));
 });
 
 test("returns it as a named, uncacheable JSON download", async () => {

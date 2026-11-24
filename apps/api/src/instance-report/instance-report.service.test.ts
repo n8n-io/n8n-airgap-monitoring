@@ -1,15 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { build } from "../test-utils/build-app";
-import { type InstanceReport, InstanceReportRepository, type InstanceReportRow } from "./instance-report.repository";
+import type { InstanceReport, InstanceReportRepository, InstanceReportRow } from "./instance-report.repository";
 import {
   type CreateInstanceReport,
   type InstanceReportEntry,
   InstanceReportService,
   type ReportFilter,
 } from "./instance-report.service";
-
-const CONSUMER_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-const CONSUMER_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
 const report: CreateInstanceReport = {
   instanceId: "instance-1",
@@ -82,49 +78,6 @@ test("passes a null consumerId through for a token-authenticated report", async 
   expect(inserted[0].consumerId).toBeNull();
 });
 
-test("openDownload keeps a report committed after it starts out of both consumer id views", async () => {
-  const app = await build();
-  const repository = new InstanceReportRepository(app.dataSource);
-  await repository.insert({
-    instanceId: "instance-1",
-    batchId: "before",
-    n8nVersion: "1.99.0",
-    dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 1 }],
-    receivedAt: "2026-10-15T00:00:00.000Z",
-    consumerId: CONSUMER_A,
-  });
-
-  const download = await app.instanceReportService.openDownload();
-  await repository.insert({
-    instanceId: "instance-1",
-    batchId: "during",
-    n8nVersion: "1.99.0",
-    dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 2 }],
-    receivedAt: "2026-10-16T00:00:00.000Z",
-    consumerId: CONSUMER_B,
-  });
-
-  const during = await collectDownload(download);
-  expect(during.consumerIds).toEqual([CONSUMER_A]);
-  expect(during.instances.map((instance) => instance.consumerIds)).toEqual([[CONSUMER_A]]);
-
-  const later = await app.instanceReportService.openDownload();
-  const after = await collectDownload(later);
-  expect(after.consumerIds).toEqual([CONSUMER_A, CONSUMER_B]);
-  expect(after.instances.map((instance) => instance.consumerIds)).toEqual([[CONSUMER_A, CONSUMER_B]]);
-});
-
-async function collectDownload(download: {
-  consumerIds: string[];
-  instances: AsyncIterable<InstanceReportEntry>;
-}): Promise<{ consumerIds: string[]; instances: InstanceReportEntry[] }> {
-  const instances: InstanceReportEntry[] = [];
-  for await (const entry of download.instances) {
-    instances.push(entry);
-  }
-  return { consumerIds: download.consumerIds, instances };
-}
-
 /**
  * A repository stub whose per-instance reads serve pre-built rows. The streaming
  * report groups by instanceId, so the fake derives the id list from the rows
@@ -159,6 +112,9 @@ function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
     ...overrides,
   };
 }
+
+const CONSUMER_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const CONSUMER_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
 test("streamInstanceReports lists each instance's consumerIds from reports received in the window", async () => {
   const [instance] = await collectInstances(
