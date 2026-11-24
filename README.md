@@ -152,7 +152,7 @@ value that instance reported for that metric, oldest-first, tagged with the
 report.
 
 `consumerIds` on each instance lists the distinct license consumer ids stored
-on the reports that instance sent, sorted. It is `[]` when those reports came
+on the reports that instance sent in the selected UTC-day window, sorted. It is `[]` when those reports came
 without a certificate, which is the case for write-token authentication. The
 id is taken from the UTC day the report was received, not from a metric's
 `date`. Several ids mean the instance authenticated with more than one license.
