@@ -127,27 +127,27 @@ const getReport: FastifyPluginAsync = async (fastify): Promise<void> => {
     const generatedAt = new Date().toISOString();
     // Colons and dots are unsafe in filenames on some OSes, so flatten the timestamp.
     const stamp = generatedAt.replace(/[:.]/g, "-");
-    const consumerIds = await fastify.instanceReportService.findConsumerIds(filter);
+    const download = await fastify.instanceReportService.openDownload(filter);
 
-    reply
-      .header("cache-control", "no-store")
-      .header("content-disposition", `attachment; filename="n8n-instance-report-${stamp}.json"`)
-      .type("application/json");
+    try {
+      reply
+        .header("cache-control", "no-store")
+        .header("content-disposition", `attachment; filename="n8n-instance-report-${stamp}.json"`)
+        .type("application/json");
 
-    const body = Readable.from(
-      renderReport(
-        generatedAt,
-        toFiltersString(filter),
-        consumerIds,
-        fastify.instanceReportService.streamInstanceReports(filter),
-      ),
-    );
+      const body = Readable.from(
+        renderReport(generatedAt, toFiltersString(filter), download.consumerIds, download.instances),
+      );
 
-    body.on("error", (error) => {
-      request.log.error({ err: error }, "report stream failed after the response had started");
-    });
+      body.on("error", (error) => {
+        request.log.error({ err: error }, "report stream failed after the response had started");
+      });
 
-    return body;
+      return body;
+    } catch (error) {
+      await download.instances.return(undefined);
+      throw error;
+    }
   });
 };
 

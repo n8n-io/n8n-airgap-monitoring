@@ -139,6 +139,16 @@ export interface ReportFilter {
   end?: string;
 }
 
+/** One download, read from a single snapshot. Draining `instances` closes that snapshot. */
+export interface InstanceReportDownload {
+  consumerIds: string[];
+  instances: AsyncGenerator<InstanceReportEntry>;
+}
+
+interface InstanceRows {
+  findByInstanceId(instanceId: string): Promise<InstanceReportRow[]>;
+}
+
 export class InstanceReportService {
   constructor(private readonly repository: InstanceReportRepository) {}
 
@@ -155,11 +165,6 @@ export class InstanceReportService {
     return { id };
   }
 
-  /** Distinct certificate consumer ids for the rows this download covers. */
-  async findConsumerIds(filter: ReportFilter = {}): Promise<string[]> {
-    return this.repository.findConsumerIds(filter);
-  }
-
   /**
    * The report's instances, one at a time, ready to be streamed straight to the
    * response. Only a single instance's history is materialised at any moment, so
@@ -170,11 +175,46 @@ export class InstanceReportService {
    * {@link toEntry}.
    */
   async *streamInstanceReports(filter: ReportFilter = {}): AsyncGenerator<InstanceReportEntry> {
-    for (const instanceId of await this.repository.findInstanceIds(filter.instanceIds)) {
-      const entry = toEntry(await this.repository.findByInstanceId(instanceId), filter);
+    const instanceIds = await this.repository.findInstanceIds(filter.instanceIds);
+    yield* iterateInstances(this.repository, instanceIds, filter);
+  }
+
+  /**
+   * Top-level consumer ids and instance entries from one snapshot. A report
+   * ingested while the download streams stays out of both. The caller drains
+   * `instances`, or calls `return`, which closes the snapshot.
+   */
+  async openDownload(filter: ReportFilter = {}): Promise<InstanceReportDownload> {
+    const snapshot = await this.repository.openReadSnapshot();
+    try {
+      const consumerIds = await snapshot.findConsumerIds(filter);
+      const instanceIds = await snapshot.findInstanceIds(filter.instanceIds);
+      const instances = iterateInstances(snapshot, instanceIds, filter, () => snapshot.close());
+      return { consumerIds, instances };
+    } catch (error) {
+      await snapshot.close();
+      throw error;
+    }
+  }
+}
+
+async function* iterateInstances(
+  reader: InstanceRows,
+  instanceIds: string[],
+  filter: ReportFilter,
+  close?: () => Promise<void>,
+): AsyncGenerator<InstanceReportEntry> {
+  try {
+    for (const instanceId of instanceIds) {
+      const rows = await reader.findByInstanceId(instanceId);
+      const entry = toEntry(rows, filter);
       if (entry !== undefined) {
         yield entry;
       }
+    }
+  } finally {
+    if (close !== undefined) {
+      await close();
     }
   }
 }
