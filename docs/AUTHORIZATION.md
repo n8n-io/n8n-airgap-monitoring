@@ -156,7 +156,8 @@ and in ADR 10:
   still a licensed instance and its reports are still wanted; a test pins that
   an expired certificate is accepted.
 - **Entitlements, features, tenant and device fingerprint** carried in the
-  license payload. The payload is decrypted only to verify its signature.
+  license payload. The payload is decrypted to verify its signature and to read
+  `consumerId`. Those other fields are not read.
 - **Binding to the reporting instance.** `instanceId` is not tied to anything
   in the certificate, and one certificate may be used by any number of
   instances.
