@@ -204,15 +204,16 @@ sequenceDiagram
     API->>API: leaf issued by and verifies against the embedded n8n license CA
     API->>API: leaf public key recovers the symmetric key, AES-decrypts the payload
     API->>API: leaf public key verifies the payload signature
+    API->>API: payload is a JSON object and consumerId is a UUID
     alt licenseCert missing, not a string, or empty
         API-->>N8N: 401 Unauthorized, "Missing license certificate"
-    else PARSE_FAILED, INVALID_ISSUER, DECRYPTION_FAILED or SIGNATURE_INVALID
+    else PARSE_FAILED, INVALID_ISSUER, DECRYPTION_FAILED, SIGNATURE_INVALID or PAYLOAD_INVALID
         Note right of API: Logs the failure code and nothing else.
         API-->>N8N: 401 Unauthorized, "Invalid license certificate"
     else certificate accepted
         API->>API: delete licenseCert from the body
         API->>API: schema validation of the remaining body (400 on failure)
-        API->>API: INSERT INTO instance_reports (409 if instanceId + batchId exists)
+        API->>API: INSERT INTO instance_reports, including consumerId (409 if instanceId + batchId exists)
         API-->>N8N: 201 Created, { id }
     end
 ```
