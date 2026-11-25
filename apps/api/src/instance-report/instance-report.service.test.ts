@@ -116,18 +116,18 @@ function row(overrides: Partial<InstanceReportRow>): InstanceReportRow {
 const CONSUMER_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const CONSUMER_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
-test("streamInstanceReports lists each instance's consumerIds from reports received in the window", async () => {
+test("streamInstanceReports lists consumerIds most recently received first", async () => {
   const [instance] = await collectInstances(
     fakeReportService([
-      row({ batchId: "b", receivedAt: "2026-10-02T00:00:00.000Z", consumerId: CONSUMER_B }),
-      row({ batchId: "a1", receivedAt: "2026-10-03T00:00:00.000Z", consumerId: CONSUMER_A }),
-      row({ batchId: "a2", receivedAt: "2026-10-04T00:00:00.000Z", consumerId: CONSUMER_A }),
+      row({ batchId: "a", receivedAt: "2026-10-02T00:00:00.000Z", consumerId: CONSUMER_A }),
+      row({ batchId: "b1", receivedAt: "2026-10-03T00:00:00.000Z", consumerId: CONSUMER_B }),
+      row({ batchId: "b2", receivedAt: "2026-10-04T00:00:00.000Z", consumerId: CONSUMER_B }),
       row({ batchId: "none", receivedAt: "2026-10-05T00:00:00.000Z", consumerId: null }),
     ]),
     { start: "2026-10-01", end: "2026-10-31" },
   );
 
-  expect(instance.consumerIds).toEqual([CONSUMER_A, CONSUMER_B]);
+  expect(instance.consumerIds).toEqual([CONSUMER_B, CONSUMER_A]);
 });
 
 test("streamInstanceReports omits a consumerId received outside the window", async () => {

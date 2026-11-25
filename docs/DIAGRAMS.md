@@ -136,7 +136,7 @@ sequenceDiagram
         SVC->>DB: SELECT * WHERE instanceId = ?<br/>ORDER BY receivedAt ASC, id ASC
         DB-->>SVC: rows, oldest-first, JSON data column parsed
         SVC->>SVC: toEntry(rows, filter)
-        Note right of SVC: instanceId - from any row<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>consumerIds - distinct ids of rows received in start..end<br/>dataPoints - every point of every row in start..end<br/>(daily - its date, cumulative - UTC day of receivedAt),<br/>tagged with its row's batchId and receivedAt, then<br/>grouped by metric name. Nothing is summed or<br/>deduplicated: reconciliation is the receiver's job.<br/>No points left - the instance is skipped.
+        Note right of SVC: instanceId - from any row<br/>label - last row wins (last-received label)<br/>firstSeen - receivedAt of first row<br/>lastReportAt - receivedAt of last row<br/>consumerIds - distinct ids of rows received in start..end, newest first<br/>dataPoints - every point of every row in start..end<br/>(daily - its date, cumulative - UTC day of receivedAt),<br/>tagged with its row's batchId and receivedAt, then<br/>grouped by metric name. Nothing is summed or<br/>deduplicated: reconciliation is the receiver's job.<br/>No points left - the instance is skipped.
         SVC-->>API: yield InstanceReportEntry
         API-->>C: chunk: JSON.stringify(entry)<br/>prefixed with "," for every entry but the first
     end

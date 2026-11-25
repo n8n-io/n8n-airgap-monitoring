@@ -101,9 +101,10 @@ export interface InstanceReportEntry {
   /** Timestamp the collector received the most recent report from this instance. */
   lastReportAt: string;
   /**
-   * Sorted distinct license consumer ids on reports this instance sent whose
-   * `receivedAt` falls in the download window. Empty when those reports had no
-   * certificate. Several ids mean this instance authenticated with more than one license.
+   * Distinct license consumer ids on reports this instance sent whose
+   * `receivedAt` falls in the download window, most recently received first.
+   * Empty when those reports had no certificate. Several ids mean this
+   * instance authenticated with more than one license.
    */
   consumerIds: string[];
   /**
@@ -194,18 +195,20 @@ function toEntry(rows: InstanceReportRow[], filter: ReportFilter): InstanceRepor
 }
 
 /**
- * Distinct ids of rows received inside the window. The id belongs to the
- * envelope, so a daily point dated inside the window does not carry an id
- * from a report received outside it.
+ * Distinct ids of rows received inside the window, most recently received
+ * first. Rows arrive oldest-first, so the walk starts at the end. The id
+ * belongs to the envelope, so a daily point dated inside the window does not
+ * carry an id from a report received outside it.
  */
 function consumerIdsOf(rows: InstanceReportRow[], filter: ReportFilter): string[] {
   const ids = new Set<string>();
-  for (const row of rows) {
+  for (let index = rows.length - 1; index >= 0; index--) {
+    const row = rows[index];
     if (row.consumerId !== null && isDayInRange(row.receivedAt.slice(0, 10), filter)) {
       ids.add(row.consumerId);
     }
   }
-  return [...ids].sort();
+  return [...ids];
 }
 
 /** A daily value counts towards its date, a cumulative total towards the UTC day it was received. */

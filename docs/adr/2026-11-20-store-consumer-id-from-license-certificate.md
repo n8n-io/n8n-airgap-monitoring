@@ -24,7 +24,7 @@ The value must be a UUID, `8-4-4-4-12` hex, either case. It is stored verbatim, 
 
 The id comes from the certificate, never from the request body. Token-mode reports store `NULL`. [API-634](https://linear.app/n8n/issue/API-634/send-consumerid-from-n8n-instance-when-write-token-auth-is-used-for) covers sending one in that mode.
 
-`GET /api/v1/report` adds `consumerIds` on each instance: the sorted, non-null ids of reports that instance sent whose `receivedAt` falls on a UTC day inside `start`/`end`. The field is `[]` when that instance's reports in the window had no certificate. A license swap on one instance is two ids on that instance, next to the executions it reported.
+`GET /api/v1/report` adds `consumerIds` on each instance: the non-null ids of reports that instance sent whose `receivedAt` falls on a UTC day inside `start`/`end`, most recently received first. The field is `[]` when that instance's reports in the window had no certificate. A license swap on one instance is two ids on that instance, newest first, next to the executions it reported.
 
 ## Alternatives Considered
 

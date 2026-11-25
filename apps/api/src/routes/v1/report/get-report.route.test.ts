@@ -87,7 +87,7 @@ const CONSUMER_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const CONSUMER_C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 const onePoint: Metric[] = [{ kind: "cumulative", name: "activeWorkflows", value: 1 }];
 
-test("lists sorted distinct consumerIds and omits rows stored without one", async () => {
+test("lists each instance's distinct consumerIds and omits rows stored without one", async () => {
   const app = await build();
   await insertRow(app, {
     instanceId: "b",

@@ -152,8 +152,9 @@ The request must carry the **read token** as a bearer token in the
 
 The file contains one entry per instance, with when it was first and last
 seen and every value it ever reported for each metric. Each instance has
-`consumerIds`, the ids on the reports that instance sent, so a customer with
-several licenses can be matched instance by instance. The list is `[]` when no
+`consumerIds`, the ids on the reports that instance sent, most recently
+received first, so a customer with several licenses can be matched instance by
+instance. The list is `[]` when no
 report in the window came with a certificate, for example when instances
 authenticate with a write token:
 
