@@ -21,7 +21,7 @@ type Verifier = (request: FastifyRequest) => string | null;
  * - Certificate mode (variable unset): the request must carry the instance's
  *   n8n license certificate as `licenseCert` in the body. Possession of a
  *   certificate n8n issued is the check. The verified payload's `consumerId`
- *   is kept when it is a UUID and stored with the report. Nothing else from
+ *   is kept and stored with the report. Nothing else from
  *   the payload is read. Any licensee's certificate passes, so the endpoint
  *   must be reachable only by the operator's own instances.
  *
