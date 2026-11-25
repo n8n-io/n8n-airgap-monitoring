@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { build } from "../../test-utils/build-app";
-import { generateMockLicense } from "../../test-utils/mock-license";
+import { DEFAULT_MOCK_CONSUMER_ID, generateMockLicense } from "../../test-utils/mock-license";
 
 // The compose file, the k8s demo and the backfill script all run in token
 // mode, so outside this suite nothing exercises certificate mode against a
@@ -28,11 +28,13 @@ test("a license certificate authenticates a report over real HTTP", async () => 
   expect(res.status).toBe(201);
 
   const { id } = (await res.json()) as { id: number };
-  const [row] = (await app.dataSource.query("SELECT instanceId, batchId, data FROM instance_reports WHERE id = ?", [
-    id,
-  ])) as Record<string, string>[];
+  const [row] = (await app.dataSource.query(
+    "SELECT instanceId, batchId, data, consumerId FROM instance_reports WHERE id = ?",
+    [id],
+  )) as Record<string, string>[];
   expect(row.instanceId).toBe("e2e-instance");
   expect(row.batchId).toBe("e2e-batch-1");
+  expect(row.consumerId).toBe(DEFAULT_MOCK_CONSUMER_ID);
   expect(JSON.parse(row.data)).toEqual(report.dataPoints);
   expect(JSON.stringify(row)).not.toContain(report.licenseCert);
 

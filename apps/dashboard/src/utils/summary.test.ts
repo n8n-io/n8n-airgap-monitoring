@@ -11,6 +11,7 @@ function instanceWithAnomaliesOn(dates: string[]): InstanceReportEntry {
     label: null,
     firstSeen: '2026-07-01T00:00:00.000Z',
     lastReportAt: '2026-10-07T23:00:00.000Z',
+    consumerIds: [],
     dataPoints: {
       execs: dates.flatMap((date) =>
         ['a', 'b'].map((batchId) => ({

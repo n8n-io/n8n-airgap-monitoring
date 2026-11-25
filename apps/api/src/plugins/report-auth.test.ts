@@ -1,6 +1,7 @@
+import { Writable } from "node:stream";
 import { afterEach, expect, test, vi } from "vitest";
 import { build } from "../test-utils/build-app";
-import { generateMockLicense } from "../test-utils/mock-license";
+import { buildContainer, generateMockLicense } from "../test-utils/mock-license";
 
 const URL = "/api/v1/instance-reports";
 
@@ -62,6 +63,51 @@ test("ignores bearer headers in certificate mode", async () => {
 
   const withCert = await app.inject({ method: "POST", url: URL, headers, payload: report });
   expect(withCert.statusCode).toBe(201);
+});
+
+test("rejects a certificate whose consumerId is not a UUID and logs only the code", async () => {
+  const lines: string[] = [];
+  const stream = new Writable({
+    write(chunk, _encoding, callback) {
+      lines.push(String(chunk));
+      callback();
+    },
+  });
+  const app = await build({ logger: { level: "warn", stream } });
+  const consumerId = "not-a-uuid";
+  const licenseCert = buildContainer(JSON.stringify({ consumerId }));
+
+  const res = await app.inject({
+    method: "POST",
+    url: URL,
+    payload: { ...report, licenseCert },
+  });
+
+  expect(res.statusCode).toBe(401);
+  expect(res.json()).toMatchObject({ message: "Invalid license certificate" });
+  expect(res.body).not.toContain(consumerId);
+  expect(res.body).not.toContain(licenseCert);
+
+  const logged = lines.join("");
+  expect(logged).toContain('"code":"PAYLOAD_INVALID"');
+  expect(logged).not.toContain(consumerId);
+  expect(logged).not.toContain(licenseCert);
+  expect(await app.dataSource.query("SELECT COUNT(*) AS count FROM instance_reports")).toEqual([{ count: 0 }]);
+});
+
+test("stores the certificate consumerId", async () => {
+  const app = await build();
+  const consumerId = "11111111-1111-4111-8111-111111111111";
+
+  const res = await app.inject({
+    method: "POST",
+    url: URL,
+    payload: { ...report, licenseCert: generateMockLicense({ consumerId }) },
+  });
+
+  expect(res.statusCode).toBe(201);
+  const [row] = (await app.dataSource.query("SELECT consumerId FROM instance_reports")) as { consumerId: string }[];
+  expect(row.consumerId).toBe(consumerId);
 });
 
 // A blank value is the same as unset, so a templated `WRITE_TOKEN=` line in a

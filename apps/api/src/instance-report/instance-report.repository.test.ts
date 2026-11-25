@@ -8,6 +8,7 @@ const event: InstanceReport = {
   n8nVersion: "1.99.0",
   dataPoints: [{ kind: "cumulative", name: "activeWorkflows", value: 7 }],
   receivedAt: "2026-03-25T00:00:00.000Z",
+  consumerId: null,
 };
 
 // Built against the real database, because the point of the assertion is that
@@ -116,4 +117,16 @@ test("findInstanceIds narrows to the given instanceIds that are stored, ascendin
     "instance-a",
     "instance-c",
   ]);
+});
+
+const CONSUMER_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+
+test("insert stores a consumerId", async () => {
+  const app = await build();
+  const repository = new InstanceReportRepository(app.dataSource);
+
+  await repository.insert({ ...event, consumerId: CONSUMER_A });
+
+  const [row] = await repository.findByInstanceId("instance-1");
+  expect(row.consumerId).toBe(CONSUMER_A);
 });

@@ -6,6 +6,8 @@ Date: 2026-09-21
 
 Status: Active
 
+Superseded by: in part [ADR 14](2026-11-20-store-consumer-id-from-license-certificate.md)
+
 ## Context
 
 `POST /api/v1/instance-reports` was guarded by a shared write token. The customer generated it, set it on this service as `N8N_MONITORING_WRITE_TOKEN`, and copied it to every n8n instance as `N8N_INSTANCE_REPORTING_AUTH_TOKEN`. That is one secret to mint and distribute per fleet, and it bound nothing to the caller.
@@ -20,7 +22,7 @@ A reporting instance authenticates by sending its license certificate as the `li
 
 The shared write token stays available as an optional alternative, and it selects the mode. When the operator sets `N8N_MONITORING_WRITE_TOKEN` on the service, every report must carry it in its `Authorization: Bearer` header, compared in constant time, and license certificates are not a credential. Without a configured token, the certificate is checked. The choice is made once at start-up and there is no mode that accepts both. Token mode keeps the service deployable for operators who cannot or do not want to restrict the POST endpoint to their own instances at the network level: with the certificate path closed, only holders of their secret can write, so TLS is the remaining requirement. Certificate mode removes the distribution chore and carries the network requirement instead.
 
-Deliberately not checked: expiry, termination, clock skew, entitlements, features, tenant, device fingerprint. An expired instance is still a licensed instance and its usage is still wanted. No identity is read from the certificate, nothing is stored, and nothing is exported. The hook deletes `licenseCert` from the body before the route schema and the service see it, and a test asserts that neither the stored row nor the export contains it. On rejection the service logs a reason code and nothing else about the certificate.
+Deliberately not checked: expiry, termination, clock skew, entitlements, features, tenant, device fingerprint. An expired instance is still a licensed instance and its usage is still wanted. No field is read from the certificate except `consumerId`, which [ADR 14](2026-11-20-store-consumer-id-from-license-certificate.md) stores and exports. The hook deletes `licenseCert` from the body before the route schema and the service see it, and a test asserts that neither the stored row nor the export contains the certificate. On rejection the service logs a reason code and nothing else about the certificate.
 
 The certificate travels in the body, not an `Authorization` header, because a measured real certificate is 7,334 bytes and grows with every feature flag. That sits within 10 percent of the 8 KB per-header default of nginx, the Kubernetes nginx ingress and Apache, and the failure would be an opaque `400` from the customer's proxy that neither side logs. Bodies have no comparable limit.
 
@@ -39,7 +41,7 @@ The read token stays as it is: its holder is the customer's operator, not a lice
 - **Certificate in the `Authorization: Bearer` header.** Rejected for the header-size reason above. A custom scheme or a dedicated header shares the size problem, and a dedicated header is more likely than `Authorization` to be logged by middleware.
 - **An operator-configurable PEM bundle of additional issuers**, named in a start-up warning and hidden from the Helm chart, for a CA rotation and for development CAs. Rejected: no production persona would use it. The embedded CA is valid until 2049, and a rotation would ship as a new image anyway, so it was a trust-widening switch in every customer's image for a scenario with no user. Development is served by the test-mode override instead.
 - **Verifier as a new entry point in the license SDK or a new package.** Rejected: about 120 lines, and a customer-deployed image cannot pick up SDK changes without a rebuild anyway. Kept as the path if a third consumer appears.
-- **Extract identity (`consumerRef`, `deviceFingerprint`) and bind `instanceId` to it, or persist license fields.** Rejected: ephemeral certificates carry little identity (zero `consumerId`, optional `consumerRef` and fingerprint), a fingerprint forces device lock and one certificate per instance, and the license fields are secret with no use case here.
+- **Extract identity (`consumerRef`, `deviceFingerprint`) and bind `instanceId` to it, or persist license fields.** Rejected for those fields: a fingerprint forces device lock and one certificate per instance, and the other license fields are secret with no use case here. [ADR 14](2026-11-20-store-consumer-id-from-license-certificate.md) later stores `consumerId` only. The all-zero id this ADR assumed for every ephemeral certificate is no longer what the license server issues for airgapped customers.
 - **Reject expired certificates.** Rejected: expired instances may report.
 - **Send only a digest and signature** so the license never travels. Viable but needs a new SDK method and an n8n bump. Kept as a documented upgrade path.
 

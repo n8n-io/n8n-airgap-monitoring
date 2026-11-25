@@ -7,7 +7,12 @@ import NodeRSA from "node-rsa";
  * certificate: the certificate is the customer's license, so neither it nor
  * anything decoded from it may reach a log line or a response body.
  */
-export type LicenseCertErrorCode = "PARSE_FAILED" | "INVALID_ISSUER" | "DECRYPTION_FAILED" | "SIGNATURE_INVALID";
+export type LicenseCertErrorCode =
+  | "PARSE_FAILED"
+  | "INVALID_ISSUER"
+  | "DECRYPTION_FAILED"
+  | "SIGNATURE_INVALID"
+  | "PAYLOAD_INVALID";
 
 export class LicenseCertError extends Error {
   constructor(
@@ -30,10 +35,13 @@ interface LicenseContainer {
 const LICENSE_KEY_PATTERN =
   /^-----BEGIN LICENSE KEY-----(?<encryptedSymmetricKey>[^|]+)\|\|(?<encryptedData>[^|]+)\|\|(?<signature>[^|]+)-----END LICENSE KEY-----$/;
 
+/** Canonical UUID, either hex case. The license server writes `consumerId` in this shape. */
+const CONSUMER_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
- * Proves that `containerStr` is a license certificate issued by `issuer`.
- * Resolves to nothing: the design uses the certificate as proof of
- * possession only, so no field is extracted for the caller.
+ * Proves that `containerStr` is a license certificate issued by `issuer`
+ * and returns the signed payload. The caller reads {@link consumerIdOf}
+ * from it and nothing else: the rest of the payload includes secrets.
  *
  * Steps, each failing with its own {@link LicenseCertErrorCode}:
  * 1. base64 → `{ x509, licenseKey }`
@@ -48,7 +56,7 @@ const LICENSE_KEY_PATTERN =
  *
  * @throws {LicenseCertError}
  */
-export function verifyLicenseCert(containerStr: string, issuer: X509Certificate): void {
+export function verifyLicenseCert(containerStr: string, issuer: X509Certificate): string {
   const { x509, licenseKey } = parseContainer(containerStr);
   const leaf = parseLeaf(x509);
 
@@ -61,7 +69,29 @@ export function verifyLicenseCert(containerStr: string, issuer: X509Certificate)
     signingScheme: "pkcs1",
   });
 
-  verifyLicenseKey(key, licenseKey);
+  return verifyLicenseKey(key, licenseKey);
+}
+
+/**
+ * The `consumerId` of a payload already returned by {@link verifyLicenseCert}.
+ * A UUID, stored verbatim, including the all-zero id on older licenses.
+ * Hex case is kept as signed.
+ *
+ * @throws {LicenseCertError} PAYLOAD_INVALID. The message never includes the value.
+ */
+export function consumerIdOf(payload: string): string {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(payload);
+  } catch {
+    throw new LicenseCertError("license payload is not JSON", "PAYLOAD_INVALID");
+  }
+
+  if (!isPayload(parsed) || !CONSUMER_ID_PATTERN.test(parsed.consumerId)) {
+    throw new LicenseCertError("license payload has no UUID consumerId", "PAYLOAD_INVALID");
+  }
+
+  return parsed.consumerId;
 }
 
 function parseContainer(containerStr: string): LicenseContainer {
@@ -101,7 +131,15 @@ function parseLeaf(x509: string): X509Certificate {
   }
 }
 
-function verifyLicenseKey(key: NodeRSA, licenseKey: string): void {
+function isPayload(value: unknown): value is { consumerId: string } {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  return typeof (value as { consumerId?: unknown }).consumerId === "string";
+}
+
+function verifyLicenseKey(key: NodeRSA, licenseKey: string): string {
   const match = licenseKey.replace(/\r?\n|\r/g, "").match(LICENSE_KEY_PATTERN);
   if (!match?.groups) {
     throw new LicenseCertError("license key format is invalid", "PARSE_FAILED");
@@ -132,4 +170,6 @@ function verifyLicenseKey(key: NodeRSA, licenseKey: string): void {
   if (!key.verify(Buffer.from(payload), signature, "utf8", "base64")) {
     throw new LicenseCertError("payload signature is invalid", "SIGNATURE_INVALID");
   }
+
+  return payload;
 }

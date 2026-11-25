@@ -53,13 +53,16 @@ Content-Type: application/json
 ```
 
 `licenseCert` is the credential. The service checks that the certificate chains
-to the n8n license CA and that its payload signature verifies, then drops it:
-nothing from the certificate is read, stored or exported, and expiry is not
-checked, so an instance whose license has run out still reports. Possession of
-a certificate n8n issued is the whole check. It travels in the body rather than
-a header because a real certificate is about 7 KB and sits too close to the
+to the n8n license CA and that its payload signature verifies, keeps the
+payload's `consumerId` when it is a UUID, then drops the certificate. That id
+ties the report to a customer in the license server for customer-specific UUIDs. A certificate with no UUID
+`consumerId` is rejected. Expiry is not checked, so an instance whose license
+has run out still reports. The certificate travels in the body rather than a
+header because a real certificate is about 7 KB and sits too close to the
 8 KB per-header limit of common reverse proxies. See
-[adr/2026-09-21-authenticate-with-license-certificate.md](docs/adr/2026-09-21-authenticate-with-license-certificate.md).
+[adr/2026-09-21-authenticate-with-license-certificate.md](docs/adr/2026-09-21-authenticate-with-license-certificate.md)
+and
+[adr/2026-11-20-store-consumer-id-from-license-certificate.md](docs/adr/2026-11-20-store-consumer-id-from-license-certificate.md).
 
 That is certificate mode, the default. If `N8N_MONITORING_WRITE_TOKEN` is set
 on the service, it runs in token mode instead: every instance must send that
@@ -126,6 +129,7 @@ Its shape is:
         "n8nVersion": "2.40.1",
         "firstSeen": "2026-09-12T10:39:00.199Z",
         "lastReportAt": "2026-09-16T10:39:00.180Z",
+        "consumerIds": ["867a53a5-f61d-46ea-8087-ca249b06528e"],
         "dataPoints": {
           "billableExecutions": [
             { "kind": "cumulative", "value": 230, "batchId": "fQnmKThPEaNxiFdR", "receivedAt": "2026-09-12T10:39:00.199Z" },
@@ -146,6 +150,13 @@ value that instance reported for that metric, oldest-first, tagged with the
 
 `airgapMonitoringVersion` is the version of this service that generated the
 report.
+
+`consumerIds` on each instance lists the distinct license consumer ids stored
+on the reports that instance sent in the selected UTC-day window, most recently
+received first. It is `[]` when those reports came without a certificate, which
+is the case for write-token authentication. The id is taken from the UTC day
+the report was received, not from a metric's `date`. Several ids mean the
+instance authenticated with more than one license.
 
 `?instanceId=` (comma-separated) narrows the report to those
 instances; `?start=` and `?end=` (`YYYY-MM-DD`, both included) narrow it to
