@@ -129,7 +129,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 declare module "fastify" {
   export interface FastifyRequest {
-    /** Set by `authenticateReport`. Null in token mode. */
+    /**
+     * Set by `authenticateReport` from the verified license payload.
+     * Null in token mode until API-634 sends `consumerId` with write-token reports.
+     */
     consumerId: string | null;
   }
 
