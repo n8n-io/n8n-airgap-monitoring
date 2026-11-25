@@ -1,0 +1,32 @@
+apps/api/src/instance-report/instance-report.service.test.ts
+  s_cbe2c930157713::t_2c1052ee3a8ad6 119,122-124,130
+docs/adr/2026-11-20-store-consumer-id-from-license-certificate.md
+  s_cbe2c930157713::t_5436b07fcffff2 27
+docs/USER_GUIDE.md
+  s_cbe2c930157713::t_cbd05d8166a9e1 155-157
+apps/api/src/routes/v1/report/get-report.route.test.ts
+  s_cbe2c930157713::t_5495ba28769e5f 90
+apps/api/src/instance-report/instance-report.service.ts
+  s_cbe2c930157713::t_56d2eda0d17e1a 104-107
+  s_cbe2c930157713::t_732a332759a873 198-201,205-206,211
+README.md
+  s_cbe2c930157713::t_c51d273418691b 155-159
+docs/DIAGRAMS.md
+  s_cbe2c930157713::t_de8e3228865a89 139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "97e693ddd864b6c5895b3dbefd985df34a279f89",
+  "prompts": {},
+  "sessions": {
+    "s_cbe2c930157713": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e7db5deb-6ff4-4902-96eb-a0109df3a0da",
+        "model": "grok-4.7"
+      },
+      "human_author": "Ali Elkhateeb <ali.elkhateeb@n8n.io>"
+    }
+  }
+}
