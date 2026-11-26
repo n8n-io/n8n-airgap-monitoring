@@ -52,6 +52,8 @@ apps/api/src/routes/v1/submissions/submissions.route.test.ts
   s_d7ca60e35378e2::t_e047b010feaf01 2
   s_d7ca60e35378e2::t_be11e598839282 41-47
   s_d7ca60e35378e2::t_84bb61fbaf4d66 64-72
+apps/api/src/routes/v1/submissions/index.ts
+  s_d7ca60e35378e2::t_229b2aef4bb67b 29
 ---
 {
   "schema_version": "authorship/3.0.0",
