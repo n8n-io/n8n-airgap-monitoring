@@ -2,7 +2,10 @@ import { authedFetch, type PendingMonth, reportReadError, reportUrl } from './ap
 
 const REVOKE_DELAY_MS = 60 * 1000
 
-/** The file name GET /api/v1/report sends, so a manual upload keeps the same name. */
+/**
+ * Names the file by its month. The server's own name carries the generation time, so it differs
+ * on every download and does not show which month the file holds.
+ */
 export function reportFileName(month: string): string {
   return `n8n-instance-report-${month}.json`
 }
