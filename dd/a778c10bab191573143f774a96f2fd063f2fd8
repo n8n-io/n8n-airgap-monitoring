@@ -1,0 +1,36 @@
+packages/submit-ui/src/App.vue
+  s_6e8ba6ea928ec8::t_96b9480b2dbba0 170
+docker-compose.yml
+  s_6e8ba6ea928ec8::t_96b9480b2dbba0 9
+turbo.json
+  s_6e8ba6ea928ec8::t_96b9480b2dbba0 6
+Dockerfile
+  s_6e8ba6ea928ec8::t_96b9480b2dbba0 20
+packages/submit-ui/vite.config.ts
+  s_6e8ba6ea928ec8::t_96b9480b2dbba0 8
+packages/submit-ui/README.md
+  s_6e8ba6ea928ec8::t_96b9480b2dbba0 26,60,65,90
+packages/submit-ui/env.d.ts
+  s_6e8ba6ea928ec8::t_96b9480b2dbba0 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dda778c10bab191573143f774a96f2fd063f2fd8",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_6e8ba6ea928ec8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "54241def-47a5-477c-931b-5c3a32dc0af8",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
