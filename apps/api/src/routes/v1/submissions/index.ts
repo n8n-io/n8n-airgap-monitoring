@@ -21,10 +21,13 @@ const submissionRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
 
   // The destination's auth token is only handed out behind the read token: the page itself is
   // public, and the browser has to hold the token to send it to n8n.
-  fastify.get("/", async () => ({
-    ...(await fastify.submissionService.overview()),
-    destination: fastify.config.reportDestination ?? null,
-  }));
+  // no-store: the response carries the destination's auth token.
+  fastify.get("/", async (_request, reply) =>
+    reply.header("cache-control", "no-store").send({
+      ...(await fastify.submissionService.overview()),
+      destination: fastify.config.reportDestination ?? null,
+    }),
+  );
 
   /** Records n8n's acknowledgement, which the browser reports, since this service never calls out. */
   fastify.post<{ Params: { month: string } }>(

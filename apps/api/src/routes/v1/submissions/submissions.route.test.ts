@@ -51,6 +51,7 @@ test("hands the report destination and its auth token to the page", async () => 
     url: "https://n8n.example.com/webhook/usage",
     authToken: "destination-secret",
   });
+  expect(res.headers["cache-control"]).toBe("no-store");
 });
 
 test("records a pending month with the read token", async () => {
