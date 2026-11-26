@@ -47,28 +47,6 @@ export function consumerIdsIn(reportText: string): string[] {
   return [...consumerIds]
 }
 
-/**
- * The upload form fills a field from the query parameter that has the field's name. These names
- * must match the field names in n8n's form.
- */
-const MONTH_FIELD = 'month'
-const CONSUMER_ID_FIELD = 'consumerId'
-
-/**
- * The upload form with the month and consumer ID already filled in. With no ID, or several, the
- * ID is left out, so a value in the configured URL does not reach the form.
- */
-export function prefilledFormUrl(formUrl: string, month: string, consumerIds: string[]): string {
-  const url = new URL(formUrl)
-  url.searchParams.set(MONTH_FIELD, month)
-  url.searchParams.delete(CONSUMER_ID_FIELD)
-  const [consumerId, ...otherIds] = consumerIds
-  if (consumerId !== undefined && otherIds.length === 0) {
-    url.searchParams.set(CONSUMER_ID_FIELD, consumerId)
-  }
-  return url.href
-}
-
 /** Saves text as a JSON file through a temporary download link. */
 export function saveFile(text: string, fileName: string): void {
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }))

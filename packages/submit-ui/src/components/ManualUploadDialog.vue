@@ -2,13 +2,7 @@
 import { computed, onMounted, reactive, ref, useTemplateRef } from 'vue'
 import { messageOf, type PendingMonth, UnauthorizedError } from '../api'
 import { formatMonth } from '../format'
-import {
-  consumerIdsIn,
-  fetchMonthReport,
-  prefilledFormUrl,
-  reportFileName,
-  saveFile,
-} from '../manual-upload'
+import { consumerIdsIn, fetchMonthReport, reportFileName, saveFile } from '../manual-upload'
 
 const props = defineProps<{ months: PendingMonth[]; uploadFormUrl: string }>()
 const emit = defineEmits<{ close: []; unauthorized: [] }>()
@@ -28,23 +22,16 @@ interface MonthRow {
   loading: boolean
   error: string
   ids: string[]
-  url: string | null
 }
 
 const rows = computed<MonthRow[]>(() =>
   props.months.map((pending) => {
     const entry = idsByMonth[pending.month]
-    const ids = entry?.status === 'loaded' ? entry.ids : []
     return {
       pending,
       loading: entry === undefined,
       error: entry?.status === 'failed' ? entry.error : '',
-      ids,
-      // Only a month whose report was read gets a link, so no link lacks its own ID.
-      url:
-        entry?.status === 'loaded'
-          ? prefilledFormUrl(props.uploadFormUrl, pending.month, ids)
-          : null,
+      ids: entry?.status === 'loaded' ? entry.ids : [],
     }
   }),
 )
@@ -114,7 +101,7 @@ onMounted(() => {
     <h2 id="manual-upload-title">Upload the usage data manually</h2>
     <p>
       This browser could not send the data to n8n. For each month, download the file and upload it
-      with the form.
+      with the form. n8n rejects the whole file if any consumer ID in it is missing or unknown.
     </p>
     <p v-if="downloadError" class="banner error" role="alert">{{ downloadError }}</p>
 
@@ -140,32 +127,30 @@ onMounted(() => {
 
         <p v-if="row.loading" class="muted">Reading the consumer ID…</p>
         <p v-else-if="row.error" class="banner error" role="alert">{{ row.error }}</p>
+        <p v-else-if="row.ids.length === 0" class="muted">
+          This report has no consumer ID. n8n rejects this file.
+        </p>
+        <p v-else-if="row.ids.length === 1">
+          Consumer ID: <code>{{ row.ids[0] }}</code>
+        </p>
         <template v-else>
-          <p v-if="row.ids.length === 0" class="muted">
-            This report has no consumer ID. Enter the consumer ID from n8n in the form.
-          </p>
-          <p v-else-if="row.ids.length === 1">
-            Consumer ID: <code>{{ row.ids[0] }}</code>
-          </p>
-          <template v-else>
-            <p class="muted">
-              This report has several consumer IDs. Choose the one that applies in the form:
-            </p>
-            <ul class="consumer-ids">
-              <li v-for="id in row.ids" :key="id">
-                <code>{{ id }}</code>
-              </li>
-            </ul>
-          </template>
-          <p>
-            <a :href="row.url ?? undefined" target="_blank" rel="noopener noreferrer"
-              >Open the upload form for {{ formatMonth(row.pending.month) }}</a
-            >
-          </p>
-          <p class="muted url">{{ row.url }}</p>
+          <p class="muted">This report has several consumer IDs. n8n checks all of them:</p>
+          <ul class="consumer-ids">
+            <li v-for="id in row.ids" :key="id">
+              <code>{{ id }}</code>
+            </li>
+          </ul>
         </template>
       </li>
     </ol>
+
+    <section class="upload-form">
+      <h3>Upload form</h3>
+      <p>
+        <a :href="uploadFormUrl" target="_blank" rel="noopener noreferrer">Open the upload form</a>
+      </p>
+      <p class="muted url">{{ uploadFormUrl }}</p>
+    </section>
 
     <p class="muted">Months that you upload here stay pending on this page.</p>
 
@@ -192,7 +177,8 @@ h3 {
 }
 
 /* The page's section rule adds a large top margin, which a dialog does not need. */
-.month {
+.month,
+.upload-form {
   margin-top: 20px;
 }
 

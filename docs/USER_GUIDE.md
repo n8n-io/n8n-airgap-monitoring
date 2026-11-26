@@ -234,7 +234,7 @@ write token, every instance needs the new value too.
 | `N8N_MONITORING_WRITE_TOKEN` | no | none | Only for the [write token alternative](#alternative-authenticate-instances-with-a-write-token). Instances must then present it as a bearer token, and license certificates are not accepted. |
 | `N8N_MONITORING_REPORT_DESTINATION` | no | none | The URL n8n gave you for submitting monthly usage. Without it the submit page cannot submit. |
 | `N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN` | with the destination | none | The secret n8n gave you together with the destination URL. Set both or neither; the service refuses to start with only one. |
-| `N8N_MONITORING_REPORT_UPLOAD_FORM_URL` | no | — | The link to the form that the user uploads the monthly report with, when the submit page cannot send usage to n8n. Unset: the submit page does not offer a manual upload. The page adds the `month` query parameter. It also adds `consumerId` when a month's report holds exactly one consumer ID. Provided by n8n. |
+| `N8N_MONITORING_REPORT_UPLOAD_FORM_URL` | no | — | The link to the form that the user uploads the monthly report with, when the submit page cannot send usage to n8n. Unset: the submit page does not offer a manual upload. Provided by n8n. |
 
 
 Tokens, the destination and the upload form URL are read at start-up. After changing one, restart the service.
