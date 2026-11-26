@@ -37,7 +37,8 @@ is covered in the
 ## Submitting to n8n
 
 The page sends each month to `N8N_MONITORING_REPORT_DESTINATION` with
-`Authorization: Bearer <N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN>`. Both
+`Authorization: Bearer <N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN>` and the
+month it carries as the query parameter `month=YYYY-MM`. Both
 values come from n8n and are set on the service, which refuses to start with
 only one of them. The page receives them from `GET /api/v1/submissions`, so
 only a holder of the read token gets the destination token, and the browser
