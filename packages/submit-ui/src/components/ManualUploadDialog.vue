@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref, useTemplateRef } from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { messageOf, type PendingMonth } from '../api'
 import { formatMonth } from '../format'
-import { consumerIdsIn, fetchMonthReport, reportFileName, saveFile } from '../manual-upload'
+import {
+  consumerIdsIn,
+  fetchMonthReport,
+  prefilledFormUrl,
+  reportFileName,
+  saveFile,
+} from '../manual-upload'
 
 const props = defineProps<{ months: PendingMonth[]; uploadFormUrl: string | null }>()
 const emit = defineEmits<{ close: [] }>()
@@ -57,6 +63,18 @@ async function download(pending: PendingMonth): Promise<void> {
     downloadingMonth.value = ''
   }
 }
+
+/** Empty until the consumer ID is known, so a link is never opened without it. */
+const formLinks = computed(() => {
+  const formUrl = props.uploadFormUrl
+  if (formUrl === null || consumerIdStatus.value === 'loading') {
+    return []
+  }
+  return props.months.map(({ month }) => ({
+    month,
+    url: prefilledFormUrl(formUrl, month, consumerIds.value),
+  }))
+})
 
 function closeDialog(): void {
   dialog.value?.close()
@@ -120,15 +138,19 @@ onMounted(() => {
 
     <section>
       <h3>Upload form</h3>
-      <template v-if="uploadFormUrl !== null">
-        <p>
-          <a :href="uploadFormUrl" target="_blank" rel="noopener noreferrer"
-            >Open the upload form</a
-          >
-        </p>
-        <p class="muted url">{{ uploadFormUrl }}</p>
+      <p v-if="uploadFormUrl === null" class="muted">Ask n8n for the link to the upload form.</p>
+      <p v-else-if="consumerIdStatus === 'loading'" class="muted">Loading…</p>
+      <template v-else>
+        <p>Each link fills in the month and the consumer ID. Attach the downloaded file.</p>
+        <ul class="form-links">
+          <li v-for="link in formLinks" :key="link.month">
+            <a :href="link.url" target="_blank" rel="noopener noreferrer"
+              >Open the form for {{ formatMonth(link.month) }}</a
+            >
+            <span class="muted url">{{ link.url }}</span>
+          </li>
+        </ul>
       </template>
-      <p v-else class="muted">Ask n8n for the link to the upload form.</p>
     </section>
 
     <p class="muted">Months that you upload here stay pending on this page.</p>
@@ -171,7 +193,18 @@ section {
   gap: 8px;
 }
 
+.form-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.form-links li + li {
+  margin-top: 12px;
+}
+
 .url {
+  display: block;
   overflow-wrap: anywhere;
 }
 </style>

@@ -47,7 +47,10 @@ prompt. See [docs/AUTHORIZATION.md](../../docs/AUTHORIZATION.md).
 
 When n8n cannot be reached or rejects the data, Submit opens a dialog. The
 dialog shows the consumer ID from the oldest pending month's report, a download
-button for each pending month, and a link to the upload form. Other failures,
+button for each pending month, and a link to the upload form for each month.
+Each link carries the `month` and `consumerId` query parameters, which fill the
+form fields of the same names. The ID is left out when the reports hold none or
+more than one. The names are constants in `src/manual-upload.ts`. Other failures,
 such as a report this service cannot serve, show only the error banner. To see
 the dialog locally, post the test data below, stop the stand-in in terminal 2,
 and press Submit.
