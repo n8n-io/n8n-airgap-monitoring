@@ -14,6 +14,7 @@
   --accent-hover: #d63b62;
   --accent-bg: #fdecf0;
   --accent-text: #c3305a;
+  --on-accent: #fff;
   --good: #1f9d55;
   --good-bg: #e4f5ea;
   --good-text: #17773f;
@@ -45,6 +46,8 @@
     --accent-hover: #ff86a2;
     --accent-bg: #3a1a23;
     --accent-text: #ff8fa9;
+    /* White on the light pink is about 2.7:1. */
+    --on-accent: #141414;
     --good: #3ccf78;
     --good-bg: #13301f;
     --good-text: #6ee09b;
@@ -121,7 +124,7 @@ code {
   padding: 2px 7px;
   border-radius: 6px;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-weight: 800;
   text-transform: none;
   letter-spacing: 0;
@@ -249,7 +252,7 @@ button {
 
 .primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .primary:hover:not(:disabled) {
