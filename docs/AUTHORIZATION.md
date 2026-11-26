@@ -2,10 +2,11 @@
 
 How n8n-airgap-monitoring decides whether to act on an incoming request.
 
-## Simple string token auth for GET /api/v1/report and the submit page
+## Simple string token auth for GET /api/v1/report and the submissions routes
 
-The report download and the `/api/v1/submissions` routes are guarded by one shared secret, the read token. The
-operator generates it and sets it on the service as `N8N_MONITORING_READ_TOKEN`;
+The report download and the `/api/v1/submissions` routes are guarded by one
+shared secret, the read token. The operator generates it and sets it on the
+service as `N8N_MONITORING_READ_TOKEN`;
 the service refuses to start without it. The token is read once at start-up,
 so a rotation needs a restart.
 
