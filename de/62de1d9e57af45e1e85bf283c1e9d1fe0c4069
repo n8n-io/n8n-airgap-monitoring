@@ -1,0 +1,25 @@
+docs/USER_GUIDE.md
+  s_d7ca60e35378e2::t_71cd6feb48d71a 237
+packages/submit-ui/README.md
+  s_d7ca60e35378e2::t_04678f50ab7855 50-53
+packages/submit-ui/src/components/ManualUploadDialog.vue
+  s_d7ca60e35378e2::t_4ad0c0e7ea12f0 5,34,104,130-135,137-142,147-154,180-181
+README.md
+  s_d7ca60e35378e2::t_ee6bd6d76ba906 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "de62de1d9e57af45e1e85bf283c1e9d1fe0c4069",
+  "prompts": {},
+  "sessions": {
+    "s_d7ca60e35378e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87d9bb31-928f-49ec-bc3e-4bed770c7d59",
+        "model": "claude-haiku-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}
