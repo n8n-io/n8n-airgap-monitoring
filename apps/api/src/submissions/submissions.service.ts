@@ -1,8 +1,6 @@
 import type { DataSource } from "@n8n/typeorm";
 import type { InstanceReportRepository, InstanceReportRow } from "../instance-report/instance-report.repository";
 
-// SPIKE (API-463): which finished months still have to go to n8n, and whether every instance
-// has delivered them yet. Only advisory: the page sends the unchanged report either way.
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Silent for longer than this before the month started: decommissioned, not part of the month. */
@@ -103,9 +101,9 @@ export class SubmissionService {
 
     const months = monthsSince(firstDay.slice(0, 7), now);
     const pending = months
-      .filter((month) => isPending(month, now) && !done.has(month))
+      .filter((month) => isClosed(month, now) && !done.has(month))
       .map((month) => checkMonth(month, instances, now));
-    const upcoming = months.filter((month) => !isPending(month, now)).map((month) => upcomingMonth(month, instances));
+    const upcoming = months.filter((month) => !isClosed(month, now)).map((month) => upcomingMonth(month, instances));
 
     return { pending, upcoming, submitted };
   }
@@ -242,7 +240,8 @@ export function pendingFrom(month: string): string {
   return `${nextMonth(month)}-${String(PENDING_FROM_DAY).padStart(2, "0")}`;
 }
 
-export function isPending(month: string, now: Date): boolean {
+/** Whether the month has ended (from pendingFrom on), by the clock alone: not whether it was submitted or has data. */
+export function isClosed(month: string, now: Date): boolean {
   return now.getTime() >= Date.parse(`${pendingFrom(month)}T00:00:00.000Z`);
 }
 
