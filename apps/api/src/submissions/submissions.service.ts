@@ -5,10 +5,10 @@ import type { InstanceReportRepository, InstanceReportRow } from "../instance-re
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Silent for longer than this before the month started: decommissioned, not part of the month. */
 const RECENTLY_ALIVE_MS = 30 * DAY_MS;
-/** The next report is expected within this many of the instance's usual intervals. */
-const CADENCE_TOLERANCE = 1.5;
-/** The intervals the cadence is taken from. */
-const CADENCE_SAMPLE = 10;
+/** Overdue once the next report has not come within this many of the instance's usual intervals. */
+const OVERDUE_AFTER_INTERVALS = 1.5;
+/** The intervals between reports the median is taken from. */
+const INTERVAL_SAMPLE = 10;
 /**
  * A month becomes pending on this day of the next month (UTC), not at midnight on the 1st: the
  * last day's daily only arrives with each instance's report slot on the 1st.
@@ -27,7 +27,7 @@ export interface MissingInstance {
   /** Last day of the month it has a daily value for, or null when it has none in the month. */
   lastDay: string | null;
   lastReportAt: string;
-  /** Latest time its next report is due, from its own reporting cadence. */
+  /** Latest time its next report is due, from its own median report interval. */
   expectedBy: string;
 }
 
@@ -71,7 +71,7 @@ interface InstanceSummary {
   firstDay: string;
   firstSeen: string;
   lastReportAt: string;
-  cadenceMs: number;
+  medianReportIntervalMs: number;
   /** Months it has any point in, by the report filter's day rule. */
   months: Set<string>;
   /** Its last daily date in each month. */
@@ -151,15 +151,15 @@ function summarize(rows: InstanceReportRow[]): InstanceSummary {
     firstDay: firstDay ?? first.receivedAt.slice(0, 10),
     firstSeen: first.receivedAt,
     lastReportAt: last.receivedAt,
-    cadenceMs: cadenceOf(rows),
+    medianReportIntervalMs: medianReportInterval(rows),
     months,
     lastDailyByMonth,
   };
 }
 
 /** The median interval between its latest reports; a day when there are not two yet. */
-function cadenceOf(rows: InstanceReportRow[]): number {
-  const times = rows.slice(-(CADENCE_SAMPLE + 1)).map((row) => Date.parse(row.receivedAt));
+function medianReportInterval(rows: InstanceReportRow[]): number {
+  const times = rows.slice(-(INTERVAL_SAMPLE + 1)).map((row) => Date.parse(row.receivedAt));
   const gaps = times
     .slice(1)
     .map((time, index) => time - times[index])
@@ -195,7 +195,7 @@ function checkMonth(month: string, instances: InstanceSummary[], now: Date): Pen
     }
 
     const lastReportAt = Date.parse(instance.lastReportAt);
-    const expectedBy = lastReportAt + CADENCE_TOLERANCE * instance.cadenceMs;
+    const expectedBy = lastReportAt + OVERDUE_AFTER_INTERVALS * instance.medianReportIntervalMs;
     const missing: MissingInstance = {
       instanceId: instance.instanceId,
       label: instance.label,
