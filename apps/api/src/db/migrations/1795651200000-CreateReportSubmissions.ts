@@ -3,8 +3,8 @@ import type { MigrationInterface, QueryRunner } from "@n8n/typeorm";
 /**
  * SPIKE (API-463): months n8n acknowledged, so they are not pending any more.
  */
-export class CreateReportSubmissions1792022400000 implements MigrationInterface {
-  name = "CreateReportSubmissions1792022400000";
+export class CreateReportSubmissions1795651200000 implements MigrationInterface {
+  name = "CreateReportSubmissions1795651200000";
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
