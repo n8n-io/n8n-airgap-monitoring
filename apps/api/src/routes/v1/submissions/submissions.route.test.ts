@@ -1,5 +1,4 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { PLACEHOLDER_REPORT_UPLOAD_FORM_URL } from "../../../plugins/config";
 import { build } from "../../../test-utils/build-app";
 
 const URL = "/api/v1/submissions";
@@ -43,7 +42,7 @@ test("serves the overview with the read token", async () => {
     upcoming: [],
     submitted: [],
     destination: null,
-    uploadFormUrl: PLACEHOLDER_REPORT_UPLOAD_FORM_URL,
+    uploadFormUrl: null,
   });
 });
 

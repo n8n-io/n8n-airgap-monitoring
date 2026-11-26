@@ -33,6 +33,8 @@ const sendStates = reactive<Record<string, SendState>>({})
 const sentAt = reactive<Record<string, string>>({})
 
 const destination = computed(() => overview.value?.destination ?? null)
+/** Null when the service has no upload form URL, so a failed send offers no manual upload. */
+const uploadFormUrl = computed(() => overview.value?.uploadFormUrl ?? null)
 const pendingCount = computed(() => overview.value?.pending.length ?? 0)
 const canSubmit = computed(() => destination.value !== null && pendingCount.value > 0)
 
@@ -167,7 +169,7 @@ async function submitAll(): Promise<void> {
     if (authenticated.value) {
       await load()
       // The dialog lists the pending months, so it opens only after the reload.
-      manualUploadOpen.value = destinationFailed.value
+      manualUploadOpen.value = destinationFailed.value && uploadFormUrl.value !== null
       // Sent months are in the history now, which carries the server's own time.
       for (const [month, state] of Object.entries(sendStates)) {
         if (state === 'sent') {
@@ -251,7 +253,7 @@ async function submitAll(): Promise<void> {
         </div>
         <div v-if="sendError" class="banner error" role="alert">
           <p>{{ sendError }}</p>
-          <div v-if="destinationFailed" class="buttons">
+          <div v-if="destinationFailed && uploadFormUrl !== null" class="buttons">
             <button type="button" class="secondary" @click="manualUploadOpen = true">
               Upload manually
             </button>
@@ -270,9 +272,9 @@ async function submitAll(): Promise<void> {
       </ol>
 
       <ManualUploadDialog
-        v-if="manualUploadOpen"
+        v-if="manualUploadOpen && uploadFormUrl !== null"
         :months="overview.pending"
-        :upload-form-url="overview.uploadFormUrl"
+        :upload-form-url="uploadFormUrl"
         @close="manualUploadOpen = false"
       />
     </template>

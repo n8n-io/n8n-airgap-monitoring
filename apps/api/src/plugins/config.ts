@@ -8,12 +8,6 @@ export interface ReportDestination {
   authToken: string;
 }
 
-/**
- * Shown when N8N_MONITORING_REPORT_UPLOAD_FORM_URL is blank. The real form URL is not in
- * public source; n8n provides it. Change this one constant to swap the default.
- */
-export const PLACEHOLDER_REPORT_UPLOAD_FORM_URL = "https://example.com/n8n-airgap-monitoring/upload-form";
-
 const WEB_PROTOCOLS = ["http:", "https:"];
 
 export interface Config {
@@ -59,11 +53,11 @@ function readReportDestination(): ReportDestination | undefined {
   return { url, authToken };
 }
 
-/** A blank value falls back to the placeholder. The page renders the value as a link, so only web URLs pass. */
+/** A blank value counts as unset. The page renders the value as a link, so only web URLs pass. */
 function readReportUploadFormUrl(): string | undefined {
   const url = process.env.N8N_MONITORING_REPORT_UPLOAD_FORM_URL?.trim();
   if (!url) {
-    return PLACEHOLDER_REPORT_UPLOAD_FORM_URL;
+    return undefined;
   }
   const isWebUrl = URL.canParse(url) && WEB_PROTOCOLS.includes(new URL(url).protocol);
   if (!isWebUrl) {

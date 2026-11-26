@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import { afterEach, expect, test, vi } from "vitest";
-import config, { PLACEHOLDER_REPORT_UPLOAD_FORM_URL } from "./config";
+import config from "./config";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -52,16 +52,16 @@ function stubUploadFormUrl(value: string | undefined) {
   vi.stubEnv("N8N_MONITORING_REPORT_UPLOAD_FORM_URL", value);
 }
 
-test("uses the placeholder upload form URL when the variable is not set", async () => {
+test("leaves the upload form URL unset when the variable is not set", async () => {
   stubUploadFormUrl(undefined);
 
-  expect((await load()).reportUploadFormUrl).toBe(PLACEHOLDER_REPORT_UPLOAD_FORM_URL);
+  expect((await load()).reportUploadFormUrl).toBeUndefined();
 });
 
-test("uses the placeholder upload form URL when the variable is blank", async () => {
+test("leaves the upload form URL unset when the variable is blank", async () => {
   stubUploadFormUrl("   ");
 
-  expect((await load()).reportUploadFormUrl).toBe(PLACEHOLDER_REPORT_UPLOAD_FORM_URL);
+  expect((await load()).reportUploadFormUrl).toBeUndefined();
 });
 
 test("reads the upload form URL, trimmed", async () => {

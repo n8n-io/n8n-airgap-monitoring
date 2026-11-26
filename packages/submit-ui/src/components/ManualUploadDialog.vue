@@ -10,7 +10,7 @@ import {
   saveFile,
 } from '../manual-upload'
 
-const props = defineProps<{ months: PendingMonth[]; uploadFormUrl: string | null }>()
+const props = defineProps<{ months: PendingMonth[]; uploadFormUrl: string }>()
 const emit = defineEmits<{ close: [] }>()
 
 const dialog = useTemplateRef<HTMLDialogElement>('dialog')
@@ -66,13 +66,12 @@ async function download(pending: PendingMonth): Promise<void> {
 
 /** Empty until the consumer ID is known, so a link is never opened without it. */
 const formLinks = computed(() => {
-  const formUrl = props.uploadFormUrl
-  if (formUrl === null || consumerIdStatus.value === 'loading') {
+  if (consumerIdStatus.value === 'loading') {
     return []
   }
   return props.months.map(({ month }) => ({
     month,
-    url: prefilledFormUrl(formUrl, month, consumerIds.value),
+    url: prefilledFormUrl(props.uploadFormUrl, month, consumerIds.value),
   }))
 })
 
@@ -138,8 +137,7 @@ onMounted(() => {
 
     <section>
       <h3>Upload form</h3>
-      <p v-if="uploadFormUrl === null" class="muted">Ask n8n for the link to the upload form.</p>
-      <p v-else-if="consumerIdStatus === 'loading'" class="muted">Loading…</p>
+      <p v-if="consumerIdStatus === 'loading'" class="muted">Loading…</p>
       <template v-else>
         <p>
           Each link fills in the month, and the consumer ID when there is one. Attach the downloaded

@@ -17,7 +17,7 @@ services:
       # with it, both from n8n; kept out of the repository. Both or neither.
       N8N_MONITORING_REPORT_DESTINATION: ${N8N_MONITORING_REPORT_DESTINATION:-}
       N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN: ${N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN:-}
-      # The manual upload link, from n8n. Empty: the page shows a placeholder link.
+      # The manual upload form, from n8n. Empty: the page does not offer a manual upload.
       N8N_MONITORING_REPORT_UPLOAD_FORM_URL: ${N8N_MONITORING_REPORT_UPLOAD_FORM_URL:-}
     volumes:
       # A named volume, not a bind mount: the container runs as `node` and a

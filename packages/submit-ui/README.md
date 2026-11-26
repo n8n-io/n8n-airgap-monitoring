@@ -25,7 +25,7 @@ Nothing about the destination is built into the page. The API reads it at
 start-up and serves it with the overview:
 
 - **`N8N_MONITORING_REPORT_UPLOAD_FORM_URL`**, the link to the manual upload
-  form. Without it the page shows a placeholder link.
+  form. Without it the page does not offer a manual upload.
 
 - **`N8N_MONITORING_REPORT_DESTINATION`** and
   **`N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN`**, the n8n URL the page posts
@@ -45,8 +45,9 @@ prompt. See [docs/AUTHORIZATION.md](../../docs/AUTHORIZATION.md).
 
 ## Manual upload
 
-When n8n cannot be reached or rejects the data, Submit opens a dialog. The
-dialog has a download button for each pending month, and a link to the upload
+When n8n cannot be reached or rejects the data, and the service has an upload
+form URL, Submit opens a dialog. Without the URL, Submit shows only the error
+banner. The dialog has a download button for each pending month, and a link to the upload
 form for each month. The dialog lists the consumer IDs from the oldest pending
 month's report, if the report has any. Token-mode reports have none, so the
 dialog then asks the user to contact n8n. Each link carries the `month` query
