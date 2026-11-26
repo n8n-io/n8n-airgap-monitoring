@@ -1,0 +1,25 @@
+apps/api/src/submissions/submissions.service.ts
+  s_f8ed281e0813d5::t_7fa90ecd4877a8 104,106,244
+  s_f8ed281e0813d5::t_fadc8bfa3d770b 243
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d8597d50815ba42054d8f31c806f566e016307e0",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_f8ed281e0813d5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1b7046d-1a60-4bd4-934a-d47cbc76bb03",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
