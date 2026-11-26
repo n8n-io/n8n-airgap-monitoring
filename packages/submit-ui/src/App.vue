@@ -180,7 +180,7 @@ async function submitAll(): Promise<void> {
 <template>
   <main>
     <header class="hero">
-      <p class="eyebrow"><span class="logo" aria-hidden="true">n8n</span> Airgap monitoring</p>
+      <p class="eyebrow">n8n Airgap monitoring</p>
       <h1>Submit usage to n8n</h1>
       <p class="lead">
         Sends the usage report of every finished month to n8n, exactly as this service reports it.
@@ -190,9 +190,8 @@ async function submitAll(): Promise<void> {
     </header>
 
     <form v-if="!authenticated" class="login" @submit.prevent="logIn">
-      <label for="token">Read token</label>
-      <p class="muted">
-        The value of <code>N8N_MONITORING_READ_TOKEN</code> this service runs with.
+      <p>
+        <label for="token">Login</label>
       </p>
       <div class="login-row">
         <input
