@@ -1,0 +1,19 @@
+packages/submit-ui/src/manual-upload.ts
+  s_d7ca60e35378e2::t_562dfb3502e75b 5-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6bc6d1b83d584c3f7c4995dd7f01cd3bbc39ce7d",
+  "prompts": {},
+  "sessions": {
+    "s_d7ca60e35378e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87d9bb31-928f-49ec-bc3e-4bed770c7d59",
+        "model": "claude-haiku-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}
