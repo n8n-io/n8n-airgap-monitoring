@@ -46,14 +46,15 @@ prompt. See [docs/AUTHORIZATION.md](../../docs/AUTHORIZATION.md).
 ## Manual upload
 
 When n8n cannot be reached or rejects the data, Submit opens a dialog. The
-dialog shows the consumer ID from the oldest pending month's report, a download
-button for each pending month, and a link to the upload form for each month.
-Each link carries the `month` and `consumerId` query parameters, which fill the
-form fields of the same names. The ID is left out when the reports hold none or
-more than one. The names are constants in `src/manual-upload.ts`. Other failures,
-such as a report this service cannot serve, show only the error banner. To see
-the dialog locally, post the test data below, stop the stand-in in terminal 2,
-and press Submit.
+dialog has a download button for each pending month, and a link to the upload
+form for each month. The dialog lists the consumer IDs from the oldest pending
+month's report, if the report has any. Token-mode reports have none, so the
+dialog then asks the user to contact n8n. Each link carries the `month` query
+parameter. It also carries `consumerId` when the report holds exactly one ID.
+The names are constants in `src/manual-upload.ts`. Other failures, such as a
+report this service cannot serve, show only the error banner. To see the dialog
+locally, post the test data below, stop the stand-in in terminal 2, and press
+Submit.
 
 ## Run it locally
 

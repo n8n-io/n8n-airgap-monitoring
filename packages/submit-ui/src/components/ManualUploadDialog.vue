@@ -141,7 +141,10 @@ onMounted(() => {
       <p v-if="uploadFormUrl === null" class="muted">Ask n8n for the link to the upload form.</p>
       <p v-else-if="consumerIdStatus === 'loading'" class="muted">Loading…</p>
       <template v-else>
-        <p>Each link fills in the month and the consumer ID. Attach the downloaded file.</p>
+        <p>
+          Each link fills in the month, and the consumer ID when there is one. Attach the downloaded
+          file.
+        </p>
         <ul class="form-links">
           <li v-for="link in formLinks" :key="link.month">
             <a :href="link.url" target="_blank" rel="noopener noreferrer"
