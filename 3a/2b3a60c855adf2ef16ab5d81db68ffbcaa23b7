@@ -1,0 +1,14 @@
+packages/submit-ui/src/App.vue
+  h_c63dce324dfc7b 183,193-194
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3a2b3a60c855adf2ef16ab5d81db68ffbcaa23b7",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
