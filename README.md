@@ -204,10 +204,11 @@ Opens a local dashboard for a downloaded report.
 
 ## Docker
 
-The [`Dockerfile`](Dockerfile) builds a single image containing the API, so a
-deployment is one container plus one volume for the SQLite file. This service is
-API only — there is no frontend to serve, no second process, and no CORS to
-configure.
+The [`Dockerfile`](Dockerfile) builds a single image containing the API and the
+submit page it serves at `/`, so a deployment is one container plus one volume
+for the SQLite file. There is no second process, and no CORS to configure on
+this service: the page calls the API on its own origin. The browser's request
+to `N8N_MONITORING_REPORT_DESTINATION` is cross-origin, which n8n's side allows.
 
 Defaults baked into the image:
 
