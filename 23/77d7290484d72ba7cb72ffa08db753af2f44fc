@@ -1,0 +1,26 @@
+apps/api/src/db/migrations/index.ts
+  s_e79b3dc24e1e50::t_724b5b0d371d51 3,9
+apps/api/src/db/migrations/1795651200000-CreateReportSubmissions.ts
+  s_e79b3dc24e1e50::t_724b5b0d371d51 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2377d7290484d72ba7cb72ffa08db753af2f44fc",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_e79b3dc24e1e50": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "89ca1d44-752f-49aa-afc0-c379fa44dcb2",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
