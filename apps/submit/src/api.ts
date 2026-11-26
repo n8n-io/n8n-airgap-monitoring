@@ -46,19 +46,46 @@ export type MonthRow =
   | { kind: 'pending'; month: string; pending: PendingMonth }
   | { kind: 'submitted'; month: string; submittedAt: string }
 
+/** Thrown when the service rejects the read token, so the page can ask for it again. */
+export class UnauthorizedError extends Error {
+  constructor() {
+    super('The read token was not accepted.')
+  }
+}
+
+/** The read token, kept in memory only: every page load asks for it again. */
+let token = ''
+
+export function setToken(value: string): void {
+  token = value.trim()
+}
+
+/** A request to this service with the read token. */
+export async function authedFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  const response = await fetch(url, {
+    cache: 'no-store',
+    ...init,
+    headers: { ...init.headers, authorization: `Bearer ${token}` },
+  })
+  if (response.status === 401) {
+    throw new UnauthorizedError()
+  }
+  return response
+}
+
 export async function fetchOverview(): Promise<SubmissionsOverview> {
-  const response = await fetch('/api/v1/submissions', { cache: 'no-store' })
+  const response = await authedFetch('/api/v1/submissions')
   if (!response.ok) {
     throw new Error(`Could not load the pending months (HTTP ${response.status}).`)
   }
   return (await response.json()) as SubmissionsOverview
 }
 
-/** The same report as GET /api/v1/report?start=…&end=…, served without the read token. */
+/** The month's usage report, exactly as GET /api/v1/report serves it. */
 export function reportUrl({ start, end }: PendingMonth): string {
-  return `/api/v1/submissions/report?start=${start}&end=${end}`
+  return `/api/v1/report?start=${start}&end=${end}`
 }
 
 export async function recordSubmission(month: string): Promise<Response> {
-  return fetch(`/api/v1/submissions/${month}`, { method: 'POST' })
+  return authedFetch(`/api/v1/submissions/${month}`, { method: 'POST' })
 }

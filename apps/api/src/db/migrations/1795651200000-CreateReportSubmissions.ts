@@ -1,7 +1,7 @@
 import type { MigrationInterface, QueryRunner } from "@n8n/typeorm";
 
 /**
- * SPIKE (API-463): months n8n acknowledged, so they are not pending any more.
+ * monthly reports n8n acknowledged, so they are not pending any more.
  */
 export class CreateReportSubmissions1795651200000 implements MigrationInterface {
   name = "CreateReportSubmissions1795651200000";

@@ -1,10 +1,22 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { fetchOverview, type MonthRow, type SendState, type SubmissionsOverview } from './api'
+import { computed, reactive, ref } from 'vue'
+import {
+  fetchOverview,
+  type MonthRow,
+  type SendState,
+  type SubmissionsOverview,
+  setToken,
+  UnauthorizedError,
+} from './api'
 import MonthRowItem from './components/MonthRow.vue'
 import { formatMonth } from './format'
 import { SUBMIT_ENDPOINT, sendMonth } from './send'
 
+/** Set once the service accepted the read token; a page load starts without it. */
+const authenticated = ref(false)
+const tokenInput = ref('')
+const loginError = ref('')
+const loggingIn = ref(false)
 const overview = ref<SubmissionsOverview>()
 const loadError = ref('')
 const sendError = ref('')
@@ -49,12 +61,39 @@ function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
+/** Back to the token prompt, e.g. after the operator rotated the token. */
+function logOut(): void {
+  authenticated.value = false
+  overview.value = undefined
+  loginError.value = 'The read token was not accepted. Enter it again.'
+}
+
 async function load(): Promise<void> {
   try {
     overview.value = await fetchOverview()
     loadError.value = ''
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      logOut()
+      return
+    }
     loadError.value = messageOf(error)
+  }
+}
+
+async function logIn(): Promise<void> {
+  loggingIn.value = true
+  loginError.value = ''
+  setToken(tokenInput.value)
+  try {
+    overview.value = await fetchOverview()
+    authenticated.value = true
+    tokenInput.value = ''
+  } catch (error) {
+    loginError.value =
+      error instanceof UnauthorizedError ? 'This is not the read token of this service.' : messageOf(error)
+  } finally {
+    loggingIn.value = false
   }
 }
 
@@ -91,22 +130,29 @@ async function submitAll(): Promise<void> {
     }
     progress.value = 'Every pending month was sent to n8n.'
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      delete sendStates[current]
+      logOut()
+      return
+    }
     sendStates[current] = 'failed'
     sendError.value = messageOf(error)
   } finally {
     sending.value = false
-    await load()
-    // Sent months are in the history now, which carries the server's own time.
-    for (const [month, state] of Object.entries(sendStates)) {
-      if (state === 'sent') {
-        delete sendStates[month]
-        delete sentAt[month]
+    // After a rejected token the page is back at the prompt, nothing to reload.
+    if (authenticated.value) {
+      await load()
+      // Sent months are in the history now, which carries the server's own time.
+      for (const [month, state] of Object.entries(sendStates)) {
+        if (state === 'sent') {
+          delete sendStates[month]
+          delete sentAt[month]
+        }
       }
     }
   }
 }
 
-onMounted(load)
 </script>
 
 <template>
@@ -125,7 +171,27 @@ onMounted(load)
       </p>
     </header>
 
-    <p v-if="loadError" class="banner error" role="alert">{{ loadError }}</p>
+    <form v-if="!authenticated" class="login" @submit.prevent="logIn">
+      <label for="token">Read token</label>
+      <p class="muted">The value of <code>N8N_MONITORING_READ_TOKEN</code> this service runs with.</p>
+      <div class="login-row">
+        <input
+          id="token"
+          v-model="tokenInput"
+          type="password"
+          autocomplete="current-password"
+          required
+          autofocus
+          :disabled="loggingIn"
+        />
+        <button type="submit" class="primary" :disabled="loggingIn || tokenInput.trim() === ''">
+          <span v-if="loggingIn" class="spinner" aria-hidden="true"></span>
+          Open
+        </button>
+      </div>
+      <p v-if="loginError" class="banner error" role="alert">{{ loginError }}</p>
+    </form>
+    <p v-else-if="loadError" class="banner error" role="alert">{{ loadError }}</p>
     <p v-else-if="!overview" class="muted">Loading…</p>
     <template v-else>
       <div class="actions">

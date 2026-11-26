@@ -1,4 +1,4 @@
-import { type PendingMonth, recordSubmission, reportUrl } from './api'
+import { authedFetch, type PendingMonth, recordSubmission, reportUrl } from './api'
 import { formatMonth } from './format'
 
 export const SUBMIT_ENDPOINT = __SUBMIT_ENDPOINT__
@@ -13,7 +13,7 @@ const SEND_TIMEOUT_MS = 5 * 60 * 1000
 export async function sendMonth(pending: PendingMonth, endpoint: string): Promise<void> {
   const name = formatMonth(pending.month)
 
-  const report = await fetch(reportUrl(pending), { cache: 'no-store' })
+  const report = await authedFetch(reportUrl(pending))
   if (!report.ok || report.body === null) {
     throw new Error(`Could not read the usage data for ${name} from this service (HTTP ${report.status}).`)
   }

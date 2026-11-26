@@ -14,7 +14,7 @@ See also the user guide at [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/report`. The service refuses to start without it. |
+| `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/report` and to login on the form for submitting usage. The service refuses to start without it. |
 | `N8N_MONITORING_WRITE_TOKEN` | no | — | Selects the authentication mode of `POST /api/v1/instance-reports`. Set: instances must present it as a bearer token and license certificates are not accepted. Unset: instances authenticate with their license certificate. |
 | `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 
