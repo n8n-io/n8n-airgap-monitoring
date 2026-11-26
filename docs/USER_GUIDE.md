@@ -207,6 +207,10 @@ query string (e.g. `instanceId=450b5c85…,9f1e2d3c…&start=2026-10-01&end=2026
 
 Without `start` or `end` the report contains the complete history.
 
+If the submit page cannot reach n8n, it opens a dialog. The dialog shows the
+consumer ID, and it lets you download each pending month as its own file. Upload
+each file with the upload form that n8n provides.
+
 ## Alternative: authenticate instances with a write token
 
 Use this only if you cannot restrict the write endpoint to your own instances
@@ -234,6 +238,7 @@ write token, every instance needs the new value too.
 | `N8N_MONITORING_WRITE_TOKEN` | no | none | Only for the [write token alternative](#alternative-authenticate-instances-with-a-write-token). Instances must then present it as a bearer token, and license certificates are not accepted. |
 | `N8N_MONITORING_REPORT_DESTINATION` | no | none | The URL n8n gave you for submitting monthly usage. Without it the submit page cannot submit. |
 | `N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN` | with the destination | none | The secret n8n gave you together with the destination URL. Set both or neither; the service refuses to start with only one. |
+| `N8N_MONITORING_REPORT_UPLOAD_FORM_URL` | no | placeholder | The link that the submit page shows when it cannot send usage to n8n. The user downloads the monthly report and uploads it with this form. Provided by n8n. |
 
 
 Tokens and the destination are read at start-up. After changing one, restart the service.

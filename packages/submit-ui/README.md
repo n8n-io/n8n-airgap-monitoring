@@ -24,6 +24,9 @@ the API starts without the page and logs a warning.
 Nothing about the destination is built into the page. The API reads it at
 start-up and serves it with the overview:
 
+- **`N8N_MONITORING_REPORT_UPLOAD_FORM_URL`**, the link to the manual upload
+  form. Without it the page shows a placeholder link.
+
 - **`N8N_MONITORING_REPORT_DESTINATION`** and
   **`N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN`**, the n8n URL the page posts
   to and the token it sends as `Authorization: Bearer <token>`. Both come from
@@ -39,6 +42,15 @@ The page asks for the service's read token (`N8N_MONITORING_READ_TOKEN`) on
 every load and keeps it in memory only. Every API call sends it as
 `Authorization: Bearer <token>`. A 401 puts the page back at the token
 prompt. See [docs/AUTHORIZATION.md](../../docs/AUTHORIZATION.md).
+
+## Manual upload
+
+When n8n cannot be reached or rejects the data, Submit opens a dialog. The
+dialog shows the consumer ID from the oldest pending month's report, a download
+button for each pending month, and a link to the upload form. Other failures,
+such as a report this service cannot serve, show only the error banner. To see
+the dialog locally, post the test data below, stop the stand-in in terminal 2,
+and press Submit.
 
 ## Run it locally
 

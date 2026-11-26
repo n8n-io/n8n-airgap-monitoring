@@ -307,6 +307,22 @@ summary:focus-visible {
   gap: 8px;
 }
 
+dialog {
+  width: 100%;
+  max-width: min(560px, calc(100vw - 32px));
+  margin: auto;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+dialog::backdrop {
+  background: color-mix(in srgb, var(--page) 70%, transparent);
+}
+
 .error {
   background: var(--critical-bg);
   color: var(--critical-text);

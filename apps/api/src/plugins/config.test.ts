@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import { afterEach, expect, test, vi } from "vitest";
-import config from "./config";
+import config, { PLACEHOLDER_REPORT_UPLOAD_FORM_URL } from "./config";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -45,4 +45,36 @@ test.each([
   stubDestination(url, authToken);
 
   await expect(load()).rejects.toThrow(message);
+});
+
+function stubUploadFormUrl(value: string | undefined) {
+  vi.stubEnv("N8N_MONITORING_READ_TOKEN", "read");
+  vi.stubEnv("N8N_MONITORING_REPORT_UPLOAD_FORM_URL", value);
+}
+
+test("uses the placeholder upload form URL when the variable is not set", async () => {
+  stubUploadFormUrl(undefined);
+
+  expect((await load()).reportUploadFormUrl).toBe(PLACEHOLDER_REPORT_UPLOAD_FORM_URL);
+});
+
+test("uses the placeholder upload form URL when the variable is blank", async () => {
+  stubUploadFormUrl("   ");
+
+  expect((await load()).reportUploadFormUrl).toBe(PLACEHOLDER_REPORT_UPLOAD_FORM_URL);
+});
+
+test("reads the upload form URL, trimmed", async () => {
+  stubUploadFormUrl(" https://n8n.example.com/form/usage ");
+
+  expect((await load()).reportUploadFormUrl).toBe("https://n8n.example.com/form/usage");
+});
+
+test.each([
+  ["not absolute", "n8n.example.com/form"],
+  ["not a web URL", "ftp://n8n.example.com/form"],
+])("refuses to start when the upload form URL is %s", async (_name, value) => {
+  stubUploadFormUrl(value);
+
+  await expect(load()).rejects.toThrow(/absolute http\(s\) URL/);
 });

@@ -26,6 +26,7 @@ const submissionRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
     reply.header("cache-control", "no-store").send({
       ...(await fastify.submissionService.overview()),
       destination: fastify.config.reportDestination ?? null,
+      uploadFormUrl: fastify.config.reportUploadFormUrl ?? null,
     }),
   );
 

@@ -1,3 +1,5 @@
+import { formatMonth } from './format'
+
 /** Mirrors apps/api/src/submissions/submissions.service.ts. */
 export interface MissingInstance {
   instanceId: string
@@ -43,6 +45,8 @@ export interface SubmissionsOverview {
   submitted: Submission[]
   /** Null when the service runs without N8N_MONITORING_REPORT_DESTINATION. */
   destination: ReportDestination | null
+  /** The manual upload form. Mirrors apps/api/src/plugins/config.ts. Null: the page hides the link. */
+  uploadFormUrl: string | null
 }
 
 /** Where a month stands while Submit runs. */
@@ -59,6 +63,10 @@ export class UnauthorizedError extends Error {
   constructor() {
     super('The read token was not accepted.')
   }
+}
+
+export function messageOf(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
 }
 
 /** The read token, kept in memory only: every page load asks for it again. */
@@ -92,6 +100,13 @@ export async function fetchOverview(): Promise<SubmissionsOverview> {
 /** The month's usage report, exactly as GET /api/v1/report serves it. */
 export function reportUrl({ start, end }: PendingMonth): string {
   return `/api/v1/report?start=${start}&end=${end}`
+}
+
+/** The error for a month whose report this service did not serve. */
+export function reportReadError(pending: PendingMonth, status: number): Error {
+  return new Error(
+    `Could not read the usage data for ${formatMonth(pending.month)} from this service (HTTP ${status}).`,
+  )
 }
 
 export async function recordSubmission(month: string): Promise<Response> {
