@@ -38,7 +38,9 @@ test.each([
   ["the auth token is missing", "https://n8n.example.com/webhook/usage", undefined, /AUTH_TOKEN must be set/],
   ["the auth token is blank", "https://n8n.example.com/webhook/usage", "  ", /AUTH_TOKEN must be set/],
   ["the URL is missing", undefined, "secret", /REPORT_DESTINATION must be set/],
-  ["the URL is not absolute", "n8n.example.com/webhook", "secret", /absolute URL/],
+  ["the URL is not absolute", "n8n.example.com/webhook", "secret", /absolute http/],
+  ["the URL has no scheme but a port", "localhost:5678/webhook", "secret", /absolute http/],
+  ["the URL is not http(s)", "ftp://n8n.example.com/usage", "secret", /absolute http/],
 ])("refuses to start when %s", async (_name, url, authToken, message) => {
   stubDestination(url, authToken);
 

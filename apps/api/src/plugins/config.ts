@@ -22,7 +22,10 @@ export interface Config {
   reportDestination: ReportDestination | undefined;
 }
 
-/** Both variables or neither, and a URL that parses, so a typo fails at start-up rather than on Submit. */
+/**
+ * Both variables or neither, and an http(s) URL, so a typo fails at start-up rather than on Submit.
+ * `URL.canParse` alone accepts `localhost:5678/webhook`, with `localhost:` as its scheme.
+ */
 function readReportDestination(): ReportDestination | undefined {
   const url = process.env.N8N_MONITORING_REPORT_DESTINATION?.trim();
   const authToken = process.env.N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN?.trim();
@@ -39,8 +42,9 @@ function readReportDestination(): ReportDestination | undefined {
       "N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN must be set when N8N_MONITORING_REPORT_DESTINATION is",
     );
   }
-  if (!URL.canParse(url)) {
-    throw new Error("N8N_MONITORING_REPORT_DESTINATION must be an absolute URL");
+  const protocol = URL.parse(url)?.protocol;
+  if (protocol !== "http:" && protocol !== "https:") {
+    throw new Error("N8N_MONITORING_REPORT_DESTINATION must be an absolute http:// or https:// URL");
   }
   return { url, authToken };
 }
