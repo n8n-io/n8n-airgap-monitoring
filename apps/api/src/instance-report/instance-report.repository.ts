@@ -10,6 +10,7 @@ export interface InstanceReport {
   n8nVersion: string;
   dataPoints: Metric[];
   receivedAt: string;
+  consumerId: string | null;
 }
 
 /** One stored event, read back with its JSON `data` column already parsed. */
@@ -20,6 +21,7 @@ export interface InstanceReportRow {
   n8nVersion: string;
   dataPoints: Metric[];
   receivedAt: string;
+  consumerId: string | null;
 }
 
 /**
@@ -68,6 +70,7 @@ export class InstanceReportRepository {
         // An absent label is stored as SQL NULL, not as the string "undefined".
         label: event.label ?? null,
         n8nVersion: event.n8nVersion,
+        consumerId: event.consumerId,
         dataPoints: event.dataPoints,
         receivedAt: event.receivedAt,
       });

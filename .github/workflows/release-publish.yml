@@ -128,6 +128,7 @@ jobs:
         run: |
           gh release create "v${VERSION}" \
             --title "v${VERSION}" \
+            --generate-notes \
             --notes "## Docker Image
 
           - \`${IMAGE}:${VERSION}\`

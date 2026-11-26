@@ -19,6 +19,10 @@ export class InstanceReportEntity {
   @Column({ type: "text" })
   n8nVersion!: string;
 
+  /** UUID from the license certificate. Null for token-mode rows and rows stored before this column. */
+  @Column({ type: "text", nullable: true })
+  consumerId!: string | null;
+
   /**
    * Stored as a JSON text column; TypeORM serialises on write and parses on read.
    */

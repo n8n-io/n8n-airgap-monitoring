@@ -1,0 +1,50 @@
+name: 'CI: CLA Check'
+run-name: "${{ github.event_name == 'workflow_dispatch' && format('CI: CLA Check (PR #{0})', inputs.pr_number) || '' }}"
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull request number to re-verify'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  statuses: write
+
+concurrency:
+  # Concurrency is evaluated before the job-level `if`, so any PR comment creates a run.
+  # Comment runs get their own group so they can never cancel the PR push check.
+  group: >-
+    cla-check-${{ github.event_name == 'issue_comment'
+      && format('comment-{0}', github.event.issue.number)
+      || github.event.pull_request.number
+      || github.event.inputs.pr_number
+      || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cla-check:
+    name: Verify CLA signatures
+    # Skip issue_comment unless it's on a PR and the body starts with /cla-check.
+    if: >-
+      github.event_name != 'issue_comment' ||
+      (github.event.issue.pull_request != null &&
+       startsWith(github.event.comment.body, '/cla-check'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Defaults for the CLA endpoints, status context, comment marker and label
+      # are already n8n's production values.
+      - uses: n8n-io/github-actions/cla-check@ea082925743265a61d9fd0a69a32b211551f88f0 # v1.0.2
+        with:
+          app-id: ${{ secrets.N8N_ASSISTANT_APP_ID }}
+          private-key: ${{ secrets.N8N_ASSISTANT_PRIVATE_KEY }}
+          pr-number: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number || github.event.pull_request.number || github.event.issue.number }}

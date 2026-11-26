@@ -2,9 +2,9 @@
 // certificate containers in the exact format the license server produces,
 // signed by a throwaway CA generated when this module loads.
 //
-// The receiver checks none of the payload's contents, so the payload is kept
-// to the minimum a real certificate carries. Dates are accepted regardless of
-// value, which the `expired` option exists to prove.
+// The receiver reads only consumerId from the payload. The rest is kept to the
+// minimum a real certificate carries. Dates are accepted regardless of value,
+// which the `expired` option exists to prove.
 import { randomBytes } from "node:crypto";
 import CryptoJS from "crypto-js";
 import forge from "node-forge";
@@ -15,6 +15,9 @@ export interface MockCa {
   certPem: string;
 }
 
+/** A fixed UUID standing in for the consumer id the license server now issues. */
+export const DEFAULT_MOCK_CONSUMER_ID = "867a53a5-f61d-46ea-8087-ca249b06528e";
+
 export interface MockLicenseOptions {
   /** Signs with a different CA than the module default. */
   ca?: MockCa;
@@ -22,6 +25,8 @@ export interface MockLicenseOptions {
   expired?: boolean;
   consumerRef?: string;
   isEphemeral?: boolean;
+  /** Defaults to {@link DEFAULT_MOCK_CONSUMER_ID}. */
+  consumerId?: string;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -68,13 +73,19 @@ export const TEST_ISSUER_CERT_PEM = TEST_CA.certPem;
  * `N8N_LICENSE_CERT` and send as `licenseCert`.
  */
 export function generateMockLicense(options: MockLicenseOptions = {}): string {
-  const { ca = TEST_CA, expired = false, consumerRef = "test@airgap.dev", isEphemeral = true } = options;
+  const {
+    ca = TEST_CA,
+    expired = false,
+    consumerRef = "test@airgap.dev",
+    isEphemeral = true,
+    consumerId = DEFAULT_MOCK_CONSUMER_ID,
+  } = options;
 
   const now = Date.now();
   const validTo = new Date(now + (expired ? -1 : 365) * DAY_MS);
 
   const payload = JSON.stringify({
-    consumerId: "00000000-0000-0000-0000-000000000000",
+    consumerId,
     consumerRef,
     version: 2,
     tenantId: 1,
