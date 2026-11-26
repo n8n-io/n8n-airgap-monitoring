@@ -1,6 +1,6 @@
 import bearerAuth from "@fastify/bearer-auth";
 import type { FastifyPluginAsync } from "fastify";
-import { isPending } from "../../../submissions/submissions.service";
+import { isClosed } from "../../../submissions/submissions.service";
 
 // Guarded by the read token, which the submit page asks for on every load. The page then fetches
 // each month from GET /api/v1/report with the same token.
@@ -35,8 +35,8 @@ const submissionRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
     { schema: { params: monthParamsSchema } },
     async (request, reply) => {
       const { month } = request.params;
-      if (!isPending(month, new Date())) {
-        throw fastify.httpErrors.badRequest("params/month must be a month that is pending");
+      if (!isClosed(month, new Date())) {
+        throw fastify.httpErrors.badRequest("params/month must be a closed month");
       }
 
       await fastify.submissionService.record(month);
