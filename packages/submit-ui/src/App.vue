@@ -220,6 +220,10 @@ async function submitAll(): Promise<void> {
             {{ sending ? 'Sending…' : pendingCount === 0 ? 'Nothing to submit' : submitLabel }}
           </button>
           <p v-if="progress" class="status" role="status">{{ progress }}</p>
+          <p v-else-if="destination === null" class="status">
+            Not configured: set <code>N8N_MONITORING_REPORT_DESTINATION</code> and
+            <code>N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN</code> on this service.
+          </p>
           <p v-else-if="pendingCount === 0 && !sending" class="status">
             Every month that can be submitted has been sent.
           </p>
