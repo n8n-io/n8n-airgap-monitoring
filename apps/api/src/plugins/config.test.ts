@@ -46,3 +46,35 @@ test.each([
 
   await expect(load()).rejects.toThrow(message);
 });
+
+function stubUploadFormUrl(value: string | undefined) {
+  vi.stubEnv("N8N_MONITORING_READ_TOKEN", "read");
+  vi.stubEnv("N8N_MONITORING_REPORT_UPLOAD_FORM_URL", value);
+}
+
+test("leaves the upload form URL unset when the variable is not set", async () => {
+  stubUploadFormUrl(undefined);
+
+  expect((await load()).reportUploadFormUrl).toBeUndefined();
+});
+
+test("leaves the upload form URL unset when the variable is blank", async () => {
+  stubUploadFormUrl("   ");
+
+  expect((await load()).reportUploadFormUrl).toBeUndefined();
+});
+
+test("reads the upload form URL, trimmed", async () => {
+  stubUploadFormUrl(" https://n8n.example.com/form/usage ");
+
+  expect((await load()).reportUploadFormUrl).toBe("https://n8n.example.com/form/usage");
+});
+
+test.each([
+  ["not absolute", "n8n.example.com/form"],
+  ["not a web URL", "ftp://n8n.example.com/form"],
+])("refuses to start when the upload form URL is %s", async (_name, value) => {
+  stubUploadFormUrl(value);
+
+  await expect(load()).rejects.toThrow(/absolute http\(s\) URL/);
+});

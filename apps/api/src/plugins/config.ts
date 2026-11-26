@@ -8,6 +8,8 @@ export interface ReportDestination {
   authToken: string;
 }
 
+const WEB_PROTOCOLS = ["http:", "https:"];
+
 export interface Config {
   readToken: string;
   /**
@@ -20,6 +22,8 @@ export interface Config {
   dbPath: string;
   /** Undefined when neither variable is set: the submit page then cannot submit. */
   reportDestination: ReportDestination | undefined;
+  /** The manual upload form that the submit page links to. Undefined: the page hides the link. */
+  reportUploadFormUrl: string | undefined;
 }
 
 /**
@@ -49,6 +53,19 @@ function readReportDestination(): ReportDestination | undefined {
   return { url, authToken };
 }
 
+/** A blank value counts as unset. The page renders the value as a link, so only web URLs pass. */
+function readReportUploadFormUrl(): string | undefined {
+  const url = process.env.N8N_MONITORING_REPORT_UPLOAD_FORM_URL?.trim();
+  if (!url) {
+    return undefined;
+  }
+  const isWebUrl = URL.canParse(url) && WEB_PROTOCOLS.includes(new URL(url).protocol);
+  if (!isWebUrl) {
+    throw new Error("N8N_MONITORING_REPORT_UPLOAD_FORM_URL must be an absolute http(s) URL");
+  }
+  return url;
+}
+
 /**
  * Reads deployment configuration from the environment.
  */
@@ -64,6 +81,7 @@ export default fp(
       writeToken: process.env.N8N_MONITORING_WRITE_TOKEN?.trim() || undefined,
       dbPath: process.env.N8N_DB_PATH?.trim() || "./data/database.sqlite",
       reportDestination: readReportDestination(),
+      reportUploadFormUrl: readReportUploadFormUrl(),
     };
 
     fastify.decorate("config", config);

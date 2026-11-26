@@ -24,6 +24,9 @@ the API starts without the page and logs a warning.
 Nothing about the destination is built into the page. The API reads it at
 start-up and serves it with the overview:
 
+- **`N8N_MONITORING_REPORT_UPLOAD_FORM_URL`**, the link to the manual upload
+  form. Without it the page does not offer a manual upload.
+
 - **`N8N_MONITORING_REPORT_DESTINATION`** and
   **`N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN`**, the n8n URL the page posts
   to and the token it sends as `Authorization: Bearer <token>`. Both come from
@@ -40,6 +43,18 @@ every load and keeps it in memory only. Every API call sends it as
 `Authorization: Bearer <token>`. A 401 puts the page back at the token
 prompt. See [docs/AUTHORIZATION.md](../../docs/AUTHORIZATION.md).
 
+## Manual upload
+
+When n8n cannot be reached or rejects the data, and the service has an upload
+form URL, Submit opens a dialog. Without the URL, Submit shows only the error
+banner. The dialog has a row for each pending month, with its own download. Each
+row shows the consumer IDs in that month's report. The upload form link is the
+same for every month, and the form takes only the file. n8n rejects a file if
+any consumer ID in it is missing or unknown. Other failures, such as a
+report this service cannot serve, show only the error banner. To see the dialog
+locally, post the test data below, stop the stand-in in terminal 2, and press
+Submit.
+
 ## Run it locally
 
 Commands are run from the repository root. Use three terminals.
@@ -50,6 +65,7 @@ Commands are run from the repository root. Use three terminals.
 N8N_MONITORING_READ_TOKEN=dev-read-token N8N_MONITORING_WRITE_TOKEN=dev-write-token \
   N8N_MONITORING_REPORT_DESTINATION=http://localhost:5678/webhook \
   N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN=dev-destination-token \
+  N8N_MONITORING_REPORT_UPLOAD_FORM_URL=https://n8n.example.com/form \
   pnpm --filter api dev
 ```
 
@@ -66,8 +82,9 @@ node -e "require('node:http').createServer((q,s)=>{s.setHeader('access-control-a
 pnpm --filter submit-ui dev
 ```
 
-Open the URL Vite prints and enter `dev-read-token`. The destination is read
-when the API starts, so restart terminal 1 to change it. To send to a real n8n
+Open the URL Vite prints and enter `dev-read-token`. The destination and the
+upload form URL are read when the API starts, so restart terminal 1 to change
+them. Any absolute http(s) URL works as the upload form URL locally. To send to a real n8n
 webhook instead, point `N8N_MONITORING_REPORT_DESTINATION` and its auth token
 at it. The webhook has to allow CORS from the page's origin, including the
 `authorization` header.

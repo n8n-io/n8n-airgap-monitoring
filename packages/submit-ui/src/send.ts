@@ -3,6 +3,7 @@ import {
   type PendingMonth,
   type ReportDestination,
   recordSubmission,
+  reportReadError,
   reportUrl,
   UnauthorizedError,
 } from './api'
@@ -10,6 +11,9 @@ import { formatMonth } from './format'
 
 /** Generous: a large fleet's month is megabytes even gzipped, and office uplinks are slow. */
 const SEND_TIMEOUT_MS = 5 * 60 * 1000
+
+/** Thrown when n8n could not be reached or did not accept the data, so the page offers a manual upload. */
+export class DestinationError extends Error {}
 
 /**
  * Sends one month to n8n exactly as this service reports it: the report stream is gzipped on its
@@ -23,9 +27,7 @@ export async function sendMonth(
 
   const report = await authedFetch(reportUrl(pending))
   if (!report.ok || report.body === null) {
-    throw new Error(
-      `Could not read the usage data for ${name} from this service (HTTP ${report.status}).`,
-    )
+    throw reportReadError(pending, report.status)
   }
   // Not `Content-Encoding: gzip`: n8n would unpack it into a JSON body capped at 16 MiB. As a
   // gzip file, its webhook streams the body to disk without that cap.
@@ -50,7 +52,7 @@ export async function sendMonth(
     // The browser does not say more: offline, DNS, a proxy and a blocked CORS request look alike.
     const reason =
       error instanceof DOMException && error.name === 'TimeoutError' ? 'timed out' : 'failed'
-    throw new Error(
+    throw new DestinationError(
       `Sending ${name} to n8n ${reason}. Check that this browser can open ${new URL(destination.url).origin}. ` +
         'The month stays pending, press Submit to retry.',
     )
@@ -58,7 +60,7 @@ export async function sendMonth(
 
   // Not UnauthorizedError: that one is about the read token and would send the page back to its prompt.
   if (response.status === 401 || response.status === 403) {
-    throw new Error(
+    throw new DestinationError(
       `n8n rejected the destination auth token for ${name} (HTTP ${response.status}). ` +
         'Check N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN on this service. The month stays pending.',
     )
@@ -66,7 +68,7 @@ export async function sendMonth(
 
   // 409: n8n already has this month, e.g. its earlier answer never reached this browser.
   if (!response.ok && response.status !== 409) {
-    throw new Error(
+    throw new DestinationError(
       `n8n did not accept ${name} (HTTP ${response.status}). The month stays pending, press Submit to retry.`,
     )
   }

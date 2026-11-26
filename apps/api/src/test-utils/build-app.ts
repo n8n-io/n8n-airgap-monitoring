@@ -19,6 +19,7 @@ process.env.TEST_LICENSE_ISSUER_CERT = TEST_ISSUER_CERT_PEM;
 // No report destination by default; tests that need one stub both variables before build().
 delete process.env.N8N_MONITORING_REPORT_DESTINATION;
 delete process.env.N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN;
+delete process.env.N8N_MONITORING_REPORT_UPLOAD_FORM_URL;
 
 // Automatically build and tear down our instance
 async function build(options: { logger?: FastifyServerOptions["logger"] } = {}) {

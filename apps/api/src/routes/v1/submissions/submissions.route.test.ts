@@ -37,7 +37,13 @@ test("serves the overview with the read token", async () => {
   const res = await app.inject({ method: "GET", url: URL, headers: READ });
 
   expect(res.statusCode).toBe(200);
-  expect(res.json()).toEqual({ pending: [], upcoming: [], submitted: [], destination: null });
+  expect(res.json()).toEqual({
+    pending: [],
+    upcoming: [],
+    submitted: [],
+    destination: null,
+    uploadFormUrl: null,
+  });
 });
 
 test("hands the report destination and its auth token to the page", async () => {
@@ -52,6 +58,15 @@ test("hands the report destination and its auth token to the page", async () => 
     authToken: "destination-secret",
   });
   expect(res.headers["cache-control"]).toBe("no-store");
+});
+
+test("hands the upload form URL to the page", async () => {
+  vi.stubEnv("N8N_MONITORING_REPORT_UPLOAD_FORM_URL", "https://n8n.example.com/form/usage");
+  const app = await build();
+
+  const res = await app.inject({ method: "GET", url: URL, headers: READ });
+
+  expect(res.json().uploadFormUrl).toBe("https://n8n.example.com/form/usage");
 });
 
 test("records a pending month with the read token", async () => {
