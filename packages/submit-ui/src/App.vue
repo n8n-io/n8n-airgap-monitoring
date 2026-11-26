@@ -66,6 +66,13 @@ function messageOf(error: unknown): string {
 function logOut(): void {
   authenticated.value = false
   overview.value = undefined
+  // After the next login the history shows the server's time for months sent in this visit.
+  for (const month of Object.keys(sendStates)) {
+    delete sendStates[month]
+  }
+  for (const month of Object.keys(sentAt)) {
+    delete sentAt[month]
+  }
   loginError.value = 'The read token was not accepted. Enter it again.'
 }
 
