@@ -1,7 +1,6 @@
 import type { DataSource } from "@n8n/typeorm";
 import type { InstanceReportRepository, InstanceReportRow } from "../instance-report/instance-report.repository";
 
-
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Silent for longer than this before the month started: decommissioned, not part of the month. */
 const RECENTLY_ALIVE_MS = 30 * DAY_MS;
