@@ -64,7 +64,8 @@ controller, image registry) are plain values.
    ```
 
    Leave out the write token if you don't want token mode. Leave out the
-   report destination auth token if you don't set `reportDestination.url`.
+   report destination auth token if you leave out `reportDestination.url` in
+   the next step: the service refuses to start with only one of the two.
 
 3. Install from a checkout of this repository:
 
@@ -73,6 +74,7 @@ controller, image registry) are plain values.
      --namespace airgap-monitoring \
      --set image.repository=registry.example.internal/n8n/n8n-airgap-monitoring \
      --set auth.existingSecret=airgap-monitoring-tokens \
+     --set reportDestination.url="<from n8n>" \
      --set persistence.storageClassName=<your ssd class>
    ```
 
