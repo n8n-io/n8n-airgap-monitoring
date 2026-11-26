@@ -49,9 +49,23 @@ const rows = computed<MonthRow[]>(() =>
   }),
 )
 
+/** One read per month. The IDs and the download use the same text, so they always agree. */
+const reportReads = new Map<string, Promise<string>>()
+
+function readReport(pending: PendingMonth): Promise<string> {
+  let read = reportReads.get(pending.month)
+  if (read === undefined) {
+    read = fetchMonthReport(pending)
+    reportReads.set(pending.month, read)
+    // A failed read is not kept, so the next attempt reads again.
+    read.catch(() => reportReads.delete(pending.month))
+  }
+  return read
+}
+
 async function loadIds(pending: PendingMonth): Promise<void> {
   try {
-    const ids = consumerIdsIn(await fetchMonthReport(pending))
+    const ids = consumerIdsIn(await readReport(pending))
     idsByMonth[pending.month] = { status: 'loaded', ids }
   } catch (error) {
     if (error instanceof UnauthorizedError) {
@@ -66,7 +80,7 @@ async function download(pending: PendingMonth): Promise<void> {
   downloadingMonth.value = pending.month
   downloadError.value = ''
   try {
-    saveFile(await fetchMonthReport(pending), reportFileName(pending.month))
+    saveFile(await readReport(pending), reportFileName(pending.month))
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       emit('unauthorized')
@@ -102,6 +116,7 @@ onMounted(() => {
       This browser could not send the data to n8n. For each month, download the file and upload it
       with the form.
     </p>
+    <p v-if="downloadError" class="banner error" role="alert">{{ downloadError }}</p>
 
     <ol class="months">
       <li v-for="row in rows" :key="row.pending.month" class="month">
@@ -111,6 +126,7 @@ onMounted(() => {
             type="button"
             class="secondary"
             :disabled="downloadingMonth !== ''"
+            :aria-label="'Download ' + formatMonth(row.pending.month)"
             @click="download(row.pending)"
           >
             <span
@@ -143,7 +159,7 @@ onMounted(() => {
           </template>
           <p>
             <a :href="row.url ?? undefined" target="_blank" rel="noopener noreferrer"
-              >Open the upload form</a
+              >Open the upload form for {{ formatMonth(row.pending.month) }}</a
             >
           </p>
           <p class="muted url">{{ row.url }}</p>

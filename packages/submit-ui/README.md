@@ -47,9 +47,9 @@ prompt. See [docs/AUTHORIZATION.md](../../docs/AUTHORIZATION.md).
 
 When n8n cannot be reached or rejects the data, and the service has an upload
 form URL, Submit opens a dialog. Without the URL, Submit shows only the error
-banner. The dialog has a row for each pending month, with its own download and
-upload form link. Each month's report is read for its consumer IDs when the
-dialog opens. A link carries the `month` query parameter. It also carries
+banner. The dialog has a row for each pending month, with its own download. Once a
+month's report is read, its row also gets an upload form link. The link carries
+the `month` query parameter. It also carries
 `consumerId` when that month's report holds exactly one ID. Reports with none
 or several IDs leave the field for the user. The names are constants in
 `src/manual-upload.ts`. Other failures, such as a

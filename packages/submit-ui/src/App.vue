@@ -124,6 +124,8 @@ async function logIn(): Promise<void> {
   setToken(tokenInput.value)
   try {
     overview.value = await fetchOverview()
+    // An error from an earlier failed reload would otherwise hide the page after this login.
+    loadError.value = ''
     authenticated.value = true
     tokenInput.value = ''
   } catch (error) {
