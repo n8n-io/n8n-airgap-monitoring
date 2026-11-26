@@ -66,6 +66,32 @@ test("records a pending month with the read token", async () => {
   expect(overview.json().submitted).toEqual([{ month: "2026-09", submittedAt: "2026-10-05T00:00:00.000Z" }]);
 });
 
+test("refuses a month that is not pending yet", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-05T00:00:00.000Z"));
+  const app = await build();
+
+  const res = await app.inject({ method: "POST", url: `${URL}/2026-10`, headers: READ });
+
+  expect(res.statusCode).toBe(400);
+  const overview = await app.inject({ method: "GET", url: URL, headers: READ });
+  expect(overview.json().submitted).toEqual([]);
+});
+
+test("keeps the first acknowledgement when a month is recorded twice", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-05T00:00:00.000Z"));
+  const app = await build();
+  await app.inject({ method: "POST", url: `${URL}/2026-09`, headers: READ });
+
+  vi.setSystemTime(new Date("2026-10-06T00:00:00.000Z"));
+  const res = await app.inject({ method: "POST", url: `${URL}/2026-09`, headers: READ });
+
+  expect(res.statusCode).toBe(201);
+  const overview = await app.inject({ method: "GET", url: URL, headers: READ });
+  expect(overview.json().submitted).toEqual([{ month: "2026-09", submittedAt: "2026-10-05T00:00:00.000Z" }]);
+});
+
 test("does not serve the report, which lives at /api/v1/report", async () => {
   const app = await build();
 
