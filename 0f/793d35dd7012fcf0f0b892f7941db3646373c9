@@ -1,0 +1,24 @@
+packages/submit-ui/src/api.ts
+  s_e93784e06be706::t_60ad3b26673ab8 73-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0f793d35dd7012fcf0f0b892f7941db3646373c9",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_e93784e06be706": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ee96ef9-f630-402b-a54a-567606cd1499",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
