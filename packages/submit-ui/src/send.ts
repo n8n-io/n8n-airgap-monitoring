@@ -1,4 +1,11 @@
-import { authedFetch, type PendingMonth, type ReportDestination, recordSubmission, reportUrl } from './api'
+import {
+  authedFetch,
+  type PendingMonth,
+  type ReportDestination,
+  recordSubmission,
+  reportUrl,
+  UnauthorizedError,
+} from './api'
 import { formatMonth } from './format'
 
 /** Generous: a large fleet's month is megabytes even gzipped, and office uplinks are slow. */
@@ -49,10 +56,18 @@ export async function sendMonth(pending: PendingMonth, destination: ReportDestin
     throw new Error(`n8n did not accept ${name} (HTTP ${response.status}). The month stays pending, press Submit to retry.`)
   }
 
-  const recorded = await recordSubmission(pending.month)
+  const notRecorded = (reason: string) =>
+    new Error(`n8n received ${name}, but this service could not record it (${reason}). Pressing Submit again is safe.`)
+  let recorded: Response
+  try {
+    recorded = await recordSubmission(pending.month)
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      throw error
+    }
+    throw notRecorded('it could not be reached')
+  }
   if (!recorded.ok) {
-    throw new Error(
-      `n8n received ${name}, but this service could not record it (HTTP ${recorded.status}). Pressing Submit again is safe.`,
-    )
+    throw notRecorded(`HTTP ${recorded.status}`)
   }
 }
