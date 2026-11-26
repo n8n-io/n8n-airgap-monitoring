@@ -42,10 +42,10 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, _opts): Promise<void
   void fastify.register(instanceReport);
   void fastify.register(submissions);
 
-  // The submit page, a dependency like any other: packages/submit-ui builds it to its dist/, which
+  // The submit page. packages/submit-ui builds it to its dist/, which
   // ships in node_modules. Unbuilt (e.g. under the unit tests) the API runs without it.
   const submitRoot = join(dirname(require.resolve("submit-ui/package.json")), "dist");
-  // It is the service's only UI, so it sits at the root; /api and /healthz are more specific routes and win.
+  // It is the service's only UI, so it sits at the root
   if (existsSync(submitRoot)) {
     void fastify.register(fastifyStatic, {
       root: submitRoot,
