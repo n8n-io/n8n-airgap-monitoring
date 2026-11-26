@@ -72,7 +72,12 @@ body {
   padding: 48px 16px 64px;
   background: var(--page);
   color: var(--text);
-  font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }

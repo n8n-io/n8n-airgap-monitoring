@@ -7,7 +7,9 @@ const props = defineProps<{ row: MonthRow; state?: SendState; sentAt?: string }>
 
 type Status = 'upcoming' | 'pending' | SendState
 
-const status = computed<Status>(() => props.state ?? (props.row.kind === 'submitted' ? 'sent' : props.row.kind))
+const status = computed<Status>(
+  () => props.state ?? (props.row.kind === 'submitted' ? 'sent' : props.row.kind),
+)
 
 const statusText: Record<Status, string> = {
   upcoming: 'In progress',
@@ -17,7 +19,9 @@ const statusText: Record<Status, string> = {
   failed: 'Not sent',
 }
 
-const deliveredAt = computed(() => props.sentAt ?? (props.row.kind === 'submitted' ? props.row.submittedAt : undefined))
+const deliveredAt = computed(
+  () => props.sentAt ?? (props.row.kind === 'submitted' ? props.row.submittedAt : undefined),
+)
 
 function nameOf(instance: MissingInstance): string {
   return instance.label ?? instance.instanceId.slice(0, 12)
@@ -40,7 +44,9 @@ function lastDayText(instance: MissingInstance): string {
         </span>
       </div>
 
-      <p v-if="status === 'sent' && deliveredAt" class="meta">Delivered {{ formatDateTime(deliveredAt) }}</p>
+      <p v-if="status === 'sent' && deliveredAt" class="meta">
+        Delivered {{ formatDateTime(deliveredAt) }}
+      </p>
 
       <p v-else-if="row.kind === 'upcoming'" class="meta">
         <template v-if="row.upcoming.collectedUpTo">

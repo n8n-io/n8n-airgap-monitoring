@@ -14,13 +14,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --build && vite build",
-    "typecheck": "vue-tsc --build"
+    "typecheck": "vue-tsc --build",
+    "lint": "prettier --write src/",
+    "lint:check": "prettier --check src/"
   },
   "devDependencies": {
     "@tsconfig/node26": "^26.0.1",
     "@types/node": "^26.4.1",
     "@vitejs/plugin-vue": "^6.0.9",
     "@vue/tsconfig": "^0.9.1",
+    "prettier": "3.9.9",
     "typescript": "catalog:vue",
     "vite": "^8.2.1",
     "vue": "^3.5.43",

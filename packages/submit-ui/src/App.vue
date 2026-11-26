@@ -42,19 +42,31 @@ const rows = computed<MonthRow[]>(() => {
   }
   const { upcoming, pending, submitted } = overview.value
   return [
-    ...upcoming.map((month): MonthRow => ({ kind: 'upcoming', month: month.month, upcoming: month })),
+    ...upcoming.map((month): MonthRow => ({
+      kind: 'upcoming',
+      month: month.month,
+      upcoming: month,
+    })),
     ...pending.map((month): MonthRow => ({ kind: 'pending', month: month.month, pending: month })),
-    ...submitted.map((month): MonthRow => ({ kind: 'submitted', month: month.month, submittedAt: month.submittedAt })),
+    ...submitted.map((month): MonthRow => ({
+      kind: 'submitted',
+      month: month.month,
+      submittedAt: month.submittedAt,
+    })),
   ].sort((a, b) => b.month.localeCompare(a.month))
 })
 
 const incompleteMonths = computed(
-  () => overview.value?.pending.filter((month) => month.waiting.length + month.stale.length > 0) ?? [],
+  () =>
+    overview.value?.pending.filter((month) => month.waiting.length + month.stale.length > 0) ?? [],
 )
 
 const incompleteSummary = computed(() =>
   incompleteMonths.value
-    .map((month) => `${formatMonth(month.month)}: ${month.instances - month.complete} of ${month.instances} instances`)
+    .map(
+      (month) =>
+        `${formatMonth(month.month)}: ${month.instances - month.complete} of ${month.instances} instances`,
+    )
     .join(', '),
 )
 
@@ -99,7 +111,9 @@ async function logIn(): Promise<void> {
     tokenInput.value = ''
   } catch (error) {
     loginError.value =
-      error instanceof UnauthorizedError ? 'This is not the read token of this service.' : messageOf(error)
+      error instanceof UnauthorizedError
+        ? 'This is not the read token of this service.'
+        : messageOf(error)
   } finally {
     loggingIn.value = false
   }
@@ -161,7 +175,6 @@ async function submitAll(): Promise<void> {
     sending.value = false
   }
 }
-
 </script>
 
 <template>
@@ -170,14 +183,17 @@ async function submitAll(): Promise<void> {
       <p class="eyebrow"><span class="logo" aria-hidden="true">n8n</span> Airgap monitoring</p>
       <h1>Submit usage to n8n</h1>
       <p class="lead">
-        Sends the usage report of every finished month to n8n, exactly as this service reports it. The
-        data leaves through this browser, the monitoring service itself makes no outbound request.
+        Sends the usage report of every finished month to n8n, exactly as this service reports it.
+        The data leaves through this browser, the monitoring service itself makes no outbound
+        request.
       </p>
     </header>
 
     <form v-if="!authenticated" class="login" @submit.prevent="logIn">
       <label for="token">Read token</label>
-      <p class="muted">The value of <code>N8N_MONITORING_READ_TOKEN</code> this service runs with.</p>
+      <p class="muted">
+        The value of <code>N8N_MONITORING_READ_TOKEN</code> this service runs with.
+      </p>
       <div class="login-row">
         <input
           id="token"
