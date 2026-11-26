@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "env": ["VITE_SUBMIT_ENDPOINT"],
+      "env": ["N8N_MONITORING_REPORT_DESTINATION"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },

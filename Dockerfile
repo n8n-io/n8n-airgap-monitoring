@@ -17,7 +17,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 # The n8n endpoint the submit page sends to, baked into the page at build time.
-ARG VITE_SUBMIT_ENDPOINT
+ARG N8N_MONITORING_REPORT_DESTINATION
 RUN pnpm turbo run build
 
 # Self-contained API: its dist plus a pruned production node_modules, including

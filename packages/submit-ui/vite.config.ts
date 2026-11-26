@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
  * Where the data goes, from the build environment so the URL is not in the repository. Fixed once
  * built, so the person submitting cannot change it. Unset, the page builds but cannot submit.
  */
-const SUBMIT_ENDPOINT = process.env.VITE_SUBMIT_ENDPOINT?.trim() || null
+const SUBMIT_ENDPOINT = process.env.N8N_MONITORING_REPORT_DESTINATION?.trim() || null
 
 /** The built page may only talk to this service and to the n8n endpoint. */
 function contentSecurityPolicy(): Plugin {

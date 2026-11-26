@@ -23,7 +23,7 @@ the API starts without the page and logs a warning.
 
 Two things are fixed at build time:
 
-- **`VITE_SUBMIT_ENDPOINT`**, the n8n URL the page posts to. It isn't in the
+- **`N8N_MONITORING_REPORT_DESTINATION`**, the n8n URL the page posts to. It isn't in the
   repository and can't be changed in the browser. Without it the page still
   builds, but it shows "Not configured" and Submit stays disabled.
 - **A Content-Security-Policy** in `index.html` that only allows requests to
@@ -57,12 +57,12 @@ node -e "require('node:http').createServer((q,s)=>{s.setHeader('access-control-a
 **3. The page**, with hot reload. Vite proxies `/api` to the API:
 
 ```sh
-VITE_SUBMIT_ENDPOINT=http://localhost:5678/webhook pnpm --filter submit-ui dev
+N8N_MONITORING_REPORT_DESTINATION=http://localhost:5678/webhook pnpm --filter submit-ui dev
 ```
 
 Open the URL Vite prints and enter `dev-read-token`. The endpoint is read
 when Vite starts, so restart terminal 3 to change it. To send to a real n8n
-webhook instead, point `VITE_SUBMIT_ENDPOINT` at it. The webhook has to allow
+webhook instead, point `N8N_MONITORING_REPORT_DESTINATION` at it. The webhook has to allow
 CORS from the page's origin.
 
 ### Test data
@@ -87,7 +87,7 @@ in `apps/api/data/`, so delete that directory to start over.
 To check the page the way the image serves it, from the API at `/`:
 
 ```sh
-VITE_SUBMIT_ENDPOINT=http://localhost:5678/webhook pnpm turbo run build --filter api...
+N8N_MONITORING_REPORT_DESTINATION=http://localhost:5678/webhook pnpm turbo run build --filter api...
 ```
 
 Then start the API as in step 1 and open http://localhost:3456/. The API

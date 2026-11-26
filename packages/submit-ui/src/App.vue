@@ -167,7 +167,7 @@ async function submitAll(): Promise<void> {
       <p class="destination">
         <span class="destination-label">Destination</span>
         <code v-if="SUBMIT_ENDPOINT">{{ SUBMIT_ENDPOINT }}</code>
-        <span v-else class="not-configured">Not configured, set VITE_SUBMIT_ENDPOINT when building this page</span>
+        <span v-else class="not-configured">Not configured, set N8N_MONITORING_REPORT_DESTINATION when building this page</span>
       </p>
     </header>
 
