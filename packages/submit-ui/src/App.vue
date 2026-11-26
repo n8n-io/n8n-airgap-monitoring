@@ -139,7 +139,6 @@ async function submitAll(): Promise<void> {
     sendStates[current] = 'failed'
     sendError.value = messageOf(error)
   } finally {
-    sending.value = false
     // After a rejected token the page is back at the prompt, nothing to reload.
     if (authenticated.value) {
       await load()
@@ -151,6 +150,8 @@ async function submitAll(): Promise<void> {
         }
       }
     }
+    // Only now: until the reload, the overview still lists the months just sent.
+    sending.value = false
   }
 }
 
