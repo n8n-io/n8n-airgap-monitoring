@@ -1,0 +1,25 @@
+apps/api/src/plugins/db.test.ts
+  s_13d1f600d7010a::t_08b00103ac5175 5,21
+  s_13d1f600d7010a::t_efc8f7ee34c6b7 42-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ca21fde61abcf3cc43b7862deb1541ad23c9e9ef",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_13d1f600d7010a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "62732526-fac2-4774-a2b4-e36f8a1f6365",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
