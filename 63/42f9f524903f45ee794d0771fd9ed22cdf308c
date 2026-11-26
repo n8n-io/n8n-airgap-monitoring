@@ -1,0 +1,24 @@
+apps/api/src/db/migrations/index.ts
+  s_961ed12e75424b::t_5b97e5d0063273 9-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6342f9f524903f45ee794d0771fd9ed22cdf308c",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_961ed12e75424b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8d468f37-67d5-4724-8321-f6b0990ae1d8",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}

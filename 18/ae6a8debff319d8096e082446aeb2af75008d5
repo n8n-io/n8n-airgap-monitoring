@@ -1,0 +1,74 @@
+docs/charts/airgap-monitoring/README.md
+  s_961ed12e75424b::t_5ea5c42676a3e7 31-33,211
+  s_961ed12e75424b::t_bf0e9a4c7b5554 62-63,66-67
+  s_961ed12e75424b::t_24466b3b0afc91 68
+docker-compose.yml
+  s_961ed12e75424b::t_0206a61c793ce7 5,16-19
+apps/api/src/content-security-policy.ts
+  s_961ed12e75424b::t_62ae6c7e0ce267 1-7
+apps/api/src/plugins/config.ts
+  s_961ed12e75424b::t_507edb1e85cb60 4-10,21-45,62
+packages/submit-ui/src/send.ts
+  s_961ed12e75424b::t_d564a99bf2982a 1,11,24,26,34,39-43
+  s_961ed12e75424b::t_c3630cac30561e 44-46
+docs/charts/airgap-monitoring/values.yaml
+  s_961ed12e75424b::t_5ea5c42676a3e7 50-54,62-69
+packages/submit-ui/src/App.vue
+  s_961ed12e75424b::t_d564a99bf2982a 13,30,32,111-112,128
+packages/submit-ui/README.md
+  s_961ed12e75424b::t_5ea5c42676a3e7 24-31,33-34,51-52,56-57,60,66,69-73,97
+  s_961ed12e75424b::t_218b03873c150f 32
+packages/submit-ui/src/api.ts
+  s_961ed12e75424b::t_d564a99bf2982a 34-39,44-45
+docs/charts/airgap-monitoring/templates/deployment.yaml
+  s_961ed12e75424b::t_5ea5c42676a3e7 74-84
+apps/api/src/routes/v1/submissions/submissions.route.test.ts
+  s_961ed12e75424b::t_ef060fceae9955 9,40-53
+apps/api/src/routes/v1/submissions/index.ts
+  s_961ed12e75424b::t_ef060fceae9955 22-27
+docs/charts/airgap-monitoring/values.schema.json
+  s_961ed12e75424b::t_5ea5c42676a3e7 30-38
+docs/AUTHORIZATION.md
+  s_961ed12e75424b::t_bf0e9a4c7b5554 36
+  s_961ed12e75424b::t_5ea5c42676a3e7 37-46
+  s_961ed12e75424b::t_4a2fb840f38cd0 47
+docs/USER_GUIDE.md
+  s_961ed12e75424b::t_5ea5c42676a3e7 235-236,239
+apps/api/src/content-security-policy.test.ts
+  s_961ed12e75424b::t_62ae6c7e0ce267 1-14
+packages/submit-ui/vite.config.ts
+  s_961ed12e75424b::t_d564a99bf2982a 1,4-5,9
+README.md
+  h_c63dce324dfc7b 20
+  s_961ed12e75424b::t_5ea5c42676a3e7 21
+apps/api/src/plugins/config.test.ts
+  s_961ed12e75424b::t_ef060fceae9955 1-46
+apps/api/src/test-utils/build-app.ts
+  s_961ed12e75424b::t_ef060fceae9955 19-21
+apps/api/src/app.ts
+  s_961ed12e75424b::t_81a2c8434ab83f 52-56
+  s_961ed12e75424b::t_62ae6c7e0ce267 6
+turbo.json
+  s_961ed12e75424b::t_0206a61c793ce7 22-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "18ae6a8debff319d8096e082446aeb2af75008d5",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_961ed12e75424b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8d468f37-67d5-4724-8321-f6b0990ae1d8",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
