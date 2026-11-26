@@ -1,0 +1,14 @@
+apps/api/src/app.ts
+  h_c63dce324dfc7b 45,48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "82f49671a83bc728191d05d525a932ef57f17983",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
