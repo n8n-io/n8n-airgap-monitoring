@@ -1,0 +1,34 @@
+packages/submit-ui/src/App.vue
+  s_5e437629a01690::t_ae162308716ff3 45-49,51-55,60-61,66-69,114-116,186-188,194-196
+packages/submit-ui/package.json
+  s_5e437629a01690::t_201d554fd842e3 17-19,26
+packages/submit-ui/src/send.ts
+  s_5e437629a01690::t_ae162308716ff3 18-21,26-28,42-45,51-52,69-71,75-77
+packages/submit-ui/src/main.css
+  s_5e437629a01690::t_ae162308716ff3 75-80
+packages/submit-ui/src/components/MonthRow.vue
+  s_5e437629a01690::t_ae162308716ff3 10-12,22-24,47-49
+pnpm-lock.yaml
+  s_5e437629a01690::t_a3b485baafb8db 293-295
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c9c1253403a7fc24e937e7c7e810304518590890",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_5e437629a01690": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cf352b99-7e93-46d7-b70a-05d5e6ab8082",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
