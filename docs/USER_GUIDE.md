@@ -237,7 +237,7 @@ write token, every instance needs the new value too.
 | `N8N_MONITORING_REPORT_UPLOAD_FORM_URL` | no | — | The link to the form that the user uploads the monthly report with, when the submit page cannot send usage to n8n. Unset: the submit page does not offer a manual upload. The page adds the `month` query parameter. It also adds `consumerId` when a month's report holds exactly one consumer ID. Provided by n8n. |
 
 
-Tokens and the destination are read at start-up. After changing one, restart the service.
+Tokens, the destination and the upload form URL are read at start-up. After changing one, restart the service.
 
 ### On each n8n instance
 

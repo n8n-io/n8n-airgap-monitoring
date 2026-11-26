@@ -67,6 +67,7 @@ Commands are run from the repository root. Use three terminals.
 N8N_MONITORING_READ_TOKEN=dev-read-token N8N_MONITORING_WRITE_TOKEN=dev-write-token \
   N8N_MONITORING_REPORT_DESTINATION=http://localhost:5678/webhook \
   N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN=dev-destination-token \
+  N8N_MONITORING_REPORT_UPLOAD_FORM_URL=https://n8n.example.com/form \
   pnpm --filter api dev
 ```
 
@@ -83,8 +84,9 @@ node -e "require('node:http').createServer((q,s)=>{s.setHeader('access-control-a
 pnpm --filter submit-ui dev
 ```
 
-Open the URL Vite prints and enter `dev-read-token`. The destination is read
-when the API starts, so restart terminal 1 to change it. To send to a real n8n
+Open the URL Vite prints and enter `dev-read-token`. The destination and the
+upload form URL are read when the API starts, so restart terminal 1 to change
+them. Any absolute http(s) URL works as the upload form URL locally. To send to a real n8n
 webhook instead, point `N8N_MONITORING_REPORT_DESTINATION` and its auth token
 at it. The webhook has to allow CORS from the page's origin, including the
 `authorization` header.
