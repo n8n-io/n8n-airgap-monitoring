@@ -26,9 +26,13 @@ export async function sendMonth(pending: PendingMonth, destination: ReportDestin
   // gzip file, its webhook streams the body to disk without that cap.
   const body = await new Response(report.body.pipeThrough(new CompressionStream('gzip'))).blob()
 
+  // Keeps a query string or fragment n8n may have put in the destination URL.
+  const target = new URL(destination.url)
+  target.searchParams.set('month', pending.month)
+
   let response: Response
   try {
-    response = await fetch(`${destination.url}?month=${pending.month}`, {
+    response = await fetch(target, {
       method: 'POST',
       headers: { 'content-type': 'application/gzip', authorization: `Bearer ${destination.authToken}` },
       body,
