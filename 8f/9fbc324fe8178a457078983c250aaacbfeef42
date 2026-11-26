@@ -1,0 +1,42 @@
+docker-compose.yml
+  s_d7ca60e35378e2::t_0935c990a185fe 20
+README.md
+  s_d7ca60e35378e2::t_be5388fe17a145 22
+packages/submit-ui/src/App.vue
+  s_d7ca60e35378e2::t_b077d12b7aecb0 36-37
+  s_d7ca60e35378e2::t_a632230d5eaf00 256
+  s_d7ca60e35378e2::t_220a7a63aedaf1 172
+  s_d7ca60e35378e2::t_f3edca0944f97e 275,277
+packages/submit-ui/README.md
+  s_d7ca60e35378e2::t_44a4474f39f760 48-50
+  s_d7ca60e35378e2::t_1bfcc573be6c31 28
+docs/USER_GUIDE.md
+  s_d7ca60e35378e2::t_b08410c178cc00 237
+apps/api/src/routes/v1/submissions/submissions.route.test.ts
+  s_d7ca60e35378e2::t_4f443da1b94fba 45
+apps/api/src/plugins/config.ts
+  s_d7ca60e35378e2::t_14770ae6bbcaae 56,60
+apps/api/src/plugins/config.test.ts
+  s_d7ca60e35378e2::t_1451e718957fb0 3
+  s_d7ca60e35378e2::t_5c8b1e5aa70bf4 55,58,61,64
+packages/submit-ui/src/components/ManualUploadDialog.vue
+  s_d7ca60e35378e2::t_6b5cd3b971c126 69,74
+  s_d7ca60e35378e2::t_9a69644ade2f25 140
+  s_d7ca60e35378e2::t_226bc25a60f07e 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8f9fbc324fe8178a457078983c250aaacbfeef42",
+  "prompts": {},
+  "sessions": {
+    "s_d7ca60e35378e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87d9bb31-928f-49ec-bc3e-4bed770c7d59",
+        "model": "claude-haiku-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}
