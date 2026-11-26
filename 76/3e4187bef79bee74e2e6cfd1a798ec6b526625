@@ -1,0 +1,24 @@
+packages/submit-ui/src/App.vue
+  s_5e437629a01690::t_e74b06a24ce5d8 223-226
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "763e4187bef79bee74e2e6cfd1a798ec6b526625",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_5e437629a01690": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cf352b99-7e93-46d7-b70a-05d5e6ab8082",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
