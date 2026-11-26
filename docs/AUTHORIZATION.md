@@ -33,6 +33,18 @@ reports cannot read the fleet's data. How to download the report and share it
 is covered in the
 [user guide](USER_GUIDE.md#3-download-usage-reports-from-n8n-airgap-monitoring).
 
+## Submitting to n8n
+
+The page sends each month to `N8N_MONITORING_REPORT_DESTINATION` with
+`Authorization: Bearer <N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN>`. Both
+values come from n8n and are set on the service, which refuses to start with
+only one of them. The page receives them from `GET /api/v1/submissions`, so
+only a holder of the read token gets the destination token, and the browser
+must hold it to send it. A `401` or `403` from n8n is reported on the page as a
+rejected destination token, not as a rejected read token. The service sets a
+Content-Security-Policy on the page that allows requests to itself and to the
+destination's origin only.
+
 ## Create instance report route
 
 `POST /api/v1/instance-reports` runs in one of two modes. The operator picks

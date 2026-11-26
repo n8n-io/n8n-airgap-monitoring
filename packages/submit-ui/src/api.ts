@@ -31,10 +31,18 @@ export interface UpcomingMonth {
   collectedUpTo: string | null
 }
 
+/** Where Submit sends the data, from the service's environment. Mirrors apps/api/src/plugins/config.ts. */
+export interface ReportDestination {
+  url: string
+  authToken: string
+}
+
 export interface SubmissionsOverview {
   pending: PendingMonth[]
   upcoming: UpcomingMonth[]
   submitted: Submission[]
+  /** Null when the service runs without N8N_MONITORING_REPORT_DESTINATION. */
+  destination: ReportDestination | null
 }
 
 /** Where a month stands while Submit runs. */

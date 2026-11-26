@@ -10,7 +10,7 @@ import {
 } from './api'
 import MonthRowItem from './components/MonthRow.vue'
 import { formatMonth } from './format'
-import { SUBMIT_ENDPOINT, sendMonth } from './send'
+import { sendMonth } from './send'
 
 /** Set once the service accepted the read token; a page load starts without it. */
 const authenticated = ref(false)
@@ -27,8 +27,9 @@ const sendStates = reactive<Record<string, SendState>>({})
 /** When n8n acknowledged a month in this visit, until the reload brings the server's time. */
 const sentAt = reactive<Record<string, string>>({})
 
+const destination = computed(() => overview.value?.destination ?? null)
 const pendingCount = computed(() => overview.value?.pending.length ?? 0)
-const canSubmit = computed(() => SUBMIT_ENDPOINT !== null && pendingCount.value > 0)
+const canSubmit = computed(() => destination.value !== null && pendingCount.value > 0)
 
 const submitLabel = computed(() =>
   pendingCount.value === 1 ? 'Submit 1 month' : `Submit ${pendingCount.value} months`,
@@ -107,8 +108,8 @@ function onSubmit(): void {
 
 /** Oldest month first; stops at the first failure, which leaves that month and the later ones pending. */
 async function submitAll(): Promise<void> {
-  const endpoint = SUBMIT_ENDPOINT
-  if (endpoint === null) {
+  const target = destination.value
+  if (target === null) {
     return
   }
   confirming.value = false
@@ -124,7 +125,7 @@ async function submitAll(): Promise<void> {
     for (const month of [...(overview.value?.pending ?? [])]) {
       current = month.month
       sendStates[current] = 'sending'
-      await sendMonth(month, endpoint)
+      await sendMonth(month, target)
       sendStates[current] = 'sent'
       sentAt[current] = new Date().toISOString()
     }
@@ -163,11 +164,6 @@ async function submitAll(): Promise<void> {
       <p class="lead">
         Sends the usage report of every finished month to n8n, exactly as this service reports it. The
         data leaves through this browser, the monitoring service itself makes no outbound request.
-      </p>
-      <p class="destination">
-        <span class="destination-label">Destination</span>
-        <code v-if="SUBMIT_ENDPOINT">{{ SUBMIT_ENDPOINT }}</code>
-        <span v-else class="not-configured">Not configured, set N8N_MONITORING_REPORT_DESTINATION when building this page</span>
       </p>
     </header>
 

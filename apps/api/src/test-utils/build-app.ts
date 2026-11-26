@@ -16,6 +16,9 @@ process.env.N8N_MONITORING_READ_TOKEN = "test-read-token";
 // which the Vitest config pins.
 delete process.env.N8N_MONITORING_WRITE_TOKEN;
 process.env.TEST_LICENSE_ISSUER_CERT = TEST_ISSUER_CERT_PEM;
+// No report destination by default; tests that need one stub both variables before build().
+delete process.env.N8N_MONITORING_REPORT_DESTINATION;
+delete process.env.N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN;
 
 // Automatically build and tear down our instance
 async function build(options: { logger?: FastifyServerOptions["logger"] } = {}) {

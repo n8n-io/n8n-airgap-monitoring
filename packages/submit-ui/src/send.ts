@@ -1,7 +1,5 @@
-import { authedFetch, type PendingMonth, recordSubmission, reportUrl } from './api'
+import { authedFetch, type PendingMonth, type ReportDestination, recordSubmission, reportUrl } from './api'
 import { formatMonth } from './format'
-
-export const SUBMIT_ENDPOINT = __SUBMIT_ENDPOINT__
 
 /** Generous: a large fleet's month is megabytes even gzipped, and office uplinks are slow. */
 const SEND_TIMEOUT_MS = 5 * 60 * 1000
@@ -10,7 +8,7 @@ const SEND_TIMEOUT_MS = 5 * 60 * 1000
  * Sends one month to n8n exactly as this service reports it: the report stream is gzipped on its
  * way through and never parsed or changed, so the tab holds only the compressed bytes.
  */
-export async function sendMonth(pending: PendingMonth, endpoint: string): Promise<void> {
+export async function sendMonth(pending: PendingMonth, destination: ReportDestination): Promise<void> {
   const name = formatMonth(pending.month)
 
   const report = await authedFetch(reportUrl(pending))
@@ -23,9 +21,9 @@ export async function sendMonth(pending: PendingMonth, endpoint: string): Promis
 
   let response: Response
   try {
-    response = await fetch(`${endpoint}?month=${pending.month}`, {
+    response = await fetch(`${destination.url}?month=${pending.month}`, {
       method: 'POST',
-      headers: { 'content-type': 'application/gzip' },
+      headers: { 'content-type': 'application/gzip', authorization: `Bearer ${destination.authToken}` },
       body,
       signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
     })
@@ -33,8 +31,16 @@ export async function sendMonth(pending: PendingMonth, endpoint: string): Promis
     // The browser does not say more: offline, DNS, a proxy and a blocked CORS request look alike.
     const reason = error instanceof DOMException && error.name === 'TimeoutError' ? 'timed out' : 'failed'
     throw new Error(
-      `Sending ${name} to n8n ${reason}. Check that this browser can open ${new URL(endpoint).origin}. ` +
+      `Sending ${name} to n8n ${reason}. Check that this browser can open ${new URL(destination.url).origin}. ` +
         'The month stays pending, press Submit to retry.',
+    )
+  }
+
+  // Not UnauthorizedError: that one is about the read token and would send the page back to its prompt.
+  if (response.status === 401 || response.status === 403) {
+    throw new Error(
+      `n8n rejected the destination auth token for ${name} (HTTP ${response.status}). ` +
+        'Check N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN on this service. The month stays pending.',
     )
   }
 

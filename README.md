@@ -17,7 +17,8 @@ See also the user guide at [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 | `N8N_MONITORING_READ_TOKEN` | yes | — | Bearer token required to download the usage report from `GET /api/v1/report` and to login on the form for submitting usage. The service refuses to start without it. |
 | `N8N_MONITORING_WRITE_TOKEN` | no | — | Selects the authentication mode of `POST /api/v1/instance-reports`. Set: instances must present it as a bearer token and license certificates are not accepted. Unset: instances authenticate with their license certificate. |
 | `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
-| `N8N_MONITORING_REPORT_DESTINATION` | no | — | The n8n URL the submit page sends monthly usage to. It is baked into the page and its Content-Security-Policy. |
+| `N8N_MONITORING_REPORT_DESTINATION` | no | — | The n8n URL the submit page sends monthly usage to, provided by n8n. Set it together with `N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN`; the service refuses to start with only one of them. |
+| `N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN` | with the destination | — | Secret provided by n8n together with the destination URL. The submit page sends it as `Authorization: Bearer <token>` to the destination. |
 
 A reporting n8n instance authenticates with its n8n license certificate, or,
 if you set a write token, with that token alone. See

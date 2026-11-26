@@ -2,11 +2,7 @@
 # `pnpm dev` remains the dev workflow.
 services:
   airgap-monitoring:
-    build:
-      context: .
-      args:
-        # Where the submit page sends the data; kept out of the repository.
-        N8N_MONITORING_REPORT_DESTINATION: ${N8N_MONITORING_REPORT_DESTINATION:-}
+    build: .
     ports:
       # 3001 on the host, not 3000: port 3000 is a popular default and is
       # commonly taken by something else already (Grafana, for one).
@@ -17,6 +13,10 @@ services:
       # as a bearer header and license certificates are not accepted. Drop the
       # line for certificate mode; see docs/AUTHORIZATION.md.
       N8N_MONITORING_WRITE_TOKEN: dev-write-token
+      # Where the submit page sends the data and the bearer token it sends
+      # with it, both from n8n; kept out of the repository. Both or neither.
+      N8N_MONITORING_REPORT_DESTINATION: ${N8N_MONITORING_REPORT_DESTINATION:-}
+      N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN: ${N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN:-}
     volumes:
       # A named volume, not a bind mount: the container runs as `node` and a
       # bind-mounted host directory hits uid mismatches.

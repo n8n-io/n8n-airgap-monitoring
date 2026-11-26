@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import AjvCompiler from "@fastify/ajv-compiler";
 import fastifyStatic from "@fastify/static";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
+import { contentSecurityPolicy } from "./content-security-policy";
 import instanceReport from "./instance-report/instance-report.plugin";
 import config from "./plugins/config";
 import db from "./plugins/db";
@@ -48,7 +49,11 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, _opts): Promise<void
   if (existsSync(submitRoot)) {
     void fastify.register(fastifyStatic, {
       root: submitRoot,
-      setHeaders: (res) => res.setHeader("x-frame-options", "DENY"),
+      setHeaders: (res) => {
+        res.setHeader("x-frame-options", "DENY");
+        // A header, not a <meta> tag in the built page: the destination is only known at start-up.
+        res.setHeader("content-security-policy", contentSecurityPolicy(fastify.config.reportDestination));
+      },
     });
   } else {
     fastify.log.warn("submit-ui is not built, / serves no page");

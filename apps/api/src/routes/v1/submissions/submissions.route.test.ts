@@ -6,6 +6,7 @@ const READ = { authorization: "Bearer test-read-token" };
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.unstubAllEnvs();
 });
 
 test.each([
@@ -36,7 +37,20 @@ test("serves the overview with the read token", async () => {
   const res = await app.inject({ method: "GET", url: URL, headers: READ });
 
   expect(res.statusCode).toBe(200);
-  expect(res.json()).toEqual({ pending: [], upcoming: [], submitted: [] });
+  expect(res.json()).toEqual({ pending: [], upcoming: [], submitted: [], destination: null });
+});
+
+test("hands the report destination and its auth token to the page", async () => {
+  vi.stubEnv("N8N_MONITORING_REPORT_DESTINATION", "https://n8n.example.com/webhook/usage");
+  vi.stubEnv("N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN", "destination-secret");
+  const app = await build();
+
+  const res = await app.inject({ method: "GET", url: URL, headers: READ });
+
+  expect(res.json().destination).toEqual({
+    url: "https://n8n.example.com/webhook/usage",
+    authToken: "destination-secret",
+  });
 });
 
 test("records a pending month with the read token", async () => {

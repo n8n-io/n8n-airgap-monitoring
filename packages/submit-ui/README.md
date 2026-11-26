@@ -21,13 +21,17 @@ holds only the built page, and Vue is bundled into it, so it's a
 ["^build"]`). If `dist/` is missing, for example under the API's unit tests,
 the API starts without the page and logs a warning.
 
-Two things are fixed at build time:
+Nothing about the destination is built into the page. The API reads it at
+start-up and serves it with the overview:
 
-- **`N8N_MONITORING_REPORT_DESTINATION`**, the n8n URL the page posts to. It isn't in the
-  repository and can't be changed in the browser. Without it the page still
-  builds, but it shows "Not configured" and Submit stays disabled.
-- **A Content-Security-Policy** in `index.html` that only allows requests to
-  this service and to the endpoint's origin.
+- **`N8N_MONITORING_REPORT_DESTINATION`** and
+  **`N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN`**, the n8n URL the page posts
+  to and the token it sends as `Authorization: Bearer <token>`. Both come from
+  n8n and are set together or not at all. They come with
+  `GET /api/v1/submissions`, behind the read token, and can't be changed in the
+  browser. Without them Submit stays disabled.
+- **A Content-Security-Policy** header, set by the API on the page, that only
+  allows requests to this service and to the destination's origin.
 
 ## Authentication
 
@@ -44,26 +48,29 @@ Commands are run from the repository root. Use three terminals.
 
 ```sh
 N8N_MONITORING_READ_TOKEN=dev-read-token N8N_MONITORING_WRITE_TOKEN=dev-write-token \
+  N8N_MONITORING_REPORT_DESTINATION=http://localhost:5678/webhook \
+  N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN=dev-destination-token \
   pnpm --filter api dev
 ```
 
-**2. A stand-in for the n8n endpoint**, which logs what it receives and
-answers the browser's CORS preflight:
+**2. A stand-in for the n8n endpoint**, which logs what it receives, including
+the authorization header, and answers the browser's CORS preflight:
 
 ```sh
-node -e "require('node:http').createServer((q,s)=>{s.setHeader('access-control-allow-origin','*');s.setHeader('access-control-allow-headers','content-type');let n=0;q.on('data',c=>n+=c.length);q.on('end',()=>{console.log(q.method,q.url,n,'bytes');s.end()})}).listen(5678)"
+node -e "require('node:http').createServer((q,s)=>{s.setHeader('access-control-allow-origin','*');s.setHeader('access-control-allow-headers','content-type, authorization');let n=0;q.on('data',c=>n+=c.length);q.on('end',()=>{console.log(q.method,q.url,q.headers.authorization,n,'bytes');s.end()})}).listen(5678)"
 ```
 
 **3. The page**, with hot reload. Vite proxies `/api` to the API:
 
 ```sh
-N8N_MONITORING_REPORT_DESTINATION=http://localhost:5678/webhook pnpm --filter submit-ui dev
+pnpm --filter submit-ui dev
 ```
 
-Open the URL Vite prints and enter `dev-read-token`. The endpoint is read
-when Vite starts, so restart terminal 3 to change it. To send to a real n8n
-webhook instead, point `N8N_MONITORING_REPORT_DESTINATION` at it. The webhook has to allow
-CORS from the page's origin.
+Open the URL Vite prints and enter `dev-read-token`. The destination is read
+when the API starts, so restart terminal 1 to change it. To send to a real n8n
+webhook instead, point `N8N_MONITORING_REPORT_DESTINATION` and its auth token
+at it. The webhook has to allow CORS from the page's origin, including the
+`authorization` header.
 
 ### Test data
 
@@ -87,7 +94,7 @@ in `apps/api/data/`, so delete that directory to start over.
 To check the page the way the image serves it, from the API at `/`:
 
 ```sh
-N8N_MONITORING_REPORT_DESTINATION=http://localhost:5678/webhook pnpm turbo run build --filter api...
+pnpm turbo run build --filter api...
 ```
 
 Then start the API as in step 1 and open http://localhost:3456/. The API
