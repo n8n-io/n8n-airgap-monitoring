@@ -1,0 +1,22 @@
+docs/USER_GUIDE.md
+  s_d7ca60e35378e2::t_3fa952acc38aad 240
+packages/submit-ui/README.md
+  s_d7ca60e35378e2::t_82f35d9942d405 87-89
+  s_d7ca60e35378e2::t_8064b341fc83b6 70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "50a40795b77db00e2c6aa601f1d6c3f88f7d189b",
+  "prompts": {},
+  "sessions": {
+    "s_d7ca60e35378e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87d9bb31-928f-49ec-bc3e-4bed770c7d59",
+        "model": "claude-haiku-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+packages/submit-ui/src/manual-upload.ts
+  s_d7ca60e35378e2::t_11e1010c8dc562 59,64
+packages/submit-ui/README.md
+  s_d7ca60e35378e2::t_e508e46be49d4f 50-55
+packages/submit-ui/src/App.vue
+  s_d7ca60e35378e2::t_8cce59d0bd8429 182-183,187-188
+  s_d7ca60e35378e2::t_25ff87cd310a0a 98-107
+  s_d7ca60e35378e2::t_8df9efb9edc326 291-298
+  s_d7ca60e35378e2::t_c16e155cc30c23 274
+  s_d7ca60e35378e2::t_3e898e3af01603 29-30
+  s_d7ca60e35378e2::t_572d7be5ffab31 7
+  s_d7ca60e35378e2::t_2652c46e2a0028 86
+README.md
+  s_d7ca60e35378e2::t_314b04312b2a90 22
+docs/USER_GUIDE.md
+  s_d7ca60e35378e2::t_26ed3cd4a006d6 237
+packages/submit-ui/src/components/ManualUploadDialog.vue
+  s_d7ca60e35378e2::t_4a52524db154fa 2
+  s_d7ca60e35378e2::t_ae9e3cffebb2fe 3,14,18-19,21-22,26-31,34-52,54-55,57-61,69,71-74,87-89,102-103,106-109,114,117,121,123-146,148-152,168,172,178-180,183,185-188,191,197-198
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7310884f0daa3f8a11f96102bc0ec5c724bbd093",
+  "prompts": {},
+  "sessions": {
+    "s_d7ca60e35378e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87d9bb31-928f-49ec-bc3e-4bed770c7d59",
+        "model": "claude-haiku-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}
