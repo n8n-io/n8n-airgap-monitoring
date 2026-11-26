@@ -1,0 +1,73 @@
+packages/submit-ui/src/components/ManualUploadDialog.vue
+  s_d7ca60e35378e2::t_53a65c59905d69 1-151
+  s_d7ca60e35378e2::t_61c3fea9b9c4be 152-177
+packages/submit-ui/README.md
+  s_d7ca60e35378e2::t_878c3c08d2d5d3 46-54
+  s_d7ca60e35378e2::t_97a0311dfe5630 27-29
+docker-compose.yml
+  s_d7ca60e35378e2::t_655cc06e8a8838 20-21
+README.md
+  s_d7ca60e35378e2::t_11f6818bb0c3ee 22
+packages/submit-ui/src/main.css
+  s_d7ca60e35378e2::t_54ff2ecf9c8659 310-325
+packages/submit-ui/src/api.ts
+  s_d7ca60e35378e2::t_170df19d2e92de 105-106,110-111
+  s_d7ca60e35378e2::t_5468e9d280b2e4 107-109
+  s_d7ca60e35378e2::t_efeb4fd74967fb 48-49
+  s_d7ca60e35378e2::t_e94f0e59afc244 68-71
+  s_d7ca60e35378e2::t_f1d9bc31557a01 1-2
+packages/submit-ui/src/manual-upload.ts
+  s_d7ca60e35378e2::t_62cb97516ee91a 3-4
+  s_d7ca60e35378e2::t_028a2482ad5120 54-55
+  s_d7ca60e35378e2::t_fcdfaed16697d3 1-2,5-53,56
+turbo.json
+  s_d7ca60e35378e2::t_ade3e6df09f604 27-28
+apps/api/src/plugins/config.test.ts
+  s_d7ca60e35378e2::t_7c44bb442367ab 3
+  s_d7ca60e35378e2::t_eb6f0e912471f7 49-80
+docs/USER_GUIDE.md
+  s_d7ca60e35378e2::t_13662751dcb088 210-213
+  s_d7ca60e35378e2::t_5eb90800e7043d 241
+apps/api/src/test-utils/build-app.ts
+  s_d7ca60e35378e2::t_55e71271bd1bbe 22
+packages/submit-ui/src/App.vue
+  s_d7ca60e35378e2::t_3c1777bc33588c 255-257
+  s_d7ca60e35378e2::t_ff7a7ad9b3f1e4 164,169-170
+  s_d7ca60e35378e2::t_0e69200d2ceb84 271-277
+  s_d7ca60e35378e2::t_27282dec473b12 5,12,15,25-27
+  s_d7ca60e35378e2::t_0fc8d20ccae912 140
+  s_d7ca60e35378e2::t_ef002235864904 252-254,258-259
+packages/submit-ui/src/send.ts
+  s_d7ca60e35378e2::t_096ed1f5414c17 63
+  s_d7ca60e35378e2::t_16b6d2de7851be 1-7,9,15-16
+  s_d7ca60e35378e2::t_d7694464fa7a4c 30
+  s_d7ca60e35378e2::t_fb99425935665c 55
+  s_d7ca60e35378e2::t_64e0dc11d45ec0 71-73
+  s_d7ca60e35378e2::t_2e87a279d86097 17
+apps/api/src/plugins/config.ts
+  s_d7ca60e35378e2::t_5d1505ee32b184 90
+  s_d7ca60e35378e2::t_63b0775cb892d2 11-18,31-32
+  s_d7ca60e35378e2::t_6087c8306f3ca4 62-74
+apps/api/src/routes/v1/submissions/submissions.route.test.ts
+  s_d7ca60e35378e2::t_e047b010feaf01 2
+  s_d7ca60e35378e2::t_be11e598839282 41-47
+  s_d7ca60e35378e2::t_84bb61fbaf4d66 64-72
+apps/api/src/routes/v1/submissions/index.ts
+  s_d7ca60e35378e2::t_229b2aef4bb67b 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bb0eeade580c08cc55c2903d08aecce03733ad6c",
+  "prompts": {},
+  "sessions": {
+    "s_d7ca60e35378e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87d9bb31-928f-49ec-bc3e-4bed770c7d59",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}

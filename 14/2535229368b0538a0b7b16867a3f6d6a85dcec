@@ -1,0 +1,35 @@
+packages/submit-ui/src/components/ManualUploadDialog.vue
+  s_d7ca60e35378e2::t_d2f1fd965fad4c 196-205,207
+  s_d7ca60e35378e2::t_61513781744872 67-71,73-77
+  s_d7ca60e35378e2::t_bd83b5219b12ef 146-148,150
+  s_d7ca60e35378e2::t_8332379e582bc9 141-145,149,151-152
+  s_d7ca60e35378e2::t_85f1d6c2ec75f5 2
+  s_d7ca60e35378e2::t_220388ebec57fc 5-11
+  s_d7ca60e35378e2::t_b8ecedcdc40ca6 72,78
+packages/submit-ui/README.md
+  s_d7ca60e35378e2::t_bffa420e22fc10 50-53
+README.md
+  s_d7ca60e35378e2::t_3a8d4e52b2015f 22
+packages/submit-ui/src/manual-upload.ts
+  s_d7ca60e35378e2::t_1f3ad9108d8e88 47-60,64-67
+  s_d7ca60e35378e2::t_82483f8be11e6b 61-63
+docs/USER_GUIDE.md
+  s_d7ca60e35378e2::t_c7c1efaec16554 242
+  s_d7ca60e35378e2::t_297fd3cdfc7c1c 211-213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "142535229368b0538a0b7b16867a3f6d6a85dcec",
+  "prompts": {},
+  "sessions": {
+    "s_d7ca60e35378e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87d9bb31-928f-49ec-bc3e-4bed770c7d59",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Sam Wooler <swooler592@gmail.com>"
+    }
+  }
+}
