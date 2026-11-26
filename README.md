@@ -19,7 +19,7 @@ See also the user guide at [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 | `N8N_DB_PATH` | no | `./data/database.sqlite` | SQLite file holding the usage events. Point this at a mounted volume so reports survive container restarts. |
 | `N8N_MONITORING_REPORT_DESTINATION` | no | — | The n8n URL the submit page sends monthly usage to, provided by n8n. Set it together with `N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN`; the service refuses to start with only one of them. |
 | `N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN` | with the destination | — | Secret provided by n8n together with the destination URL. The submit page sends it as `Authorization: Bearer <token>` to the destination. |
-| `N8N_MONITORING_REPORT_UPLOAD_FORM_URL` | no | — | The link to the form that the user uploads the monthly report with, when the submit page cannot send usage to n8n. Unset: the submit page does not offer a manual upload. The page adds the `month` and `consumerId` query parameters, which fill the form fields of the same names. Provided by n8n. |
+| `N8N_MONITORING_REPORT_UPLOAD_FORM_URL` | no | — | The link to the form that the user uploads the monthly report with, when the submit page cannot send usage to n8n. Unset: the submit page does not offer a manual upload. The page adds the `month` query parameter. It also adds `consumerId` when a month's report holds exactly one consumer ID. Provided by n8n. |
 
 A reporting n8n instance authenticates with its n8n license certificate, or,
 if you set a write token, with that token alone. See

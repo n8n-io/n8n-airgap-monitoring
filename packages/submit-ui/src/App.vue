@@ -4,6 +4,7 @@ import {
   fetchOverview,
   messageOf,
   type MonthRow,
+  type PendingMonth,
   type SendState,
   type SubmissionsOverview,
   setToken,
@@ -25,6 +26,8 @@ const sendError = ref('')
 /** True when the last Submit failed at n8n, so the page offers a manual upload. */
 const destinationFailed = ref(false)
 const manualUploadOpen = ref(false)
+/** The months the dialog offers. Fixed when the dialog opens, so a failed reload cannot change them. */
+const manualUploadMonths = ref<PendingMonth[]>([])
 const progress = ref('')
 const sending = ref(false)
 const confirming = ref(false)
@@ -80,6 +83,7 @@ const incompleteSummary = computed(() =>
 /** Back to the token prompt, e.g. after the operator rotated the token. */
 function logOut(): void {
   authenticated.value = false
+  manualUploadOpen.value = false
   overview.value = undefined
   // After the next login the history shows the server's time for months sent in this visit.
   for (const month of Object.keys(sendStates)) {
@@ -89,6 +93,16 @@ function logOut(): void {
     delete sentAt[month]
   }
   loginError.value = 'The read token was not accepted. Enter it again.'
+}
+
+/** Months from the overview that were not sent in this visit. */
+function unsentMonths(): PendingMonth[] {
+  return (overview.value?.pending ?? []).filter((month) => sendStates[month.month] !== 'sent')
+}
+
+function openManualUpload(): void {
+  manualUploadMonths.value = unsentMonths()
+  manualUploadOpen.value = true
 }
 
 async function load(): Promise<void> {
@@ -165,10 +179,13 @@ async function submitAll(): Promise<void> {
     sendError.value = messageOf(error)
     destinationFailed.value = error instanceof DestinationError
   } finally {
+    // Taken before the reload, which replaces the overview and the send states.
+    const unsent = unsentMonths()
     // After a rejected token the page is back at the prompt, nothing to reload.
     if (authenticated.value) {
       await load()
-      // The dialog lists the pending months, so it opens only after the reload.
+      // The dialog opens only after the reload, with the months that were not sent.
+      manualUploadMonths.value = unsent
       manualUploadOpen.value = destinationFailed.value && uploadFormUrl.value !== null
       // Sent months are in the history now, which carries the server's own time.
       for (const [month, state] of Object.entries(sendStates)) {
@@ -254,7 +271,7 @@ async function submitAll(): Promise<void> {
         <div v-if="sendError" class="banner error" role="alert">
           <p>{{ sendError }}</p>
           <div v-if="destinationFailed && uploadFormUrl !== null" class="buttons">
-            <button type="button" class="secondary" @click="manualUploadOpen = true">
+            <button type="button" class="secondary" @click="openManualUpload">
               Upload manually
             </button>
           </div>
@@ -270,13 +287,14 @@ async function submitAll(): Promise<void> {
           :sent-at="sentAt[row.month]"
         />
       </ol>
-
-      <ManualUploadDialog
-        v-if="manualUploadOpen && uploadFormUrl !== null"
-        :months="overview.pending"
-        :upload-form-url="uploadFormUrl"
-        @close="manualUploadOpen = false"
-      />
     </template>
+
+    <ManualUploadDialog
+      v-if="authenticated && manualUploadOpen && uploadFormUrl !== null"
+      :months="manualUploadMonths"
+      :upload-form-url="uploadFormUrl"
+      @close="manualUploadOpen = false"
+      @unauthorized="logOut"
+    />
   </main>
 </template>

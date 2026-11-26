@@ -47,12 +47,12 @@ prompt. See [docs/AUTHORIZATION.md](../../docs/AUTHORIZATION.md).
 
 When n8n cannot be reached or rejects the data, and the service has an upload
 form URL, Submit opens a dialog. Without the URL, Submit shows only the error
-banner. The dialog has a download button for each pending month, and a link to the upload
-form for each month. The dialog lists the consumer IDs from the oldest pending
-month's report, if the report has any. Token-mode reports have none, so the
-dialog then asks the user to contact n8n. Each link carries the `month` query
-parameter. It also carries `consumerId` when the report holds exactly one ID.
-The names are constants in `src/manual-upload.ts`. Other failures, such as a
+banner. The dialog has a row for each pending month, with its own download and
+upload form link. Each month's report is read for its consumer IDs when the
+dialog opens. A link carries the `month` query parameter. It also carries
+`consumerId` when that month's report holds exactly one ID. Reports with none
+or several IDs leave the field for the user. The names are constants in
+`src/manual-upload.ts`. Other failures, such as a
 report this service cannot serve, show only the error banner. To see the dialog
 locally, post the test data below, stop the stand-in in terminal 2, and press
 Submit.

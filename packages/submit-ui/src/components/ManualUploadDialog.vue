@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, useTemplateRef } from 'vue'
-import { messageOf, type PendingMonth } from '../api'
+import { computed, onMounted, reactive, ref, useTemplateRef } from 'vue'
+import { messageOf, type PendingMonth, UnauthorizedError } from '../api'
 import { formatMonth } from '../format'
 import {
   consumerIdsIn,
@@ -11,44 +11,54 @@ import {
 } from '../manual-upload'
 
 const props = defineProps<{ months: PendingMonth[]; uploadFormUrl: string }>()
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: []; unauthorized: [] }>()
 
 const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 
-/** Report texts already fetched, by month, so each month comes from this service once. */
-const reportTexts = new Map<string, string>()
+/** What one month's report says about the consumer ID, once it has been read. */
+type MonthIds = { status: 'loaded'; ids: string[] } | { status: 'failed'; error: string }
 
-type ConsumerIdStatus = 'loading' | 'loaded' | 'failed'
-const consumerIdStatus = ref<ConsumerIdStatus>('loading')
-const consumerIds = ref<string[]>([])
-const consumerIdError = ref('')
-
+/** A month with no entry is still being read. */
+const idsByMonth = reactive<Record<string, MonthIds>>({})
 const downloadingMonth = ref('')
 const downloadError = ref('')
 
-async function reportOf(pending: PendingMonth): Promise<string> {
-  const known = reportTexts.get(pending.month)
-  if (known !== undefined) {
-    return known
-  }
-  const text = await fetchMonthReport(pending)
-  reportTexts.set(pending.month, text)
-  return text
+interface MonthRow {
+  pending: PendingMonth
+  loading: boolean
+  error: string
+  ids: string[]
+  url: string | null
 }
 
-/** The oldest month is the first one the user uploads, so its report holds the consumer IDs shown. */
-async function loadConsumerIds(): Promise<void> {
-  const oldest = props.months[0]
-  if (oldest === undefined) {
-    consumerIdStatus.value = 'loaded'
-    return
-  }
+const rows = computed<MonthRow[]>(() =>
+  props.months.map((pending) => {
+    const entry = idsByMonth[pending.month]
+    const ids = entry?.status === 'loaded' ? entry.ids : []
+    return {
+      pending,
+      loading: entry === undefined,
+      error: entry?.status === 'failed' ? entry.error : '',
+      ids,
+      // Only a month whose report was read gets a link, so no link lacks its own ID.
+      url:
+        entry?.status === 'loaded'
+          ? prefilledFormUrl(props.uploadFormUrl, pending.month, ids)
+          : null,
+    }
+  }),
+)
+
+async function loadIds(pending: PendingMonth): Promise<void> {
   try {
-    consumerIds.value = consumerIdsIn(await reportOf(oldest))
-    consumerIdStatus.value = 'loaded'
+    const ids = consumerIdsIn(await fetchMonthReport(pending))
+    idsByMonth[pending.month] = { status: 'loaded', ids }
   } catch (error) {
-    consumerIdError.value = messageOf(error)
-    consumerIdStatus.value = 'failed'
+    if (error instanceof UnauthorizedError) {
+      emit('unauthorized')
+      return
+    }
+    idsByMonth[pending.month] = { status: 'failed', error: messageOf(error) }
   }
 }
 
@@ -56,24 +66,17 @@ async function download(pending: PendingMonth): Promise<void> {
   downloadingMonth.value = pending.month
   downloadError.value = ''
   try {
-    saveFile(await reportOf(pending), reportFileName(pending.month))
+    saveFile(await fetchMonthReport(pending), reportFileName(pending.month))
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      emit('unauthorized')
+      return
+    }
     downloadError.value = messageOf(error)
   } finally {
     downloadingMonth.value = ''
   }
 }
-
-/** Empty until the consumer ID is known, so a link is never opened without it. */
-const formLinks = computed(() => {
-  if (consumerIdStatus.value === 'loading') {
-    return []
-  }
-  return props.months.map(({ month }) => ({
-    month,
-    url: prefilledFormUrl(props.uploadFormUrl, month, consumerIds.value),
-  }))
-})
 
 function closeDialog(): void {
   dialog.value?.close()
@@ -81,7 +84,9 @@ function closeDialog(): void {
 
 onMounted(() => {
   dialog.value?.showModal()
-  void loadConsumerIds()
+  for (const pending of props.months) {
+    void loadIds(pending)
+  }
 })
 </script>
 
@@ -94,65 +99,57 @@ onMounted(() => {
   >
     <h2 id="manual-upload-title">Upload the usage data manually</h2>
     <p>
-      This browser could not send the data to n8n. Download each month and upload it with the form.
+      This browser could not send the data to n8n. For each month, download the file and upload it
+      with the form.
     </p>
 
-    <section>
-      <h3>Consumer ID</h3>
-      <p v-if="consumerIdStatus === 'loading'" class="muted">Loading…</p>
-      <p v-else-if="consumerIdStatus === 'failed'" class="banner error" role="alert">
-        {{ consumerIdError }}
-      </p>
-      <ul v-else-if="consumerIds.length > 0" class="consumer-ids">
-        <li v-for="id in consumerIds" :key="id">
-          <code>{{ id }}</code>
-        </li>
-      </ul>
-      <p v-else class="muted">
-        These reports have no license consumer ID. Ask n8n for your consumer ID.
-      </p>
-    </section>
-
-    <section>
-      <h3>Download</h3>
-      <ul class="downloads">
-        <li v-for="month in months" :key="month.month">
+    <ol class="months">
+      <li v-for="row in rows" :key="row.pending.month" class="month">
+        <div class="month-head">
+          <h3>{{ formatMonth(row.pending.month) }}</h3>
           <button
             type="button"
             class="secondary"
             :disabled="downloadingMonth !== ''"
-            @click="download(month)"
+            @click="download(row.pending)"
           >
             <span
-              v-if="downloadingMonth === month.month"
+              v-if="downloadingMonth === row.pending.month"
               class="spinner small"
               aria-hidden="true"
             ></span>
-            Download {{ formatMonth(month.month) }}
+            Download
           </button>
-        </li>
-      </ul>
-      <p v-if="downloadError" class="banner error" role="alert">{{ downloadError }}</p>
-    </section>
+        </div>
 
-    <section>
-      <h3>Upload form</h3>
-      <p v-if="consumerIdStatus === 'loading'" class="muted">Loading…</p>
-      <template v-else>
-        <p>
-          Each link fills in the month, and the consumer ID when there is one. Attach the downloaded
-          file.
-        </p>
-        <ul class="form-links">
-          <li v-for="link in formLinks" :key="link.month">
-            <a :href="link.url" target="_blank" rel="noopener noreferrer"
-              >Open the form for {{ formatMonth(link.month) }}</a
+        <p v-if="row.loading" class="muted">Reading the consumer ID…</p>
+        <p v-else-if="row.error" class="banner error" role="alert">{{ row.error }}</p>
+        <template v-else>
+          <p v-if="row.ids.length === 0" class="muted">
+            This report has no consumer ID. Enter the consumer ID from n8n in the form.
+          </p>
+          <p v-else-if="row.ids.length === 1">
+            Consumer ID: <code>{{ row.ids[0] }}</code>
+          </p>
+          <template v-else>
+            <p class="muted">
+              This report has several consumer IDs. Choose the one that applies in the form:
+            </p>
+            <ul class="consumer-ids">
+              <li v-for="id in row.ids" :key="id">
+                <code>{{ id }}</code>
+              </li>
+            </ul>
+          </template>
+          <p>
+            <a :href="row.url ?? undefined" target="_blank" rel="noopener noreferrer"
+              >Open the upload form</a
             >
-            <span class="muted url">{{ link.url }}</span>
-          </li>
-        </ul>
-      </template>
-    </section>
+          </p>
+          <p class="muted url">{{ row.url }}</p>
+        </template>
+      </li>
+    </ol>
 
     <p class="muted">Months that you upload here stay pending on this page.</p>
 
@@ -168,17 +165,30 @@ h2 {
 }
 
 h3 {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 0.95rem;
 }
 
+.months {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 /* The page's section rule adds a large top margin, which a dialog does not need. */
-section {
+.month {
   margin-top: 20px;
 }
 
-.consumer-ids,
-.downloads {
+.month-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.consumer-ids {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -186,22 +196,6 @@ section {
 
 .consumer-ids code {
   user-select: all;
-}
-
-.downloads {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.form-links {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.form-links li + li {
-  margin-top: 12px;
 }
 
 .url {

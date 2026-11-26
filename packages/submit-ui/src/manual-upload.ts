@@ -56,11 +56,12 @@ const CONSUMER_ID_FIELD = 'consumerId'
 
 /**
  * The upload form with the month and consumer ID already filled in. With no ID, or several, the
- * ID stays empty: this page cannot tell which one belongs to the month.
+ * ID is left out, so a value in the configured URL does not reach the form.
  */
 export function prefilledFormUrl(formUrl: string, month: string, consumerIds: string[]): string {
   const url = new URL(formUrl)
   url.searchParams.set(MONTH_FIELD, month)
+  url.searchParams.delete(CONSUMER_ID_FIELD)
   const [consumerId, ...otherIds] = consumerIds
   if (consumerId !== undefined && otherIds.length === 0) {
     url.searchParams.set(CONSUMER_ID_FIELD, consumerId)
