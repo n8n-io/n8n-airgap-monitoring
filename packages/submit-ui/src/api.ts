@@ -70,11 +70,9 @@ export function setToken(value: string): void {
 
 /** A request to this service with the read token. */
 export async function authedFetch(url: string, init: RequestInit = {}): Promise<Response> {
-  const response = await fetch(url, {
-    cache: 'no-store',
-    ...init,
-    headers: { ...init.headers, authorization: `Bearer ${token}` },
-  })
+  const headers = new Headers(init.headers)
+  headers.set('authorization', `Bearer ${token}`)
+  const response = await fetch(url, { cache: 'no-store', ...init, headers })
   if (response.status === 401) {
     throw new UnauthorizedError()
   }
