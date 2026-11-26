@@ -207,11 +207,6 @@ query string (e.g. `instanceId=450b5c85…,9f1e2d3c…&start=2026-10-01&end=2026
 
 Without `start` or `end` the report contains the complete history.
 
-If the submit page cannot reach n8n, it opens a dialog. The dialog shows the
-consumer ID, and it lets you download each pending month as its own file. Each
-month has a link to the upload form that n8n provides. The link fills in the
-month and the consumer ID. Attach the downloaded file in the form.
-
 ## Alternative: authenticate instances with a write token
 
 Use this only if you cannot restrict the write endpoint to your own instances
