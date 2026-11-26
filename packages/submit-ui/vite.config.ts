@@ -32,8 +32,6 @@ function contentSecurityPolicy(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
-  // Served by the API under /submit/, see apps/api/src/app.ts.
-  base: '/submit/',
   plugins: [vue(), contentSecurityPolicy()],
   define: {
     __SUBMIT_ENDPOINT__: JSON.stringify(SUBMIT_ENDPOINT),

@@ -165,6 +165,9 @@ importers:
       sqlite3:
         specifier: 5.1.7
         version: 5.1.7(supports-color@8.1.1)
+      submit-ui:
+        specifier: workspace:*
+        version: link:../../packages/submit-ui
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.5.8
@@ -273,11 +276,7 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(typescript@6.0.3)
 
-  apps/submit:
-    dependencies:
-      vue:
-        specifier: ^3.5.43
-        version: 3.5.43(typescript@6.0.3)
+  packages/submit-ui:
     devDependencies:
       '@tsconfig/node26':
         specifier: ^26.0.1
@@ -287,7 +286,7 @@ importers:
         version: 26.4.1
       '@vitejs/plugin-vue':
         specifier: ^6.0.9
-        version: 6.0.9(vite@8.2.1(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12))(vue@3.5.43(typescript@6.0.3))
+        version: 6.0.9(vite@8.3.8(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12))(vue@3.5.43(typescript@6.0.3))
       '@vue/tsconfig':
         specifier: ^0.9.1
         version: 0.9.1(typescript@6.0.3)(vue@3.5.43(typescript@6.0.3))
@@ -296,7 +295,10 @@ importers:
         version: 6.0.3
       vite:
         specifier: ^8.2.1
-        version: 8.2.1(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12)
+        version: 8.3.8(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12)
+      vue:
+        specifier: ^3.5.43
+        version: 3.5.43(typescript@6.0.3)
       vue-tsc:
         specifier: ^3.3.12
         version: 3.3.12(typescript@6.0.3)

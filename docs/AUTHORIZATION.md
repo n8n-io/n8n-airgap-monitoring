@@ -21,7 +21,7 @@ request without an `Authorization` header, or with a bearer token that does
 not equal the configured value, is answered with `401 Unauthorized`. There is
 nothing else to it: no users, no scopes, no expiry.
 
-The submit page at `/submit/` is itself static and public, but it shows
+The submit page at `/` is itself static and public, but it shows
 nothing until the user enters the read token. The page keeps the token in
 memory only and sends it as the bearer token on every call: the submissions
 overview, recording a month, and `GET /api/v1/report` for each month's data.

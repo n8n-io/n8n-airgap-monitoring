@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import AjvCompiler from "@fastify/ajv-compiler";
 import fastifyStatic from "@fastify/static";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
@@ -41,19 +41,17 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, _opts): Promise<void
   void fastify.register(instanceReport);
   void fastify.register(submissions);
 
-  // SPIKE (API-463): the submit page built from apps/submit. The image copies it to public/,
-  // a local build reads it straight from apps/submit/dist.
-  const submitRoot = [join(__dirname, "..", "public"), join(__dirname, "..", "..", "submit", "dist")].find((dir) =>
-    existsSync(dir),
-  );
-  if (submitRoot !== undefined) {
+  // The submit page, a dependency like any other: packages/submit-ui builds it to its dist/, which
+  // ships in node_modules. Unbuilt (e.g. under the unit tests) the API runs without it.
+  const submitRoot = join(dirname(require.resolve("submit-ui/package.json")), "dist");
+  // It is the service's only UI, so it sits at the root; /api and /healthz are more specific routes and win.
+  if (existsSync(submitRoot)) {
     void fastify.register(fastifyStatic, {
       root: submitRoot,
-      prefix: "/submit/",
-      redirect: true,
       setHeaders: (res) => res.setHeader("x-frame-options", "DENY"),
     });
-    fastify.get("/submit", async (_request, reply) => reply.redirect("/submit/"));
+  } else {
+    fastify.log.warn("submit-ui is not built, / serves no page");
   }
 
   void fastify.register(healthRoutes);

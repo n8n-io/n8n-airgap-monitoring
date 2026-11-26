@@ -1,5 +1,6 @@
 packages:
   - "apps/*"
+  - "packages/*"
 
 # sqlite3's install script downloads its prebuilt binary for the current
 # platform (falling back to a source build only when no prebuild exists), so

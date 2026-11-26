@@ -45,7 +45,7 @@ In order to run, the service needs:
 - **A secret read token** in `N8N_MONITORING_READ_TOKEN`, which you generate
   yourself. It is a plain string that unlocks the fleet report, sent verbatim
   in the `Authorization: Bearer <token>` header of a request. The submit page
-  at `/submit/` asks for it each time you open it.
+  at the service's root URL asks for it each time you open it.
 - **A persistent volume mounted at `/data`**, on SSD-backed storage. It holds
   the SQLite database, the only copy of your usage history, so include it in
   your backups.
