@@ -269,12 +269,6 @@ button {
   font-size: 1.05rem;
 }
 
-.secondary {
-  background: transparent;
-  border-color: var(--border);
-  color: var(--text);
-}
-
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -297,24 +291,9 @@ summary:focus-visible {
   border-radius: 12px;
 }
 
-.banner p {
-  margin: 0 0 12px;
-}
-
-.buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 .error {
   background: var(--critical-bg);
   color: var(--critical-text);
-}
-
-.warning {
-  background: var(--warning-bg);
-  color: var(--warning-text);
 }
 
 .spinner {

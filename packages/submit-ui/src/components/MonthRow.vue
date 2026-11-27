@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { MissingInstance, MonthRow, SendState } from '../api'
-import { daysSince, formatDateTime, formatDay, formatMonth } from '../format'
+import type { MissingInstance, MonthRow, PendingMonth, SendState } from '../api'
+import { formatDateTime, formatDay, formatMonth } from '../format'
 
 const props = defineProps<{ row: MonthRow; state?: SendState; sentAt?: string }>()
 
@@ -23,12 +23,16 @@ const deliveredAt = computed(
   () => props.sentAt ?? (props.row.kind === 'submitted' ? props.row.submittedAt : undefined),
 )
 
+function completeText({ complete, instances }: PendingMonth): string {
+  return `${complete} of ${instances} ${instances === 1 ? 'instance' : 'instances'} reported the whole month`
+}
+
 function nameOf(instance: MissingInstance): string {
   return instance.label ?? instance.instanceId.slice(0, 12)
 }
 
 function lastDayText(instance: MissingInstance): string {
-  return instance.lastDay === null ? 'no data this month' : `data up to ${instance.lastDay}`
+  return instance.lastDay === null ? 'no daily data this month' : `data up to ${instance.lastDay}`
 }
 </script>
 
@@ -56,22 +60,15 @@ function lastDayText(instance: MissingInstance): string {
       </p>
 
       <template v-else-if="row.kind === 'pending'">
-        <p class="meta">
-          {{ row.pending.complete }} of {{ row.pending.instances }}
-          {{ row.pending.instances === 1 ? 'instance' : 'instances' }} reported the whole month
-        </p>
-        <ul v-if="row.pending.waiting.length + row.pending.stale.length > 0" class="missing">
-          <li v-for="instance in row.pending.waiting" :key="instance.instanceId">
-            <span class="mark mark-warning" aria-hidden="true"></span>
-            <strong>{{ nameOf(instance) }}</strong> {{ lastDayText(instance) }}, next report due by
-            {{ formatDateTime(instance.expectedBy) }}
-          </li>
-          <li v-for="instance in row.pending.stale" :key="instance.instanceId">
-            <span class="mark mark-critical" aria-hidden="true"></span>
-            <strong>{{ nameOf(instance) }}</strong> {{ lastDayText(instance) }}, silent for
-            {{ daysSince(instance.lastReportAt) }} days
-          </li>
-        </ul>
+        <details v-if="row.pending.missing.length > 0" class="meta">
+          <summary>{{ completeText(row.pending) }}</summary>
+          <ul class="missing">
+            <li v-for="instance in row.pending.missing" :key="instance.instanceId">
+              <strong>{{ nameOf(instance) }}</strong> {{ lastDayText(instance) }}
+            </li>
+          </ul>
+        </details>
+        <p v-else class="meta">{{ completeText(row.pending) }}</p>
       </template>
     </div>
   </li>
@@ -155,6 +152,10 @@ li:last-child::before {
   font-size: 0.88rem;
 }
 
+summary {
+  cursor: pointer;
+}
+
 .missing {
   margin: 6px 0 0;
   padding: 0;
@@ -168,23 +169,6 @@ li:last-child::before {
 
 .missing li::before {
   content: none;
-}
-
-.mark {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 6px;
-  border-radius: 50%;
-  vertical-align: 1px;
-}
-
-.mark-warning {
-  background: var(--warning);
-}
-
-.mark-critical {
-  background: var(--critical);
 }
 
 .status-upcoming .body {

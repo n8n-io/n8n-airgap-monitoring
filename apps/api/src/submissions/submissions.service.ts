@@ -1,13 +1,6 @@
 import type { DataSource } from "@n8n/typeorm";
 import type { InstanceReportRepository, InstanceReportRow } from "../instance-report/instance-report.repository";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-/** Silent for longer than this before the month started: decommissioned, not part of the month. */
-const RECENTLY_ALIVE_MS = 30 * DAY_MS;
-/** Overdue once the next report has not come within this many of the instance's usual intervals. */
-const OVERDUE_AFTER_INTERVALS = 1.5;
-/** The intervals between reports the median is taken from. */
-const INTERVAL_SAMPLE = 10;
 /**
  * A month becomes pending on this day of the next month (UTC), not at midnight on the 1st: the
  * last day's daily only arrives with each instance's report slot on the 1st.
@@ -19,15 +12,12 @@ export interface Submission {
   submittedAt: string;
 }
 
-/** An instance that has not delivered the month's last day. */
+/** An instance with data in the month that has not delivered the month's last day. */
 export interface MissingInstance {
   instanceId: string;
   label: string | null;
-  /** Last day of the month it has a daily value for, or null when it has none in the month. */
+  /** Last day of the month it has a daily value for, or null when it only has totals in the month. */
   lastDay: string | null;
-  lastReportAt: string;
-  /** Latest time its next report is due, from its own median report interval. */
-  expectedBy: string;
 }
 
 export interface PendingMonth {
@@ -36,10 +26,7 @@ export interface PendingMonth {
   end: string;
   instances: number;
   complete: number;
-  /** The missing days most likely arrive with the instance's next report. */
-  waiting: MissingInstance[];
-  /** The missing days are not coming on their own: the report is overdue or already went past them. */
-  stale: MissingInstance[];
+  missing: MissingInstance[];
 }
 
 /** A month with data that cannot be submitted yet. */
@@ -68,9 +55,6 @@ interface InstanceSummary {
   instanceId: string;
   label: string | null;
   firstDay: string;
-  firstSeen: string;
-  lastReportAt: string;
-  medianReportIntervalMs: number;
   /** Months it has any point in, by the report filter's day rule. */
   months: Set<string>;
   /** Its last daily date in each month. */
@@ -101,7 +85,7 @@ export class SubmissionService {
     const months = monthsSince(firstDay.slice(0, 7), now);
     const pending = months
       .filter((month) => isClosed(month, now) && !done.has(month))
-      .map((month) => checkMonth(month, instances, now));
+      .map((month) => checkMonth(month, instances));
     const upcoming = months.filter((month) => !isClosed(month, now)).map((month) => upcomingMonth(month, instances));
 
     return { pending, upcoming, submitted };
@@ -148,65 +132,26 @@ function summarize(rows: InstanceReportRow[]): InstanceSummary {
     instanceId: first.instanceId,
     label: last.label,
     firstDay: firstDay ?? first.receivedAt.slice(0, 10),
-    firstSeen: first.receivedAt,
-    lastReportAt: last.receivedAt,
-    medianReportIntervalMs: medianReportInterval(rows),
     months,
     lastDailyByMonth,
   };
 }
 
-/** The median interval between its latest reports; a day when there are not two yet. */
-function medianReportInterval(rows: InstanceReportRow[]): number {
-  const times = rows.slice(-(INTERVAL_SAMPLE + 1)).map((row) => Date.parse(row.receivedAt));
-  const gaps = times
-    .slice(1)
-    .map((time, index) => time - times[index])
-    .sort((a, b) => a - b);
-
-  return gaps.length === 0 ? DAY_MS : gaps[Math.floor(gaps.length / 2)];
-}
-
-function checkMonth(month: string, instances: InstanceSummary[], now: Date): PendingMonth {
+/**
+ * Instances report daily, so by the time a month is pending every instance still running has
+ * delivered its last day. One that has not usually stopped during the month, e.g. was decommissioned.
+ */
+function checkMonth(month: string, instances: InstanceSummary[]): PendingMonth {
   const { start, end } = monthBounds(month);
-  const monthStart = Date.parse(`${start}T00:00:00.000Z`);
-  const monthEnd = monthStart + daysIn(month) * DAY_MS;
-  // A report covers the days up to the day before its slot, and is delivered at most a day after
-  // its slot. Two days after the month's last day, a missing last day is not coming any more.
-  const coveredBy = monthEnd + DAY_MS;
+  const pendingMonth: PendingMonth = { month, start, end, instances: 0, complete: 0, missing: [] };
 
-  const pendingMonth: PendingMonth = { month, start, end, instances: 0, complete: 0, waiting: [], stale: [] };
-
-  for (const instance of instances) {
-    const inMonth =
-      instance.months.has(month) ||
-      (Date.parse(instance.firstSeen) < monthEnd &&
-        Date.parse(instance.lastReportAt) >= monthStart - RECENTLY_ALIVE_MS);
-    if (!inMonth) {
-      continue;
-    }
-
+  for (const instance of instances.filter(({ months }) => months.has(month))) {
     pendingMonth.instances += 1;
     const lastDay = instance.lastDailyByMonth.get(month) ?? null;
     if (lastDay === end) {
       pendingMonth.complete += 1;
-      continue;
-    }
-
-    const lastReportAt = Date.parse(instance.lastReportAt);
-    const expectedBy = lastReportAt + OVERDUE_AFTER_INTERVALS * instance.medianReportIntervalMs;
-    const missing: MissingInstance = {
-      instanceId: instance.instanceId,
-      label: instance.label,
-      lastDay,
-      lastReportAt: instance.lastReportAt,
-      expectedBy: new Date(expectedBy).toISOString(),
-    };
-
-    if (lastReportAt < coveredBy && now.getTime() < expectedBy) {
-      pendingMonth.waiting.push(missing);
     } else {
-      pendingMonth.stale.push(missing);
+      pendingMonth.missing.push({ instanceId: instance.instanceId, label: instance.label, lastDay });
     }
   }
 

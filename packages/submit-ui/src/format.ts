@@ -1,5 +1,3 @@
-const DAY_MS = 24 * 60 * 60 * 1000
-
 /** "September 2026" for "2026-09", in the viewer's language. */
 export function formatMonth(month: string): string {
   const [year = 0, number = 1] = month.split('-').map(Number)
@@ -23,8 +21,4 @@ export function formatDay(day: string): string {
 /** In the viewer's time zone, which the browser names. */
 export function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
-}
-
-export function daysSince(iso: string): number {
-  return Math.floor((Date.now() - Date.parse(iso)) / DAY_MS)
 }

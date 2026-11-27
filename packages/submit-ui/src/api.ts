@@ -3,8 +3,6 @@ export interface MissingInstance {
   instanceId: string
   label: string | null
   lastDay: string | null
-  lastReportAt: string
-  expectedBy: string
 }
 
 export interface PendingMonth {
@@ -13,8 +11,7 @@ export interface PendingMonth {
   end: string
   instances: number
   complete: number
-  waiting: MissingInstance[]
-  stale: MissingInstance[]
+  missing: MissingInstance[]
 }
 
 export interface Submission {

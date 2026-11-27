@@ -9,7 +9,6 @@ import {
   UnauthorizedError,
 } from './api'
 import MonthRowItem from './components/MonthRow.vue'
-import { formatMonth } from './format'
 import { sendMonth } from './send'
 
 /** Set once the service accepted the read token; a page load starts without it. */
@@ -22,7 +21,6 @@ const loadError = ref('')
 const sendError = ref('')
 const progress = ref('')
 const sending = ref(false)
-const confirming = ref(false)
 const sendStates = reactive<Record<string, SendState>>({})
 /** When n8n acknowledged a month in this visit, until the reload brings the server's time. */
 const sentAt = reactive<Record<string, string>>({})
@@ -55,20 +53,6 @@ const rows = computed<MonthRow[]>(() => {
     })),
   ].sort((a, b) => b.month.localeCompare(a.month))
 })
-
-const incompleteMonths = computed(
-  () =>
-    overview.value?.pending.filter((month) => month.waiting.length + month.stale.length > 0) ?? [],
-)
-
-const incompleteSummary = computed(() =>
-  incompleteMonths.value
-    .map(
-      (month) =>
-        `${formatMonth(month.month)}: ${month.instances - month.complete} of ${month.instances} instances`,
-    )
-    .join(', '),
-)
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
@@ -119,21 +103,12 @@ async function logIn(): Promise<void> {
   }
 }
 
-function onSubmit(): void {
-  if (incompleteMonths.value.length > 0) {
-    confirming.value = true
-    return
-  }
-  void submitAll()
-}
-
 /** Oldest month first; stops at the first failure, which leaves that month and the later ones pending. */
 async function submitAll(): Promise<void> {
   const target = destination.value
   if (target === null) {
     return
   }
-  confirming.value = false
   sending.value = true
   sendError.value = ''
   progress.value = ''
@@ -214,22 +189,12 @@ async function submitAll(): Promise<void> {
     <p v-else-if="!overview" class="muted">Loading…</p>
     <template v-else>
       <div class="actions">
-        <div v-if="confirming" class="banner warning" role="alert">
-          <p>
-            <strong>Some instances have not delivered the whole month yet.</strong>
-            {{ incompleteSummary }}. Their data for those months will not be sent later.
-          </p>
-          <div class="buttons">
-            <button type="button" class="primary" @click="submitAll">Send anyway</button>
-            <button type="button" class="secondary" @click="confirming = false">Cancel</button>
-          </div>
-        </div>
-        <div v-else class="action-bar">
+        <div class="action-bar">
           <button
             type="button"
             class="primary large"
             :disabled="sending || !canSubmit"
-            @click="onSubmit"
+            @click="submitAll"
           >
             <span v-if="sending" class="spinner" aria-hidden="true"></span>
             {{ sending ? 'Sending…' : pendingCount === 0 ? 'Nothing to submit' : submitLabel }}
