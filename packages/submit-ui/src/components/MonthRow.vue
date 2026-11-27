@@ -60,15 +60,15 @@ function lastDayText(instance: MissingInstance): string {
       </p>
 
       <template v-else-if="row.kind === 'pending'">
+        <p class="meta">{{ completeText(row.pending) }}</p>
         <details v-if="row.pending.missing.length > 0" class="meta">
-          <summary>{{ completeText(row.pending) }}</summary>
+          <summary>Show instances that only reported until a certain day this month</summary>
           <ul class="missing">
             <li v-for="instance in row.pending.missing" :key="instance.instanceId">
               <strong>{{ nameOf(instance) }}</strong> {{ lastDayText(instance) }}
             </li>
           </ul>
         </details>
-        <p v-else class="meta">{{ completeText(row.pending) }}</p>
       </template>
     </div>
   </li>
