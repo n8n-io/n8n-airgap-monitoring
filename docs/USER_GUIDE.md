@@ -44,7 +44,8 @@ In order to run, the service needs:
 
 - **A secret read token** in `N8N_MONITORING_READ_TOKEN`, which you generate
   yourself. It is a plain string that unlocks the fleet report, sent verbatim
-  in the `Authorization: Bearer <token>` header of a request.
+  in the `Authorization: Bearer <token>` header of a request. The submit page
+  at the service's root URL asks for it each time you open it.
 - **A persistent volume mounted at `/data`**, on SSD-backed storage. It holds
   the SQLite database, the only copy of your usage history, so include it in
   your backups.
@@ -231,9 +232,11 @@ write token, every instance needs the new value too.
 | `N8N_MONITORING_READ_TOKEN` | yes | none | Bearer token required to download the report. The service refuses to start without it. |
 | `N8N_DB_PATH` | no | `/data/database.sqlite` in the image | Location of the SQLite file. Must be on persistent storage. |
 | `N8N_MONITORING_WRITE_TOKEN` | no | none | Only for the [write token alternative](#alternative-authenticate-instances-with-a-write-token). Instances must then present it as a bearer token, and license certificates are not accepted. |
+| `N8N_MONITORING_REPORT_DESTINATION` | no | none | The URL n8n gave you for submitting monthly usage. Without it the submit page cannot submit. |
+| `N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN` | with the destination | none | The secret n8n gave you together with the destination URL. Set both or neither; the service refuses to start with only one. |
 
 
-Tokens are read at start-up. After rotating one, restart the service.
+Tokens and the destination are read at start-up. After changing one, restart the service.
 
 ### On each n8n instance
 

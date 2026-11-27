@@ -2,10 +2,11 @@
 
 How n8n-airgap-monitoring decides whether to act on an incoming request.
 
-## Simple string token auth for GET /api/v1/report
+## Simple string token auth for GET /api/v1/report and the submissions routes
 
-The report download is guarded by one shared secret, the read token. The
-operator generates it and sets it on the service as `N8N_MONITORING_READ_TOKEN`;
+The report download and the `/api/v1/submissions` routes are guarded by one
+shared secret, the read token. The operator generates it and sets it on the
+service as `N8N_MONITORING_READ_TOKEN`;
 the service refuses to start without it. The token is read once at start-up,
 so a rotation needs a restart.
 
@@ -21,10 +22,30 @@ request without an `Authorization` header, or with a bearer token that does
 not equal the configured value, is answered with `401 Unauthorized`. There is
 nothing else to it: no users, no scopes, no expiry.
 
+The submit page at `/` is itself static and public, but it shows
+nothing until the user enters the read token. The page keeps the token in
+memory only and sends it as the bearer token on every call: the submissions
+overview, recording a month, and `GET /api/v1/report` for each month's data.
+There is no session, so every page load asks for the token again. A 401 on
+any call puts the page back at the token prompt.
+
 Reporting n8n instances never hold this token, so an instance that can write
 reports cannot read the fleet's data. How to download the report and share it
 is covered in the
 [user guide](USER_GUIDE.md#3-download-usage-reports-from-n8n-airgap-monitoring).
+
+## Submitting to n8n
+
+The page sends each month to `N8N_MONITORING_REPORT_DESTINATION` with
+`Authorization: Bearer <N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN>` and the
+month it carries as the query parameter `month=YYYY-MM`. Both
+values come from n8n and are set on the service, which refuses to start with
+only one of them. The page receives them from `GET /api/v1/submissions`, so
+only a holder of the read token gets the destination token, and the browser
+must hold it to send it. A `401` or `403` from n8n is reported on the page as a
+rejected destination token, not as a rejected read token. The service sets a
+Content-Security-Policy on the page that allows requests to itself and to the
+destination's origin only.
 
 ## Create instance report route
 

@@ -27,7 +27,15 @@
       "properties": {
         "existingSecret": { "type": "string" },
         "readTokenKey": { "type": "string", "minLength": 1 },
-        "writeTokenKey": { "type": "string", "minLength": 1 }
+        "writeTokenKey": { "type": "string", "minLength": 1 },
+        "reportDestinationAuthTokenKey": { "type": "string", "minLength": 1 }
+      }
+    },
+    "reportDestination": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": { "type": "string", "pattern": "^(https?://.+)?$" }
       }
     },
     "nodeOptions": { "type": "string" },

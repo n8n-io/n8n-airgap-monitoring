@@ -1,6 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 
+/** Where the submit page sends monthly usage, both values provided by n8n. */
+export interface ReportDestination {
+  url: string;
+  /** Sent by the submit page as `Authorization: Bearer <authToken>`. */
+  authToken: string;
+}
+
 export interface Config {
   readToken: string;
   /**
@@ -11,6 +18,35 @@ export interface Config {
    */
   writeToken: string | undefined;
   dbPath: string;
+  /** Undefined when neither variable is set: the submit page then cannot submit. */
+  reportDestination: ReportDestination | undefined;
+}
+
+/**
+ * Both variables or neither, and an http(s) URL, so a typo fails at start-up rather than on Submit.
+ * `URL.canParse` alone accepts `localhost:5678/webhook`, with `localhost:` as its scheme.
+ */
+function readReportDestination(): ReportDestination | undefined {
+  const url = process.env.N8N_MONITORING_REPORT_DESTINATION?.trim();
+  const authToken = process.env.N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN?.trim();
+  if (!url && !authToken) {
+    return undefined;
+  }
+  if (!url) {
+    throw new Error(
+      "N8N_MONITORING_REPORT_DESTINATION must be set when N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN is",
+    );
+  }
+  if (!authToken) {
+    throw new Error(
+      "N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN must be set when N8N_MONITORING_REPORT_DESTINATION is",
+    );
+  }
+  const protocol = URL.parse(url)?.protocol;
+  if (protocol !== "http:" && protocol !== "https:") {
+    throw new Error("N8N_MONITORING_REPORT_DESTINATION must be an absolute http:// or https:// URL");
+  }
+  return { url, authToken };
 }
 
 /**
@@ -27,6 +63,7 @@ export default fp(
       readToken,
       writeToken: process.env.N8N_MONITORING_WRITE_TOKEN?.trim() || undefined,
       dbPath: process.env.N8N_DB_PATH?.trim() || "./data/database.sqlite",
+      reportDestination: readReportDestination(),
     };
 
     fastify.decorate("config", config);

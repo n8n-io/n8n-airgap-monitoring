@@ -28,6 +28,9 @@ controller, image registry) are plain values.
 - Either a write token distributed to every reporting n8n instance
   (`N8N_INSTANCE_REPORTING_AUTH_TOKEN`), or, without one, instances that hold
   an n8n license certificate (`N8N_LICENSE_CERT`).
+- To submit monthly usage from the page at the service's root: the
+  destination URL and auth token n8n gave you. The token goes in the same
+  Secret, the URL in `reportDestination.url`.
 - Without a write token, a network in which only your own n8n instances can
   reach the service's data ingestion endpoint. See
   [Network exposure](#network-exposure).
@@ -56,8 +59,13 @@ controller, image registry) are plain values.
    kubectl create namespace airgap-monitoring
    kubectl -n airgap-monitoring create secret generic airgap-monitoring-tokens \
      --from-literal=N8N_MONITORING_READ_TOKEN="$(openssl rand -hex 32)" \
-     --from-literal=N8N_MONITORING_WRITE_TOKEN="$(openssl rand -hex 32)"   # optional
+     --from-literal=N8N_MONITORING_WRITE_TOKEN="$(openssl rand -hex 32)" \
+     --from-literal=N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN="<from n8n>"
    ```
+
+   Leave out the write token if you don't want token mode. Leave out the
+   report destination auth token if you leave out `reportDestination.url` in
+   the next step: the service refuses to start with only one of the two.
 
 3. Install from a checkout of this repository:
 
@@ -66,6 +74,7 @@ controller, image registry) are plain values.
      --namespace airgap-monitoring \
      --set image.repository=registry.example.internal/n8n/n8n-airgap-monitoring \
      --set auth.existingSecret=airgap-monitoring-tokens \
+     --set reportDestination.url="<from n8n>" \
      --set persistence.storageClassName=<your ssd class>
    ```
 
@@ -201,6 +210,7 @@ The ones you will need. Everything else is documented in
 | `imagePullSecrets` | `[]` | For a private mirror. |
 | `auth.existingSecret` | `""` | **Required.** Secret holding the read token and, optionally, the write token. |
 | `auth.readTokenKey` / `auth.writeTokenKey` | `N8N_MONITORING_READ_TOKEN` / `N8N_MONITORING_WRITE_TOKEN` | Keys in that Secret. A present write-token key puts the service in token mode; an absent one in certificate mode. |
+| `reportDestination.url` / `auth.reportDestinationAuthTokenKey` | `""` / `N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN` | The submission URL n8n gave you, and the Secret key holding the token that came with it. Set both or neither. |
 | `persistence.storageClassName` | cluster default | An SSD-backed class. |
 | `persistence.size` | `10Gi` | |
 | `persistence.existingClaim` | `""` | Reuse a PVC, for example one restored from a snapshot. |

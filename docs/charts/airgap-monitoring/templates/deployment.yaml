@@ -71,6 +71,17 @@ spec:
                   name: {{ $secret }}
                   key: {{ .Values.auth.writeTokenKey }}
                   optional: true
+            # Both or neither; the service refuses to start with only one.
+            {{- with .Values.reportDestination.url }}
+            - name: N8N_MONITORING_REPORT_DESTINATION
+              value: {{ . | quote }}
+            {{- end }}
+            - name: N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secret }}
+                  key: {{ .Values.auth.reportDestinationAuthTokenKey }}
+                  optional: true
             {{- with .Values.nodeOptions }}
             - name: NODE_OPTIONS
               value: {{ . | quote }}

@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import fp from "fastify-plugin";
 import { expect, onTestFinished, test } from "vitest";
 import app from "../app";
+import { migrations } from "../db/migrations";
 import { build } from "../test-utils/build-app";
 
 test("opens the database in WAL mode with synchronous left at FULL", async () => {
@@ -17,10 +18,7 @@ test("runs migrations on startup and records them once", async () => {
 
   const applied = await dataSource.query("SELECT name FROM migrations ORDER BY id");
 
-  expect(applied).toEqual([
-    { name: "CreateInstanceReports1788912000000" },
-    { name: "AddConsumerIdToInstanceReports1795132800000" },
-  ]);
+  expect(applied).toEqual(migrations.map((migration) => ({ name: migration.name })));
 });
 
 // Every container restart is a second start against a populated file. The
@@ -41,6 +39,8 @@ test("a second start against the same database file keeps its data and does not 
     await second.close();
   });
 
-  expect(await second.dataSource.query("SELECT COUNT(*) AS count FROM migrations")).toEqual([{ count: 2 }]);
+  expect(await second.dataSource.query("SELECT COUNT(*) AS count FROM migrations")).toEqual([
+    { count: migrations.length },
+  ]);
   expect(await second.dataSource.query("SELECT batchId FROM instance_reports")).toEqual([{ batchId: "batch-1" }]);
 });

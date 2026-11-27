@@ -47,6 +47,11 @@ podAnnotations: {}
 #                already hold, and the endpoint must be reachable only by your
 #                own instances (see README, Network exposure).
 #
+#   report destination auth token: optional, provided by n8n together with
+#                reportDestination.url. The submit page sends it as a bearer
+#                token with the monthly usage. Set both or neither; the
+#                service refuses to start with only one.
+#
 # The service trusts the embedded n8n license CA only; a CA rotation ships as a
 # new image.
 auth:
@@ -54,6 +59,14 @@ auth:
   # Keys inside that Secret. The write-token key may be absent.
   readTokenKey: N8N_MONITORING_READ_TOKEN
   writeTokenKey: N8N_MONITORING_WRITE_TOKEN
+  reportDestinationAuthTokenKey: N8N_MONITORING_REPORT_DESTINATION_AUTH_TOKEN
+
+# ----- Submitting usage to n8n -----
+# The URL n8n provides for submitting monthly usage from the page at the
+# service's root. Empty: the page loads but cannot submit. Requires the report
+# destination auth token in the Secret above.
+reportDestination:
+  url: ""
 
 # ----- Runtime -----
 # Cap the V8 heap below the container memory limit so garbage collection kicks

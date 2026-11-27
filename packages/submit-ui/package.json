@@ -1,0 +1,32 @@
+{
+  "name": "submit-ui",
+  "version": "0.0.0",
+  "private": true,
+  "license": "LicenseRef-n8n-enterprise",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --build && vite build",
+    "typecheck": "vue-tsc --build",
+    "lint": "prettier --write src/",
+    "lint:check": "prettier --check src/"
+  },
+  "devDependencies": {
+    "@tsconfig/node26": "^26.0.1",
+    "@types/node": "^26.4.1",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "@vue/tsconfig": "^0.9.1",
+    "prettier": "3.9.9",
+    "typescript": "catalog:vue",
+    "vite": "^8.2.1",
+    "vue": "^3.5.43",
+    "vue-tsc": "^3.3.12"
+  }
+}

@@ -1,5 +1,5 @@
-# One image holding the API: an airgapped customer runs a single container and a
-# single volume for the SQLite file. There is no frontend in this service.
+# One image holding the API and the submit page it serves: an airgapped customer
+# runs a single container and a single volume for the SQLite file.
 
 FROM node:26-slim AS build
 
@@ -8,6 +8,8 @@ WORKDIR /repo
 # Manifests first, so a source-only change reuses the cached install layer.
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/api/package.json apps/api/
+# The submit page, a workspace dependency of the API that it serves at /.
+COPY packages/submit-ui/package.json packages/submit-ui/
 
 # Keep this in sync with "packageManager" field in the root package.json.
 RUN npm install -g pnpm@12.3.4
@@ -17,7 +19,7 @@ COPY . .
 RUN pnpm turbo run build
 
 # Self-contained API: its dist plus a pruned production node_modules, including
-# fastify-cli and sqlite3, whose install script downloaded the linux prebuild
+# submit-ui (only its dist/, see its "files"), fastify-cli and sqlite3, whose install script downloaded the linux prebuild
 # above, so no compiler toolchain is needed here. `--legacy` because the
 # workspace does not use injected dependencies, which pnpm's deploy assumes.
 RUN pnpm deploy --legacy --filter api --prod /out
@@ -33,11 +35,6 @@ COPY --from=build --chown=node:node /out ./
 
 ENV NODE_ENV=production
 ENV N8N_DB_PATH=/data/database.sqlite
-# N8N_MONITORING_READ_TOKEN is deliberately unset: the API refuses to boot
-# without it rather than defaulting to open access. N8N_MONITORING_WRITE_TOKEN
-# is optional and selects the mode: unset, reporting instances authenticate
-# with their n8n license certificate; set, they must present this token as a
-# bearer header and certificates are not accepted.
 
 RUN mkdir -p /data && chown node:node /data
 VOLUME /data
