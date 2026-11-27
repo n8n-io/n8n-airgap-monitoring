@@ -1,0 +1,24 @@
+packages/submit-ui/src/components/MonthRow.vue
+  s_3bb9452ae71216::t_fe6bb7162488ed 63,65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "24deb4192d35787552a7ee6e173e0005c3e91164",
+  "prompts": {},
+  "humans": {
+    "h_c63dce324dfc7b": {
+      "author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  },
+  "sessions": {
+    "s_3bb9452ae71216": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "13ff31ce-d044-438f-a1ec-bb9f69c0c4c1",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "konstantintieber <konstantin.tieber@n8n.io>"
+    }
+  }
+}
